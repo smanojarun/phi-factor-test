@@ -97,6 +97,7 @@ class PFPatientDetailsModel: NSObject {
      */
     
     func loadvaluesParam(client_id: String,client_secret: String,refresh_token: String,grant_type: String) -> NSMutableURLRequest {
+        print("PFPatientDetailsModel loadvaluesParam begin")
         let app_version : Int = Int(NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleVersion") as! String)!
         let parameter = [
             
@@ -114,6 +115,7 @@ class PFPatientDetailsModel: NSObject {
         } catch {
             print("JSON serialization Error!")
         }
+        print("PFPatientDetailsModel loadvaluesParam end")
         return urlRequest
     }
 
@@ -132,7 +134,7 @@ class PFPatientDetailsModel: NSObject {
      */
 
     func param(clinical_trial_id: NSNumber, patient_name: NSString,patient_id: NSString, age_id: NSNumber, gender_id: NSNumber, ethinicity_id: NSNumber, language_id: NSNumber, encounterID: NSString) -> NSMutableURLRequest {
-
+        print("PFPatientDetailsModel param begin")
         var document_url = ""
         let defaults = NSUserDefaults.standardUserDefaults()
         let awsURLOne = defaults.stringForKey("awsURLOne")
@@ -188,6 +190,7 @@ class PFPatientDetailsModel: NSObject {
         } catch {
             print("JSON serialization Error!")
         }
+        print("PFPatientDetailsModel param end")
         return urlRequest
     }
 

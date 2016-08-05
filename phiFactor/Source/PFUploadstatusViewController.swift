@@ -11,7 +11,7 @@ import Foundation
 import Alamofire
 
 /// Showing the details about uploaded video as list.
-@objc class PFUploadstatusViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+@objc class PFUploadstatusViewController: GAITrackedViewController, UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet var allVideoUpload: UIButton!
     @IBOutlet weak var uploadtable: UITableView!
@@ -31,20 +31,22 @@ import Alamofire
     @IBOutlet var noDataLabel: UILabel!
 
     override func viewDidLoad() {
-
+        print("UploadStatus viewDidLoad begin")
+        self.screenName = PFUploadstatusViewControllerScreenName
         super.viewDidLoad()
         nodataLabelInprogeress.hidden=true
         noDataLabel.hidden=true
         Status = ["InProgress", "Completed"]
         global = PFCameraScreenModel()
-
+        uploadtable.hidden = true
+        completedTableView.hidden = true
         getPatientVideoStatus()
 
         if((defults.objectForKey("patient") as? NSMutableArray) != nil) {
         patientId = (defults.objectForKey("patient") as? NSMutableArray)!
         print(patientId)
         }
-
+        print("UploadStatus viewDidLoad end")
         // Do any additional setup after loading the view.
     }
 
@@ -56,6 +58,8 @@ import Alamofire
      */
 
     func getPatientVideoStatus()  {
+        print("UploadStatus getPatientVideoStatus begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "getPatientVideoStatus", value: nil)
         self.progessbar(self.view)
         self.progessbarshow()
         let defaults = NSUserDefaults.standardUserDefaults()
@@ -94,11 +98,14 @@ import Alamofire
 
                     }
                     else {
-                    self.uploadtable.reloadData()
-                    self.completedTableView.reloadData()
+                        self.uploadtable.hidden = false
+                        self.completedTableView.hidden = false
+                        self.uploadtable.reloadData()
+                        self.completedTableView.reloadData()
                     }
                     self.progressbarhidden()
                 }
+                print("UploadStatus getPatientVideoStatus end")
         }
         })
     }
@@ -109,14 +116,17 @@ import Alamofire
      */
 
     @IBAction func uploadBack(sender:AnyObject){
-                 uploadSuccessfullyArr.removeAllObjects()
-                inprogressArr.removeAllObjects()
+        print("UploadStatus uploadBack begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "backToPatientScreen", value: nil)
+        uploadSuccessfullyArr.removeAllObjects()
+        inprogressArr.removeAllObjects()
         let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
         
         let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
         nextViewController.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
         self.dismissViewControllerAnimated(true) {
         }
+        print("UploadStatus uploadBack end")
     }
 
     /**
@@ -126,7 +136,7 @@ import Alamofire
      */
 
     @IBAction func allVideoUpload(sender: AnyObject) {
-
+        print("UploadStatus allVideoUpload begin")
         allVideoUpload.tag=2
         NSNotificationCenter.defaultCenter().addObserver(self,
                                                          selector: #selector(PFUploadstatusViewController.videoStatus),
@@ -150,6 +160,7 @@ import Alamofire
                                                          selector: #selector(PFUploadstatusViewController.uploadSuccess),
                                                          name: "UploadStatus",
                                                          object: nil)
+        print("UploadStatus allVideoUpload end")
     }
 
     /**
@@ -285,7 +296,7 @@ import Alamofire
     
     func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
 
-        return 90.0
+        return 81.0
     }
 
     func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -359,6 +370,7 @@ import Alamofire
         else {
             self.noDataLabel.hidden=true
         }
+        cell.backgroundColor=UIColor .clearColor()
         return cell
     }
 

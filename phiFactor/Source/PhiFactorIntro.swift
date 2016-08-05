@@ -11,6 +11,7 @@ import UIKit
 import Alamofire
 import AVFoundation
 import DeviceKit
+import Crashlytics
 
 extension String {
     var isEmail: Bool {
@@ -40,13 +41,14 @@ extension UIView {
 }
 
 
-class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentationControllerDelegate {
+class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPresentationControllerDelegate, ABPadLockScreenSetupViewControllerDelegate, ABPadLockScreenViewControllerDelegate {
 
     var logout: NSNumber!
     var warningmessage: String?
     var loginModel = PFLogingModel()
     var istextend: Bool!
     var cameraModel: PFCameraScreenModel?
+    private(set) var thePin: String?
 
     @IBOutlet weak var playbackgroundview: UIView!
     @IBOutlet weak var baseviewforreferenceview: UIView!
@@ -85,7 +87,8 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        print("IntroScreen viewDidLoad begin")
+        self.screenName = PhiFactorIntroScreenName
         if let version : String = NSBundle.mainBundle().infoDictionary?["CFBundleShortVersionString"] as? String
         {
             if let bundle_version = NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleVersion") as? String
@@ -93,9 +96,9 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
                 labelAppVersion.text = String("V \(version).\(bundle_version)")
             }
         }
+        let versionInt : Int = (NSBundle.mainBundle().infoDictionary?["CFBundleShortVersionString"] as? Int)!
         cameraModel = PFCameraScreenModel()
         loginModel=PFLogingModel()
-
 //      default hidden
         getStarted.hidden=true
         self.getStarted.enabled=true
@@ -215,6 +218,7 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
         else {
             print("logout is no")
         }
+        print("IntroScreen viewDidLoad end")
     }
     
     /**
@@ -280,6 +284,13 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
         super.viewWillAppear(animated)
         cameraModel!.avPlayer.play()
         avPlayer1.play()
+//        let defaults = NSUserDefaults.standardUserDefaults()
+//        user = defaults.objectForKey(PF_USERNAME) as? String
+//        pass = defaults.objectForKey(PF_PASSWORD) as? String
+//        if user != nil && pass != nil
+//        {
+//            registerDeviceService()
+//        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -293,6 +304,8 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
      */
     @IBAction func getStarted(sender: AnyObject) {
 
+        print("IntroScreen getStarted begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "GetStarted", value: nil)
         let defaults = NSUserDefaults.standardUserDefaults()
         defaults.setInteger(1, forKey: "notoplay")
         getStarted.hidden=true
@@ -366,7 +379,7 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
                 }, completion: nil)
              self.progessbar(self.signinview)
         })
-
+        print("IntroScreen getStarted end")
     }
 
     /**
@@ -376,6 +389,8 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
      */
     
     @IBAction func signin(sender: AnyObject) {
+        print("IntroScreen signin begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "SignIn", value: nil)
         self.warning.text = ""
         getStarted.hidden=true
 
@@ -386,11 +401,13 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
             self.username.resignFirstResponder()
             self.password.resignFirstResponder()
         }
-        if((device != .iPhone6sPlus) && (device != .iPhoneSE) && (device != .iPhone6s)) {
-
-            UIAlertView(title: "", message: "The device doesn't meet the minimum requirements to run the application.", delegate: nil, cancelButtonTitle: "OK").show()
-        }
-        else {
+//        if((device != .iPhone6sPlus) && (device != .iPhoneSE) && (device != .iPhone6s)) {
+//
+//            UIAlertView(title: "", message: "The device doesn't meet the minimum requirements to run the application.", delegate: nil, cancelButtonTitle: "OK").show()
+//            print("DeviceNotMeetMinReq")
+//            PFGlobalConstants.sendException("DeviceNotMeetMinReq", isFatal: false)
+//        }
+//        else {
 
             if(self.username.text==""&&(self.password.text=="")) {
                 self.username.attributedPlaceholder = NSAttributedString(string: "Enter username",
@@ -431,162 +448,15 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
                     }
                      else {
 
-                        self.progessbarshow()
-                        requestString = "\(baseURL)/login"
-                        print(requestString)
-                        url1 = NSURL(string: requestString as String)!
-
-                        urlRequest = NSMutableURLRequest(URL: url1)
-                        urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
-                        loginModel.param(user, pass: pass, grandType: "password", url: urlRequest)
-
-
-                        Alamofire.request(urlRequest)
-
-                            .responseJSON { response in
-
-                                switch response.result {
-                                case .Failure( let error):
-                                    let err = error as NSError
-                                    if err.code == -1009 {
-                                        self.netwrkAlertLabel.text = "Unable to connect.Check your network connection."
-                                        self.networkAlertViewAction()
-                                    }
-                                     else {
-                                        self.netwrkAlertLabel.text = "There is an error occured."
-                                        self.networkAlertViewAction()
-                                    }
-                                    self.progressbarhidden()
-                                case .Success(let responseObject):
-                                    print(responseObject)
-
-                                    let httpStatusCode = response.response?.statusCode
-                                    print(httpStatusCode)
-
-                                    if(httpStatusCode==200) {
-                                        
-                                        let response = responseObject as! NSDictionary
-                                        let access_token = response.objectForKey("access_token")! as! String
-                                        let token_type = response.objectForKey("token_type")! as! String
-                                        let refresh_token = response.objectForKey("refresh_token")! as! String
-
-                                        let defaults = NSUserDefaults.standardUserDefaults()
-                                        defaults.setObject (access_token ,forKey: "access_token")
-                                        defaults.setObject(token_type, forKey: "token_type")
-                                        defaults.setObject(refresh_token, forKey: "refresh_token")
-
-                                        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-                                        let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
-                                        let nav = UINavigationController(rootViewController: nextViewController)
-                                        nav.navigationBarHidden = true
-                                        let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
-                                        UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
-                                            appDelegaet!.window?.rootViewController = nav
-                                        }) { (isCompleted) in
-
-                                        }
-
-                                    }
-                                    else if(httpStatusCode==400) {
-                                        print("Invalid params")
-                                        let responseDict = responseObject as? NSDictionary
-
-                                        self.username.attributedPlaceholder = NSAttributedString(string: "Enter valid username",
-                                            attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
-
-                                        self.password.attributedPlaceholder = NSAttributedString(string: "Enter valid password",
-                                            attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
-                                        if let message = responseDict?.objectForKey("error_description") as? String
-                                        {
-                                            self.warning.text = message
-                                        }
-                                        else
-                                        {
-                                            self.warning.text = "Enter valid username and password"
-                                        }
-                                        self.warning.textColor = UIColor.redColor()
-
-                                        self.warning.font = UIFont(name: "calibri", size: CGFloat(13))
-                                        self.warning.hidden=false
-                                        self.password.shake(4, withDelta: 5)
-                                        self.username.shake(4, withDelta: 5)
-
-
-                                        self.progressbarhidden()
-                                    }
-                                    else if(httpStatusCode==401) {
-                                        print("unauthorised")
-                                        let responseDict = responseObject as? NSDictionary
-
-                                        self.username.attributedPlaceholder = NSAttributedString(string: "Enter valid username",
-                                            attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
-
-                                        self.password.attributedPlaceholder = NSAttributedString(string: "Enter valid password",
-                                            attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
-
-                                        if let message = responseDict?.objectForKey("error_description") as? String
-                                        {
-                                            self.warning.text = message
-                                        }
-                                        else
-                                        {
-                                            self.warning.text = "Enter valid username and password"
-                                        }
-                                        self.warning.textColor = UIColor.redColor()
-
-                                        self.warning.font = UIFont(name: "calibri", size: CGFloat(13))
-                                        self.warning.hidden=false
-
-                                        self.password.shake(4, withDelta: 5)
-                                        self.username.shake(4, withDelta: 5)
-                                        self.progressbarhidden()
-                                    }
-                                    else if(httpStatusCode==505){
-                                        
-                                        let response = responseObject as! NSDictionary
-                                        self.uuidValue = response.objectForKey("uuid")! as! String
-                                        
-                                        self.baseview.addSubview(self.restPasswordView)
-                                        var restPasswordResize:CGRect!
-                                        restPasswordResize=self.restPasswordView.frame
-                                        restPasswordResize.origin.x=self.restPasswordView.frame.origin.x;
-                                        restPasswordResize.origin.y=self.baseview.frame.size.height;                                        restPasswordResize.size.width=self.baseview.frame.size.width
-                                        restPasswordResize.size.height=self.restPasswordView.frame.size.height;
-                                        self.restPasswordView.frame=restPasswordResize
-                                        
-                                        var setframepass:CGRect!
-                                        setframepass=self.signinview.frame;
-                                        setframepass.origin.x=self.baseview.frame.origin.x;
-                                        setframepass.origin.y=self.baseview.frame.size.height;
-                                        setframepass.size.width=self.baseview.frame.size.width
-                                        setframepass.size.height=self.signinview.frame.size.height;
-                                        
-                                        var setresize:CGRect!
-                                        setresize=self.restPasswordView.frame
-                                        setresize.origin.x=self.restPasswordView.frame.origin.x;
-                                        setresize.origin.y=self.baseview.frame.size.height-250;
-                                        setresize.size.width=self.baseview.frame.size.width
-                                        setresize.size.height=self.restPasswordView.frame.size.height+250;
-                                        
-                                        UIView.animateWithDuration(0.40, delay:0, options:UIViewAnimationOptions.CurveEaseInOut, animations:
-                                            {
-                                                self.signinview.frame=setframepass;
-                                                
-                                            }, completion:nil)
-                                            UIView.animateWithDuration(0.40, delay:0.39, options:UIViewAnimationOptions.CurveEaseInOut, animations:
-                                            {
-                                                self.restPasswordView.frame=setresize;
-                                            }, completion:nil)
-                                    }
-                                }
-                        }
+                        registerDeviceService()
+//                        self.userLoginService()
                     }
                 }
             }
             let defaults = NSUserDefaults.standardUserDefaults()
             defaults.setObject (warningmessage, forKey: "Warning")
-        }
-   
+//        }
+        print("IntroScreen signin end")
     }
 
     /**
@@ -596,6 +466,8 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
      */
 
     @IBAction func forgotpasswor(sender: AnyObject) {
+        print("IntroScreen forgotpasswor begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "ForgotPassword", value: nil)
         getStarted.hidden=true
 
         if istextend ==  false {
@@ -644,6 +516,7 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
                 self.forgotpassword.frame=setfinalframepass2
                  self.progessbar(self.forgotpassword)
             }, completion: nil)
+        print("IntroScreen forgotpasswor end")
     }
 
     /**
@@ -654,6 +527,8 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
 
     @IBAction func backtologin(sender: AnyObject)
     {
+        print("IntroScreen backtologin begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "BackToLogin", value: nil)
         if istextend ==  false {
             self.baseview.frame.origin.y += 200
             istextend = true
@@ -719,7 +594,7 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
             {
                 self.signinview.frame=setresize;
             }, completion:nil)
-
+        print("IntroScreen backtologin end")
     }
 
     /**
@@ -731,7 +606,8 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
      */
 
     @IBAction func PFIsenditnow(sender: AnyObject) {
-
+        print("IntroScreen PFIsenditnow begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "SendItNow", value: nil)
         if istextend ==  false {
             self.baseview.frame.origin.y += 200
             istextend = true
@@ -780,6 +656,8 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
                                 self.netwrkAlertLabel.text = "There is an error occured."
                                 self.networkAlertViewAction()
                             }
+                            print("Network erroer")
+                            PFGlobalConstants.sendException("NetworkError", isFatal: false)
                             self.progressbarhidden()
                         case .Success(let responseObject):
                             print(responseObject)
@@ -811,6 +689,7 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
                                 self.progressbarhidden()
                             }
                         }
+                        print("IntroScreen PFIsenditnow end")
                 }
             }
         }
@@ -1013,6 +892,8 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
      - parameter sender: reset password button from inteface.
      */
     @IBAction func restPasswordAction(sender: AnyObject){
+        print("IntroScreen restPasswordAction begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "ResetPassword", value: nil)
         self.progessbarshow()
         restPasswordSuccessLabel.hidden=false
         let pattern = "(?=^.{8,}$)(?=.*[!@#$%^&*]+)(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$"
@@ -1068,6 +949,7 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
                                 self.netwrkAlertLabel.text = "There is an error occured."
                                 self.networkAlertViewAction()
                             }
+                            PFGlobalConstants.sendException("NetworkError", isFatal: false)
                         case .Success(let responseObject):
                             print(responseObject)
                             
@@ -1106,10 +988,12 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
                             }
                             self.progressbarhidden()
                         }
+                        print("IntroScreen restPasswordAction end")
                 }
             }
             else{
                 self.restPasswordSuccessLabel.text = "New Password Doesn't Match With Your Re-Enter Password"
+                print("IntroScreen restPasswordAction end")
             }
         }
     }
@@ -1123,5 +1007,290 @@ class PhiFactorIntro: UIViewController, UITextFieldDelegate, UIPopoverPresentati
         cameraModel!.avPlayer.play()
         avPlayer1.play()
     }
-
+    
+    func userLoginService() {
+        print("IntroScreen userLoginService begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "UserLoginService", value: nil)
+        self.progessbarshow()
+        requestString = "\(baseURL)/login"
+        print(requestString)
+        url1 = NSURL(string: requestString as String)!
+        
+        urlRequest = NSMutableURLRequest(URL: url1)
+        urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
+        loginModel.param(user, pass: pass, grandType: "password", url: urlRequest)
+        
+        
+        Alamofire.request(urlRequest)
+            
+            .responseJSON { response in
+                
+                switch response.result {
+                case .Failure( let error):
+                    let err = error as NSError
+                    if err.code == -1009 {
+                        self.netwrkAlertLabel.text = "Unable to connect.Check your network connection."
+                        self.networkAlertViewAction()
+                    }
+                    else {
+                        self.netwrkAlertLabel.text = "There is an error occured."
+                        self.networkAlertViewAction()
+                    }
+                    print("Network error")
+                    self.progressbarhidden()
+                case .Success(let responseObject):
+                    print(responseObject)
+                    
+                    let httpStatusCode = response.response?.statusCode
+                    print(httpStatusCode)
+                    
+                    if(httpStatusCode==200) {
+                        
+                        let response = responseObject as! NSDictionary
+                        let access_token = response.objectForKey("access_token")! as! String
+                        let token_type = response.objectForKey("token_type")! as! String
+                        let refresh_token = response.objectForKey("refresh_token")! as! String
+                        
+                        let defaults = NSUserDefaults.standardUserDefaults()
+                        defaults.setObject (access_token ,forKey: "access_token")
+                        defaults.setObject(token_type, forKey: "token_type")
+                        defaults.setObject(refresh_token, forKey: "refresh_token")
+                        defaults.setObject(user, forKey: PF_USERNAME)
+                        defaults.setObject(pass, forKey: PF_PASSWORD)
+                        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                        let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
+                        let nav = UINavigationController(rootViewController: nextViewController)
+                        nav.navigationBarHidden = true
+                        let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
+                        UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+                            appDelegaet!.window?.rootViewController = nav
+                        }) { (isCompleted) in
+                            
+                        }
+                        
+                    }
+                    else if(httpStatusCode==400) {
+                        print("Invalid params")
+                        let responseDict = responseObject as? NSDictionary
+                        
+                        self.username.attributedPlaceholder = NSAttributedString(string: "Enter valid username",
+                            attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
+                        
+                        self.password.attributedPlaceholder = NSAttributedString(string: "Enter valid password",
+                            attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
+                        if let message = responseDict?.objectForKey("error_description") as? String
+                        {
+                            self.warning.text = message
+                        }
+                        else
+                        {
+                            self.warning.text = "Enter valid username and password"
+                        }
+                        self.warning.textColor = UIColor.redColor()
+                        
+                        self.warning.font = UIFont(name: "calibri", size: CGFloat(13))
+                        self.warning.hidden=false
+                        self.password.shake(4, withDelta: 5)
+                        self.username.shake(4, withDelta: 5)
+                        
+                        
+                        self.progressbarhidden()
+                    }
+                    else if(httpStatusCode==401) {
+                        print("unauthorised")
+                        let responseDict = responseObject as? NSDictionary
+                        
+                        self.username.attributedPlaceholder = NSAttributedString(string: "Enter valid username",
+                            attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
+                        
+                        self.password.attributedPlaceholder = NSAttributedString(string: "Enter valid password",
+                            attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
+                        
+                        if let message = responseDict?.objectForKey("error_description") as? String
+                        {
+                            self.warning.text = message
+                        }
+                        else
+                        {
+                            self.warning.text = "Enter valid username and password"
+                        }
+                        self.warning.textColor = UIColor.redColor()
+                        
+                        self.warning.font = UIFont(name: "calibri", size: CGFloat(13))
+                        self.warning.hidden=false
+                        
+                        self.password.shake(4, withDelta: 5)
+                        self.username.shake(4, withDelta: 5)
+                        self.progressbarhidden()
+                    }
+                    else if(httpStatusCode==505){
+                        
+                        let response = responseObject as! NSDictionary
+                        self.uuidValue = response.objectForKey("uuid")! as! String
+                        
+                        self.baseview.addSubview(self.restPasswordView)
+                        var restPasswordResize:CGRect!
+                        restPasswordResize=self.restPasswordView.frame
+                        restPasswordResize.origin.x=self.restPasswordView.frame.origin.x;
+                        restPasswordResize.origin.y=self.baseview.frame.size.height;                                        restPasswordResize.size.width=self.baseview.frame.size.width
+                        restPasswordResize.size.height=self.restPasswordView.frame.size.height;
+                        self.restPasswordView.frame=restPasswordResize
+                        
+                        var setframepass:CGRect!
+                        setframepass=self.signinview.frame;
+                        setframepass.origin.x=self.baseview.frame.origin.x;
+                        setframepass.origin.y=self.baseview.frame.size.height;
+                        setframepass.size.width=self.baseview.frame.size.width
+                        setframepass.size.height=self.signinview.frame.size.height;
+                        
+                        var setresize:CGRect!
+                        setresize=self.restPasswordView.frame
+                        setresize.origin.x=self.restPasswordView.frame.origin.x;
+                        setresize.origin.y=self.baseview.frame.size.height-250;
+                        setresize.size.width=self.baseview.frame.size.width
+                        setresize.size.height=self.restPasswordView.frame.size.height+250;
+                        
+                        UIView.animateWithDuration(0.40, delay:0, options:UIViewAnimationOptions.CurveEaseInOut, animations:
+                            {
+                                self.signinview.frame=setframepass;
+                                
+                            }, completion:nil)
+                        UIView.animateWithDuration(0.40, delay:0.39, options:UIViewAnimationOptions.CurveEaseInOut, animations:
+                            {
+                                self.restPasswordView.frame=setresize;
+                            }, completion:nil)
+                    }
+                }
+                print("IntroScreen userLoginService end")
+        }
+    }
+    
+    func registerDeviceService() {
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "RegisterDevice", value: nil)
+        self.progessbarshow()
+        let registerDeviceUrlString = "\(baseURL)/register_device"
+        let registerDeviceURl = NSURL(string: registerDeviceUrlString)
+        urlRequest = NSMutableURLRequest(URL: registerDeviceURl!)
+        urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
+        urlRequest = loginModel.getRegisterDeviceParams(user)
+        Alamofire.request(urlRequest).responseJSON { (response) in
+            switch response.result
+            {
+            case .Failure(let error):
+                let err = error as NSError
+                if err.code == -1009 {
+                    self.netwrkAlertLabel.text = "Unable to connect.Check your network connection."
+                    self.networkAlertViewAction()
+                }
+                else {
+                    self.netwrkAlertLabel.text = "There is an error occured."
+                    self.networkAlertViewAction()
+                }
+                self.progressbarhidden()
+                break
+            case .Success(let responseObject):
+                let httpStatusCode = response.response?.statusCode
+                print(httpStatusCode)
+                
+                if(httpStatusCode==200) {
+                    let defaults = NSUserDefaults.standardUserDefaults()
+                    if let passcode = defaults.objectForKey("PF_Passcode") as? String {
+                        self.thePin = passcode
+                        PFGlobalConstants.authenticateUserByTouchID({ (status) in
+                            switch status{
+                            case .authorized:
+                                let response = responseObject as! NSDictionary
+                                let result = response.objectForKey("result")! as! String
+                                let message = response.objectForKey("message")! as! String
+                                if result == "Success"
+                                {
+                                    self.userLoginService()
+                                    self.warning.text = ""
+                                    self.warning.textColor = UIColor.lightGrayColor()
+                                }
+                                else
+                                {
+                                    self.warning.text = message
+                                    self.warning.textColor = UIColor.redColor()
+                                }
+                                break
+                            case .unAuthorized:
+                                self.warning.text = "Touch ID authentication failed."
+                                self.warning.textColor = UIColor.redColor()
+                                dispatch_async(dispatch_get_main_queue(), { 
+                                    let lockScreen = ABPadLockScreenViewController(delegate: self, complexPin: false)
+                                    lockScreen.setAllowedAttempts(3)
+                                    lockScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
+                                    lockScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
+                                    self.presentViewController(lockScreen, animated: true, completion: nil)
+                                })
+                                break
+                            case .unKnown:
+                                self.warning.text = "Check touch id registered and enabled on your device to begin."
+                                self.warning.textColor = UIColor.redColor()
+                                break
+                            case .canceled:
+                                break
+                            }
+                        })
+                    }
+                    else
+                    {
+                        self.userLoginService()
+                        self.warning.text = ""
+                        self.warning.textColor = UIColor.lightGrayColor()
+                    }
+                }
+                else if httpStatusCode == 201 {
+                    let response = responseObject as! NSDictionary
+                    let message = response.objectForKey("message")! as! String
+                    self.warning.text = message
+                    self.warning.textColor = UIColor.redColor()
+                }
+                self.progressbarhidden()
+                break
+            }
+        }
+        
+    }
+    
+    
+    //MARK: Lock Screen Setup Delegate
+    func pinSet(pin: String!, padLockScreenSetupViewController padLockScreenViewController: ABPadLockScreenSetupViewController!) {
+        thePin = pin
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    func unlockWasCancelledForSetupViewController(padLockScreenViewController: ABPadLockScreenAbstractViewController!) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    //MARK: Lock Screen Delegate
+    func padLockScreenViewController(padLockScreenViewController: ABPadLockScreenViewController!, validatePin pin: String!) -> Bool {
+        print("Validating Pin \(pin)")
+        return thePin == pin
+    }
+    
+    func unlockWasSuccessfulForPadLockScreenViewController(padLockScreenViewController: ABPadLockScreenViewController!) {
+        print("Unlock Successful!")
+        dismissViewControllerAnimated(true, completion: nil)
+        self.userLoginService()
+        self.warning.text = ""
+        self.warning.textColor = UIColor.lightGrayColor()
+    }
+    
+    func unlockWasUnsuccessful(falsePin: String!, afterAttemptNumber attemptNumber: Int, padLockScreenViewController: ABPadLockScreenViewController!) {
+        print("Failed Attempt \(attemptNumber) with incorrect pin \(falsePin)")
+        if attemptNumber == 3
+        {
+            self.warning.text = "Incorrect passcode."
+            self.warning.textColor = UIColor.redColor()
+            dismissViewControllerAnimated(true, completion: nil)
+        }
+    }
+    
+    func unlockWasCancelledForPadLockScreenViewController(padLockScreenViewController: ABPadLockScreenViewController!) {
+        print("Unlock Cancled")
+        dismissViewControllerAnimated(true, completion: nil)
+    }
 }

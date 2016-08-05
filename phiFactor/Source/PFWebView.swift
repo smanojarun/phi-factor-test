@@ -8,13 +8,15 @@
 
 import UIKit
 
-class PFWebView: UIViewController, UIWebViewDelegate {
+class PFWebView: GAITrackedViewController, UIWebViewDelegate {
 
     var url : NSURL! = nil
     @IBOutlet var webView: UIWebView!
     @IBOutlet var activityImageView: UIImageView!
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("webView viewDidLoad begin")
+        self.screenName = PFWebViewScreenName
         let imageData = NSData(contentsOfURL: NSBundle.mainBundle().URLForResource("loading", withExtension: "gif")!)
         self.activityImageView.image = UIImage.gifWithData(imageData!)
         self.activityImageView.hidden = true
@@ -24,7 +26,7 @@ class PFWebView: UIViewController, UIWebViewDelegate {
             let request = NSURLRequest(URL: url)
             webView.loadRequest(request)
         }
-        
+        print("webView viewDidLoad end")
     }
 
     override func didReceiveMemoryWarning() {

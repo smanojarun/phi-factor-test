@@ -14,7 +14,7 @@ import CoreMotion
 import Alamofire
 
 /// Recording video by front and rear camera with flash availability. Presenting the preview for each video after the recording complition. Also provide the option to retake the video.
-class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordingDelegate, UIAccelerometerDelegate,AVCaptureVideoDataOutputSampleBufferDelegate {
+class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutputRecordingDelegate, UIAccelerometerDelegate,AVCaptureVideoDataOutputSampleBufferDelegate {
     // Back button alert
     @IBOutlet var backButtonAlertCancel: UIButton!
     @IBOutlet var backButtonAlert: UIButton!
@@ -89,6 +89,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
     @IBOutlet var videothumbImageView3: UIImageView!
     @IBOutlet var videothumbImageView4: UIImageView!
     @IBOutlet var closeInfoVideoButton: UIButton!
+    @IBOutlet var videoThumbView: UIView!
+    @IBOutlet var startButtonBackgroundImageView: UIImageView!
     var blurEffectView = UIView()
     var myTimer = NSTimer()
     var previewTimer = NSTimer()
@@ -149,6 +151,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("CameraScreen viewDidLoad begin")
+        self.screenName = PFCameraviewcontrollerScreenName
         // Acelometer
         self.initAccelometer()
         
@@ -201,8 +205,10 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
             } catch let error2 as NSError {
                 error = error2
                 audioDeviceInput = nil
+                PFGlobalConstants.sendException("NoAudioInput", isFatal: false)
             } catch {
                 fatalError()
+                PFGlobalConstants.sendException("NoAudioInput", isFatal: false)
             }
             if error != nil {
                 print (error)
@@ -320,6 +326,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
         pfcPreviewSlider.minimumValue = 0.0
         pfcPreviewSlider.continuous = true
         closeInfoVideoButton.hidden = true
+        print("CameraScreen viewDidLoad end")
 
     }
     override func viewDidLayoutSubviews() {
@@ -327,6 +334,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
     }
 
     override func viewDidDisappear(animated: Bool) {
+        print("CameraScreen viewDidDisappear begin")
         self.removeCameraMovieOutput()
         self.removeCameraDataOutput()
         myTimer.invalidate()
@@ -336,10 +344,12 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
         self.removeObserver(self, forKeyPath: "sessionRunningAndDeviceAuthorized", context: &self.sessionRunningAndDeviceAuthorizedContext)
         self.removeObserver(self, forKeyPath: "stillImageOutput.capturingStillImage" ,context: &self.capturingStillImageContext)
         NSNotificationCenter.defaultCenter().removeObserver(self)
+        print("CameraScreen viewDidDisappear end")
         
     }
 
     override func viewWillAppear(animated: Bool) {
+        print("CameraScreen viewWillAppear begin")
         self.pfcCameraInstructionlabel.hidden = false
         self.pfCameraStop.enabled = false
         self.pfCameraStartButton.enabled = false
@@ -352,6 +362,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
             self.runtimeErrorHandlingObserver = NSNotificationCenter.defaultCenter().addObserverForName(AVCaptureSessionRuntimeErrorNotification, object: self.session, queue: nil, usingBlock: {
                 (note: NSNotification?) in
                 print(note)
+                PFGlobalConstants.sendException("AVCaptureSessionRuntimeErrorNotification", isFatal: false)
                 let strongSelf: PFCameraviewcontrollerscreen = weakSelf!
                 dispatch_async(strongSelf.sessionQueue, {
                     //                    strongSelf.session?.startRunning()
@@ -367,6 +378,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
             print("name date3")
             self.session?.startRunning()
         })
+        print("CameraScreen viewWillAppear end")
     }
 
     override func didReceiveMemoryWarning() {
@@ -394,6 +406,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
     
     func addCameraMovieOutput() {
+        print("CameraScreen addCameraMovieOutput begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "addCameraMovieOutput", value: nil)
         if self.session?.running == true {
 
             self.movieFileOutput =  AVCaptureMovieFileOutput()
@@ -409,12 +423,15 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
                 }
             else {
                 print("movie file output not added.")
+                PFGlobalConstants.sendException("addCameraMovieOutputFailed", isFatal: false)
             }
         }
         else {
 
             print("Session not running")
+            PFGlobalConstants.sendException("NoSessionRunningWhileAddCameraMovieOutput", isFatal: false)
         }
+        print("CameraScreen addCameraMovieOutput end")
     }
 
     /**
@@ -425,6 +442,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
     
     func removeCameraDataAndAddMovieoutput() {
+        print("CameraScreen removeCameraDataAndAddMovieoutput begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "addCameraMovieOutput", value: nil)
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)) {
             print("Recording start Action")
             if self.session?.running == true {
@@ -523,6 +542,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
             }
             else {
                 print("Session not running")
+                PFGlobalConstants.sendException("NoSessionRunningWhileRemoveCameraDataAndAddMovieoutput", isFatal: false)
             }
         }
         let seconds = 0.50
@@ -531,6 +551,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
         dispatch_after(dispatchTime, dispatch_get_main_queue(), {
             self.startRecordingAction()
         })
+        print("CameraScreen removeCameraDataAndAddMovieoutput end")
     }
     
     /**
@@ -539,6 +560,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
     
     func removeMovieDataAndAddCameraDataOuput() {
+        print("CameraScreen removeMovieDataAndAddCameraDataOuput begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "removeMovieDataAndAddCameraDataOuput", value: nil)
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)) {
             print("Recording stop Action")
             if self.session?.running == true {
@@ -564,7 +587,9 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
             }
             else {
                 print("Session not running")
+                PFGlobalConstants.sendException("NoSessionRunningWhileRemoveMovieDataAndAddCameraDataOuput", isFatal: false)
             }
+            print("CameraScreen removeMovieDataAndAddCameraDataOuput end")
         }
     }
 
@@ -573,6 +598,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
     
     func setCamerasession() {
+        print("CameraScreen setCamerasession begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "setCamerasession", value: nil)
         self.session?.beginConfiguration()
         let currentVideoDevice: AVCaptureDevice = self.videoDeviceInput!.device
         let currentPosition: AVCaptureDevicePosition = currentVideoDevice.position
@@ -586,6 +613,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
             self.session!.sessionPreset = AVCaptureSessionPresetiFrame960x540
         }
         self.session?.commitConfiguration()
+        print("CameraScreen setCamerasession end")
     }
 
     /**
@@ -593,6 +621,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
     
     func removeCameraMovieOutput() {
+        print("CameraScreen removeCameraMovieOutput begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "removeCameraMovieOutput", value: nil)
         if self.session?.running == true {
 
             self.session?.beginConfiguration()
@@ -602,7 +632,9 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
         else {
 
             print("Session not running")
+            PFGlobalConstants.sendException("NoSessionRunningWhileRemoveCameraMovieOutput", isFatal: false)
         }
+        print("CameraScreen removeCameraMovieOutput end")
     }
 
     /**
@@ -611,12 +643,15 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
     
     func addCameraDataOutput() {
+        print("CameraScreen addCameraDataOutput begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "addCameraDataOutput", value: nil)
         videoDeviceDataOutput.videoSettings = NSDictionary(object: Int(kCVPixelFormatType_32BGRA), forKey: kCVPixelBufferPixelFormatTypeKey as String) as! [NSObject: AnyObject]
         videoDeviceDataOutput.alwaysDiscardsLateVideoFrames = true
         videoDeviceDataOutput.setSampleBufferDelegate(self, queue: sessionQueue)
         if self.session!.canAddOutput(videoDeviceDataOutput) {
             self.session!.addOutput(videoDeviceDataOutput)
         }
+        print("CameraScreen addCameraDataOutput end")
     }
 
     /**
@@ -624,6 +659,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
     
     func removeCameraDataOutput() {
+        print("CameraScreen removeCameraDataOutput begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "removeCameraDataOutput", value: nil)
         if self.session?.running == true {
             print("session running")
             self.session?.beginConfiguration()
@@ -633,7 +670,9 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
         }
         else {
             print("videoDeviceDataOutput not removed")
+            PFGlobalConstants.sendException("videoDeviceDataOutputNotRemoved", isFatal: false)
         }
+        print("CameraScreen removeCameraDataOutput end")
     }
 
     //    func validateVideofromURL(notification: NSNotification) {
@@ -836,6 +875,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
     
     @IBAction func pfCameraStartButtonaction(sender: AnyObject? = nil) {
+        print("CameraScreen pfCameraStartButtonaction begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "pfCameraStartButtonaction", value: nil)
         self.isRotationErrorOccured = false
         backButtonCancel()
         self.pfInfoselectButton.hidden = true
@@ -857,6 +898,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
             pfcEyeAnimationImageView.hidden=false
         }
         self.removeCameraDataAndAddMovieoutput()
+        print("CameraScreen pfCameraStartButtonaction end")
     }
 
     /**
@@ -866,6 +908,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
     func startRecordingAction()
     {
+        print("CameraScreen startRecordingAction begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "startRecordingAction", value: nil)
         dispatch_async(dispatch_get_main_queue(), {
             if self.movieFileOutput?.recording == false {
                 if self.videoCount == 1
@@ -908,6 +952,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
             }
             else {
                 }
+            print("CameraScreen startRecordingAction end")
         })
     }
 
@@ -918,7 +963,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      - parameter sender: Stop button from interface
      */
     @IBAction func pfCameraStopaction(sender: AnyObject) {
-
+        print("CameraScreen pfCameraStopaction begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "pfCameraStopaction", value: nil)
         self.myTimer.invalidate()
         pfcFaceAnimationImageView.stopAnimating()
         pfcEyeAnimationImageView.stopAnimating()
@@ -939,6 +985,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
         self.pfcEyeDetectedImageView.hidden=true
         pfcToggleCameraButton.hidden = true
         pfcCameraArrow.hidden = true
+        print("CameraScreen pfCameraStopaction end")
     }
 
     /**
@@ -947,7 +994,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      - parameter sender: reatake button from interface
      */
     @IBAction func pfc_preview_retakeaction(sender: AnyObject) {
-
+        print("CameraScreen pfc_preview_retakeaction begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "retakeAction", value: nil)
         self.pfInfoselectButton.hidden = false
         previewBackground.hidden = true
         self.previewView.hidden = false
@@ -999,6 +1047,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
         // instruction label unhidden
         pfcCameraInstructionlabel.hidden=false
         pfcVideoTitleLabel.hidden=false
+        print("CameraScreen pfc_preview_retakeaction end")
     }
 
     /**
@@ -1006,6 +1055,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
       - parameter sender: remove button
      */
     @IBAction func removedemovediou(sender: AnyObject) {
+        print("CameraScreen removedemovediou begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "removeDemoeVideo", value: nil)
         avPlayer.pause()
         playTimer.invalidate()
         slider.hidden=true
@@ -1050,7 +1101,9 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
             self.pfCameraFaceDetectedImageView.hidden=false
             self.pfCameraFaceNotDetectedImageView.hidden=false
         }
-
+        self.startButtonBackgroundImageView.hidden = false
+        self.videoThumbView.hidden = false
+        print("CameraScreen removedemovediou end")
     }
 
     /**
@@ -1059,6 +1112,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      - parameter sender: play button on interface
      */
     @IBAction func playdemovediou(sender: AnyObject) {
+        print("CameraScreen playdemovediou begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "playDemoVideo", value: nil)
         slider.hidden=false
               playTimer   = NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: #selector(PFCameraviewcontrollerscreen.updateSliderInfo), userInfo: nil, repeats: true)
         slider.addTarget(self, action: #selector(PFCameraviewcontrollerscreen.sliderValueDidChangeInfo(_:)), forControlEvents: UIControlEvents.ValueChanged)
@@ -1067,6 +1122,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
         playerlayer=true
         pauseaction.hidden=false
         stopdemovedio.hidden=true
+        print("CameraScreen playdemovediou end")
     }
 
     /**
@@ -1074,6 +1130,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
       - parameter sender: camera select button
      */
     @IBAction func pfcp_pcameraselete_action(sender: UIButton) {
+        print("CameraScreen pfcp_pcameraselete_action begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "toggleCamera", value: nil)
         self.activityImageView.hidden = false
         sender.enabled = false
         self.pfcToggleCameraButton.hidden = true
@@ -1142,6 +1200,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
                 self.pfcToggleCameraButton.hidden = false
                 self.pfcCameraArrow.hidden = false
             })
+            print("CameraScreen pfcp_pcameraselete_action end")
         }
 
     }
@@ -1151,6 +1210,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
       - parameter sender: flash button on interface.
      */
     @IBAction func pfcFlashButton_action(sender: AnyObject) {
+        print("CameraScreen pfcFlashButton_action begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "flashSwitch", value: nil)
         let currentVideoDevice: AVCaptureDevice = self.videoDeviceInput!.device
         let currentPosition: AVCaptureDevicePosition = currentVideoDevice.position
         if AVCaptureDevicePosition.Front==currentPosition {
@@ -1192,6 +1253,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
                 self.videoDeviceInput!.device.unlockForConfiguration()
             }
         }
+        print("CameraScreen pfcFlashButton_action end")
     }
 
     /**
@@ -1208,6 +1270,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
 
     @IBAction func pfc_camera_cancel(sender: AnyObject) {
+        print("CameraScreen pfc_camera_cancel begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "deleteVideo", value: nil)
         if(tagvalue==nil) {
             return
         }
@@ -1293,7 +1357,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
             uploadLabel.text = "Video deleted successfully!"
             NSNotificationCenter.defaultCenter().postNotificationName("showAlert", object: nil)
         }
-       
+       print("CameraScreen pfc_camera_cancel end")
     }
 
     /**
@@ -1303,6 +1367,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
 
     @IBAction func pfcPreviewPlayButtonaction(sender: AnyObject) {
+        print("CameraScreen pfcPreviewPlayButtonaction begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "PlayVideo", value: nil)
         avPlayer.play()
         // hidden
         pfcPreviewRetakeButton.hidden=true
@@ -1312,6 +1378,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
         pfcPreviewPauseButton.hidden=false
         previewBackground.hidden = true
         pfcPreviewSlider.hidden=false
+        print("CameraScreen pfcPreviewPlayButtonaction end")
     }
 
     /**
@@ -1320,6 +1387,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
 
     @IBAction func pfcPreviewPauseButtonaction(sender: AnyObject) {
+        print("CameraScreen pfcPreviewPauseButtonaction begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "PauseVideo", value: nil)
         if !isPreviewScreen
         {
             avPlayer.pause()
@@ -1346,6 +1415,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
             previewBackground.hidden = false
             avPlayer.seekToTime(kCMTimeZero)
         }
+        print("CameraScreen pfcPreviewPauseButtonaction begin")
     }
 
     /**
@@ -1354,6 +1424,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
 
     func deleteTempVideo(reqVideoUrl: NSURL) {
+        print("CameraScreen deleteTempVideo begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "deleteLocalVideo", value: nil)
         let fileManager = NSFileManager.defaultManager()
         do {
             try fileManager.removeItemAtURL(reqVideoUrl)
@@ -1361,7 +1433,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
         } catch {
             print("Could not clear temp folder: \(error)")
         }
-        
+        print("CameraScreen deleteTempVideo end")
     }
 
     /**
@@ -1372,7 +1444,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
 
     @IBAction func pfcPreviewSubmitButtonaction(sender: AnyObject) {
-        
+        print("CameraScreen pfcPreviewSubmitButtonaction begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "submitButton", value: videoCount)
         if(self.pfcPreviewSubmitButton.tag != 463)
         {
             self.pfcCameraArrow.hidden = false
@@ -1554,7 +1627,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
             pfcCameraInstructionlabel.hidden=false
             pfcVideoTitleLabel.hidden=false
         }
-       
+       print("CameraScreen pfcPreviewSubmitButtonaction end")
     }
 
     /**
@@ -1564,7 +1637,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
     
     @IBAction func PFC_infoaction(sender: AnyObject) {
-        
+        print("CameraScreen PFC_infoaction begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "PlayInfoVideo", value: videoCount)
         if !isPreviewScreen
         {
             // preview hidden
@@ -1601,6 +1675,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
             self.previewBackground.hidden = true
             self.pfInfoselectButton.hidden = true
             self.pfcCameraBackgroundImageView.hidden = true
+            self.startButtonBackgroundImageView.hidden = true
+            self.videoThumbView.hidden = true
         }
         closeInfoVideoButton.hidden = false
         self.pfcVideoTitleLabel.hidden = true
@@ -1619,6 +1695,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
         }
         let url = NSURL.fileURLWithPath(path2)
         playItemWithURL(url)
+        print("CameraScreen PFC_infoaction end")
     }
 
     
@@ -1718,7 +1795,8 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
         if(error != nil) {
             print(error)
         }
-
+        print("CameraScreen didFinishRecordingToOutputFileAtURL begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "delegate", label: "didFinishRecordingToOutputFileAtURL", value: nil)
         let backgroundRecordId: UIBackgroundTaskIdentifier = self.backgroundRecordId
         self.backgroundRecordId = UIBackgroundTaskInvalid
         if isRotationErrorOccured {
@@ -1773,6 +1851,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
                 
                 self.previewBackground.hidden = false
                 self.pfcCameraBackgroundImageView.hidden = true
+                print("CameraScreen didFinishRecordingToOutputFileAtURL end")
             })
         }
        
@@ -1861,6 +1940,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
      */
 
     func initAccelometer() {
+        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "initAccelometer", value: nil)
         contentView.layer.cornerRadius = contentView.frame.width/2-30
         contentView.layer.masksToBounds = true
         greenCircleView.layer.cornerRadius = greenCircleView.frame.width/2-30
@@ -2341,6 +2421,7 @@ class PFCameraviewcontrollerscreen: UIViewController, AVCaptureFileOutputRecordi
     }
     
     func playItemWithURL(url : NSURL) {
+        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "PlayAVPlayer", value: nil)
         self.avAsset = AVAsset(URL: url)
         self.avPlayerItem = AVPlayerItem(asset: self.avAsset)
         self.avPlayer.replaceCurrentItemWithPlayerItem(self.avPlayerItem)

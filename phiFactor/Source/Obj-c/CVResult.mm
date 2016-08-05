@@ -45,7 +45,6 @@
 
     algobucket dlb;
 
-
     int res=dlb.ModelLoading(str_modelfile,str_modelfile1,str_modelfile2,str_xmlpath,str_eyepath);
 
     return res;
@@ -72,7 +71,7 @@
 
     algobucket dlb;
     int *facerect=new int[13];
-
+     int *logvalue=new int[15];
     cv::Mat output;
     cv :: cvtColor(matImage, matImage, CV_BGR2RGB);
     
@@ -85,14 +84,19 @@
         //cv::resize(matImage, matImage, cv::Size(matImage.cols/2,matImage.rows/2));
     }
 
-    int res=dlb.FaceQualityCheck(matImage, output, facerect, 13,videoCount,0,retakeCount);
+    int res=dlb.FaceQualityCheck(matImage, output, facerect, 13,videoCount,0,retakeCount,logvalue);
 
     int errorCode = 0;
     for(unsigned int i = 0; i < 13; i++)
     {
         NSLog(@"Error code : %d",facerect[i]);
     }
-
+    for(unsigned int p = 0; p < 15; p++)
+    {
+        NSLog(@"log values  : %d",logvalue[p]);
+    }
+    
+    
     if(output.channels() == 3)
     {
         cv :: cvtColor(output, output, CV_BGR2RGB);
@@ -156,10 +160,10 @@
             }
             UIImage *cvImage = [self UIImageFromCVMat:image];
         int *facerect=new int[13];
-
+         int *logvalue=new int[15];
         cv::Mat output;
 
-        int res=dlb.FaceQualityCheck(image, output, facerect, 13,videoCount,1,0);
+        int res=dlb.FaceQualityCheck(image, output, facerect, 13,videoCount,1,0,logvalue);
 
         int errorCode = 0;
         for(unsigned int i = 0; i < 13; i++)

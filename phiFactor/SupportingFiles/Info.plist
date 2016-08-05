@@ -19,6 +19,11 @@
 				</dict>
 			</dict>
 		</dict>
+		<key>Fabric</key>
+		<dict>
+			<key>APIKey</key>
+			<string>b06e35039458be3cb5bd6affac2ee95251f0516b</string>
+		</dict>
 		<key>S3TransferUtility</key>
 		<dict>
 			<key>Default</key>
@@ -46,6 +51,20 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>5</string>
+	<key>Fabric</key>
+	<dict>
+		<key>APIKey</key>
+		<string>b06e35039458be3cb5bd6affac2ee95251f0516b</string>
+		<key>Kits</key>
+		<array>
+			<dict>
+				<key>KitInfo</key>
+				<dict/>
+				<key>KitName</key>
+				<string>Crashlytics</string>
+			</dict>
+		</array>
+	</dict>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>

@@ -32,12 +32,14 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+    NSLog(@"IOViewController viewDidLoad begin");
+    self.screenName = @"IOViewController";
     [self.cameraViewController setupCameraView];
     [self.cameraViewController setCameraViewType:IPDFCameraViewTypeNormal];
     [self.cameraViewController setEnableBorderDetection:YES];
     [self updateTitleLabel];
     self.cameraViewController.delegate = self;
+    NSLog(@"IOViewController viewDidLoad end");
 }
 - (void)viewWillAppear:(BOOL)animated
 {
@@ -45,14 +47,18 @@
 }
 - (void)viewWillDisappear:(BOOL)animated
 {
+    NSLog(@"IOViewController viewWillDisappear begin");
     _isImageCaptured = true;
     [self.cameraViewController stop];
+    NSLog(@"IOViewController viewWillDisappear end");
 }
 - (void)viewDidAppear:(BOOL)animated
 {
+    NSLog(@"IOViewController viewDidAppear begin");
     _isImageCaptured = false;
     [self.cameraViewController start];
     [self.cameraViewController resetCameraViewController];
+    NSLog(@"IOViewController viewDidAppear end");
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle
@@ -145,6 +151,7 @@
 {
     if (_isImageCaptured == false)
     {
+        NSLog(@"IOViewController captureButton begin");
         _isImageCaptured = true;
         [self.cameraViewController setCaptureStatus:true];
         [self.cameraViewController captureImageWithCompletionHander:^(NSString *imageFilePath)
@@ -174,7 +181,7 @@
              MAImagePickerControllerAdjustViewController *adjustViewController = [[MAImagePickerControllerAdjustViewController alloc] init];
              adjustViewController.sourceImage = [[UIImage imageWithContentsOfFile:imageFilePath] fixOrientation];
              [self.navigationController pushViewController:adjustViewController animated:NO];
-
+             NSLog(@"IOViewController captureButton end");
          }];
 
     }
@@ -229,16 +236,20 @@
     
 }
 - (IBAction)cancelAction:(id)sender {
+    NSLog(@"IOViewController cancelAction begin");
     self.cameraViewController.isCapturingStill = true;
     [self.navigationController popToRootViewControllerAnimated:true];
+    NSLog(@"IOViewController cancelAction end");
 //    AppDelegate* sharedDelegate = [AppDelegate appDelegate];
 //    MainViewController *mainView = [[MainViewController alloc] initWithNibName:@"MainViewController" bundle:nil];
 //    [sharedDelegate setRootViewForWindow:mainView];
 }
 - (IBAction)skipToCameraViewAction:(id)sender {
+    NSLog(@"IOViewController skipToCameraViewAction begin");
     self.cameraViewController.isCapturingStill = true;
     UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     UIViewController *cameraView = [storyBoard instantiateViewControllerWithIdentifier:@"PFCameraviewcontrollerscreen"];
     [self.navigationController pushViewController:cameraView animated:true];
+    NSLog(@"IOViewController skipToCameraViewAction end");
 }
 @end

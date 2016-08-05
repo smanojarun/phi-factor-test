@@ -40,6 +40,7 @@ class PFCameraScreenModel: NSObject {
      - parameter iteratio: Iteration of the video.
      */
     func nextvideo(iteratio: String) {
+        print("PFCameraScreenModel nextvideo \(iteratio) begin")
         videoData = NSData(contentsOfURL: itemtobeplayed)
         patientId = defaults.stringForKey("patient_id")
         let date = NSDate()
@@ -125,9 +126,11 @@ class PFCameraScreenModel: NSObject {
         else {
             instanceOfCustomObject .uploadData(videoData, patientId, iteratio, itemtobeplayed, dateFormatter)
         }
+        print("PFCameraScreenModel nextvideo \(iteratio) end")
     }
     
     func update_media_status(videoStatus1: String!, url: AnyObject!) -> NSMutableURLRequest{
+        print("PFCameraScreenModel update_media_status \(url) begin")
         let parameters1 = ["video_url": url, "video_status": videoStatus1 ]
         print(parameters1)
         do {
@@ -138,6 +141,7 @@ class PFCameraScreenModel: NSObject {
         } catch {
             print("JSON serialization Error!")
         }
+        print("PFCameraScreenModel update_media_status \(url) end")
         return urlRequest
 
     }
@@ -147,6 +151,7 @@ class PFCameraScreenModel: NSObject {
      */
     
     func registerPatient() {
+        print("PFCameraScreenModel registerPatient begin")
         let defaults = NSUserDefaults.standardUserDefaults()
         var access_token: String!
         var token_type: String!
@@ -223,6 +228,7 @@ class PFCameraScreenModel: NSObject {
                     defaults.removeObjectForKey("lan_id")
                     defaults.removeObjectForKey("encounterID")
                 }
+                print("PFCameraScreenModel registerPatient end")
         }
     }
 
@@ -232,6 +238,7 @@ class PFCameraScreenModel: NSObject {
      - parameter imageFilePath: Document URL in local device.
      */
     func uploadDocument(imageFilePath: String) {
+        print("PFCameraScreenModel uploadDocument begin")
         let imageData = NSData(contentsOfFile: imageFilePath)
         patientId = defaults.stringForKey("patient_id")
         let date = NSDate()
@@ -247,6 +254,7 @@ class PFCameraScreenModel: NSObject {
         defaults.setObject (doc, forKey: "doc")
         
         instanceOfCustomObject .uploadData(imageData, patientId, dateFormatter, NSURL(string: imageFilePath))
+        print("PFCameraScreenModel uploadDocument end")
     }
 }
 

@@ -9,7 +9,7 @@
 import UIKit
 import AVFoundation
 
-class VideoPreviewView: UIViewController {
+class VideoPreviewView: GAITrackedViewController {
 
     @IBOutlet var videoPreviewLayer: UIView!
     @IBOutlet var playButton: UIButton!
@@ -31,7 +31,8 @@ class VideoPreviewView: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        print("videoPreviewView viewDidLoad begin")
+        self.screenName = VideoPreviewViewScreenName
         // Do any additional setup after loading the view.
         if titleString != nil
         {
@@ -65,9 +66,11 @@ class VideoPreviewView: UIViewController {
                 self.view.layer.addSublayer(self.avPlayerLayer)
                 self.avPlayerLayer.hidden = false
                 self.avPlayer.seekToTime(kCMTimeZero)
+                print("videoPreviewView viewDidLoad end")
             })
             
         }
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -93,7 +96,7 @@ class VideoPreviewView: UIViewController {
      Automatically Restarts the howtotakevideo after end of video playing.
      */
     func restartVideoFromBeginning() {
-        
+        print("videoPreviewView restartVideoFromBeginning begin")
         let seconds: Int64 = 0
         let preferredTimeScale: Int32 = 1
         let seekTime: CMTime = CMTimeMake(seconds, preferredTimeScale)
@@ -102,6 +105,7 @@ class VideoPreviewView: UIViewController {
         pauseButton.hidden=true
         playButton.hidden = false
         closeViewButton.hidden=false
+        print("videoPreviewView restartVideoFromBeginning end")
     }
 
     /**
@@ -114,10 +118,8 @@ class VideoPreviewView: UIViewController {
 //        duration = avPlayer.currentItem!.asset.duration
 //        totalDuration = Float(CMTimeGetSeconds(duration))
 //        print(totalDuration)
+        print("videoPreviewView playVideo begin")
         avPlayer.play()
-        if (avPlayer.rate != 0 && avPlayer.error == nil) {
-            print("playing")
-        }
         slider.hidden=false
         myTimer = NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: #selector(VideoPreviewView.updateSlider), userInfo: nil, repeats: true)
         slider.addTarget(self, action: #selector(VideoPreviewView.sliderValueDidChange(_: )), forControlEvents: UIControlEvents.ValueChanged)
@@ -126,6 +128,7 @@ class VideoPreviewView: UIViewController {
         pauseButton.hidden=false
         playButton.hidden=true
         closeViewButton.hidden = false
+        print("videoPreviewView playVideo end")
     }
     
     /**
@@ -133,17 +136,13 @@ class VideoPreviewView: UIViewController {
      */
     
     func updateSlider() {
-        if (avPlayer.rate != 0 && avPlayer.error == nil) {
-            print("playing")
-        }
-        else{
-            print("Not playing.")
-        }
+        print("videoPreviewView updateSlider begin")
         currentTime = Float(CMTimeGetSeconds(avPlayer.currentTime()))
         duration = avPlayer.currentItem!.asset.duration
         totalDuration = Float(CMTimeGetSeconds(duration))
         slider.value = currentTime // Setting slider value as current time
         slider.maximumValue = totalDuration // Setting maximum value as total duration of the video
+        print("videoPreviewView updateSlider end")
     }
     
     /**
@@ -153,9 +152,11 @@ class VideoPreviewView: UIViewController {
      */
     
     func sliderValueDidChange(sender: UISlider!) {
+        print("videoPreviewView sliderValueDidChange begin")
         timeInSecond=slider.value
         newtime = CMTimeMakeWithSeconds(Double(timeInSecond), 1)// Setting new time using slider value
         avPlayer.seekToTime(newtime)
+        print("videoPreviewView sliderValueDidChange end")
     }
     
     /**
@@ -164,9 +165,11 @@ class VideoPreviewView: UIViewController {
      - parameter sender: pause button from interface.
      */
     @IBAction func pausesButtonAction(sender: AnyObject) {
+        print("videoPreviewView pausesButtonAction begin")
         pauseButton.hidden=true
         playButton.hidden = false
         avPlayer.pause()
+        print("videoPreviewView pausesButtonAction end")
     }
     
     /**
@@ -175,6 +178,7 @@ class VideoPreviewView: UIViewController {
      - parameter sender: close button from interface.
      */
     @IBAction func closeViewAction(sender: AnyObject) {
+        print("videoPreviewView closeViewAction begin")
         pauseButton.hidden=true
         self.avPlayer.pause()
         if isPresentedView
@@ -187,6 +191,6 @@ class VideoPreviewView: UIViewController {
             self.view.removeFromSuperview()
             self.removeFromParentViewController()
         }
-        
+        print("videoPreviewView closeViewAction end")
     }
 }

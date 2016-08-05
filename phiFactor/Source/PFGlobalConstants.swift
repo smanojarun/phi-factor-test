@@ -10,6 +10,7 @@ import Foundation
 import DeviceKit
 import AVFoundation
 import Alamofire
+import LocalAuthentication
 
 var itemtobeplayed: NSURL!
 var videoStatus1: String!
@@ -26,8 +27,25 @@ let eyeVideoInstruction = "Capture Eye from left to right"
 let battryAlertText = "Battery level below 40%. Please connect the charger."
 let documentUploadingAlertText = "Document upload in progress."
 let faqURL = "https://phifactor.com/7f29385ba747553b17043dd57841cbc761099136/faq.html"
-
+let APP_DELEGATE = UIApplication.sharedApplication().delegate as? AppDelegate
 var canShowBatteryAlert = true
+
+let googleTrackingID = "UA-81645332-1"
+let PFCameraviewcontrollerScreenName = "PFCameraviewcontrollerscreen"
+let PFWebViewScreenName = "PFWebView"
+let PFUploadstatusViewControllerScreenName = "PFUploadstatusViewController"
+let PFSinginViewControllerScreenName = "PFSinginViewController"
+let PhiFactorIntroScreenName = "PhiFactorIntro"
+let VideoPreviewViewScreenName = "PFVideoPreviewView"
+let PF_USERNAME = "pfUserName"
+let PF_PASSWORD = "pfPassword"
+
+enum authenticateStatus {
+    case authorized
+    case unAuthorized
+    case canceled
+    case unKnown
+}
 
 class PFGlobalConstants: NSObject {
 
@@ -102,6 +120,118 @@ class PFGlobalConstants: NSObject {
                 }
         }
     }
+    
+    class func authenticateUserByTouchID(complition :(status: authenticateStatus) ->()) {
+        let context = LAContext()
+        
+        // Declare a NSError variable.
+        var error: NSError?
+        
+        // Set the reason string that will appear on the authentication alert.
+        var reasonString = "Authentication is needed to access your notes."
+        
+        // Check if the device can evaluate the policy.
+        if context.canEvaluatePolicy(LAPolicy.DeviceOwnerAuthenticationWithBiometrics, error: &error) {
+            [context .evaluatePolicy(LAPolicy.DeviceOwnerAuthenticationWithBiometrics, localizedReason: reasonString, reply: { (success: Bool, evalPolicyError: NSError?) -> Void in
+                
+                if success {
+                    complition(status: .authorized)
+                }
+                else{
+                    // If authentication failed then show a message to the console with a short description.
+                    // In case that the error is a user fallback, then show the password alert view.
+                    print(evalPolicyError?.localizedDescription)
+                    
+                    switch evalPolicyError!.code {
+                        
+                    case LAError.SystemCancel.rawValue:
+                        print("Authentication was cancelled by the system")
+                        complition(status: .unAuthorized)
+                        
+                    case LAError.UserCancel.rawValue:
+                        print("Authentication was cancelled by the user")
+                        complition(status: .canceled)
+                        
+                    case LAError.UserFallback.rawValue:
+                        print("User selected to enter custom password")
+                        complition(status: .unAuthorized)
+                        NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
+                        })
+                        
+                    default:
+                        print("Authentication failed")
+                        complition(status: .unAuthorized)
+                        NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
+                        })
+                    }
+                }
+                
+            })]
+        }
+        else
+        {
+            complition(status: .unKnown)
+        }
+    }
+    
+    
+    class func authenticateUserForwebLogin(uuidFromServer : String) {
+        let registerDeviceUrlString = "\(baseURL)/touch_id_success"
+        let registerDeviceURl = NSURL(string: registerDeviceUrlString)
+        urlRequest = NSMutableURLRequest(URL: registerDeviceURl!)
+        urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
+        let loginModel = PFLogingModel()
+        urlRequest = loginModel.getPushLoginParams(uuidFromServer)
+        Alamofire.request(urlRequest).responseJSON { (response) in
+            switch response.result
+            {
+            case .Failure(let error):
+                let err = error as NSError
+                if err.code == -1009 {
+//                    self.netwrkAlertLabel.text = "Unable to connect.Check your network connection."
+//                    self.networkAlertViewAction()
+                }
+                else {
+//                    self.netwrkAlertLabel.text = "There is an error occured."
+//                    self.networkAlertViewAction()
+                }
+                break
+            case .Success(let responseObject):
+                let httpStatusCode = response.response?.statusCode
+                print(httpStatusCode)
+                
+                if(httpStatusCode==200) {
+                    let response = responseObject as! NSDictionary
+                    let result = response.objectForKey("result")! as! String
+                    let message = response.objectForKey("message")! as! String
+//                    let alert = UIAlertView(title: "", message: message, delegate: nil, cancelButtonTitle: "Ok")
+//                    alert.show()
+                }
+                else if httpStatusCode == 201 {
+                    let response = responseObject as! NSDictionary
+                    let message = response.objectForKey("message")! as! String
+//                    let alert = UIAlertView(title: "", message: message, delegate: nil, cancelButtonTitle: "Ok")
+//                    alert.show()
+                }
+                break
+            }
+        }
+        
+    }
+    
+    class func sendEventWithCatogory(catagory: String, action: String, label: String, value: NSNumber?)
+    {
+        let dic = GAIDictionaryBuilder.createEventWithCategory(catagory, action: action, label: label, value: value).build()
+        APP_DELEGATE?.gaiInstance.defaultTracker.send(dic as [NSObject:AnyObject])
+        APP_DELEGATE?.gaiInstance.dispatch()
+    }
+    class func sendException(description: String, isFatal: Bool)
+    {
+        let dic = GAIDictionaryBuilder.createExceptionWithDescription(description, withFatal: NSNumber(bool: isFatal)).build()
+        APP_DELEGATE?.gaiInstance.defaultTracker.send(dic as [NSObject:AnyObject])
+        APP_DELEGATE?.gaiInstance.dispatch()
+    }
+
 
 }
 extension Double {

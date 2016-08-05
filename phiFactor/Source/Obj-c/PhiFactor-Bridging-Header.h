@@ -7,3 +7,8 @@
 #import "UITextField+Shake.h"
 
 #import "IOViewController.h"
+#import "GAI.h"
+#import "GAIDictionaryBuilder.h"
+#import "GAITrackedViewController.h"
+//#import <Google/Analytics.h>
+#import "ABPadLockScreen.h"

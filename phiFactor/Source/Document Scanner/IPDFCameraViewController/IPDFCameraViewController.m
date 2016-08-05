@@ -84,6 +84,7 @@
 
 - (void)createGLKView
 {
+    NSLog(@"IPDFCameraViewController createGLKView begin");
     if (self.context) return;
     
     self.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
@@ -96,6 +97,7 @@
     [self insertSubview:view atIndex:0];
     _glkView = view;
     _coreImageContext = [CIContext contextWithEAGLContext:self.context options:@{ kCIContextWorkingColorSpace : [NSNull null],kCIContextUseSoftwareRenderer : @(NO)}];
+    NSLog(@"IPDFCameraViewController createGLKView end");
 }
 
 - (void)setupCameraView
@@ -174,6 +176,7 @@
 -(void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
     if (self.forceStop) return;
+    NSLog(@"IPDFCameraViewController didOutputSampleBuffer begin");
     if (_isStopped || _isCapturing || !CMSampleBufferIsValid(sampleBuffer) || _isCapturingStill) return;
     
     CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)CMSampleBufferGetImageBuffer(sampleBuffer);
@@ -224,10 +227,10 @@
         [_coreImageContext drawImage:image inRect:self.bounds fromRect:[image extent]];
         if([_glkView enableSetNeedsDisplay])
         {
-//            dispatch_async(dispatch_get_main_queue(), ^{
+            dispatch_async(dispatch_get_main_queue(), ^{
             [_glkView setNeedsDisplay];
                 [_glkView display];
-//            });
+            });
         }
         
         if(_intrinsicContentSize.width != image.extent.size.width) {
@@ -239,6 +242,7 @@
         
         image = nil;
     }
+    NSLog(@"IPDFCameraViewController didOutputSampleBuffer end");
 }
 
 - (CGSize)intrinsicContentSize

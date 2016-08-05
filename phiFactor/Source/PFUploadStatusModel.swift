@@ -37,36 +37,36 @@ class PFUploadStatusModel: NSObject {
             let eyeDetectMediaStatus = patientIndexValue.objectAtIndex(3).objectForKey("media_status") as! String
 
             if(introMediaStatus=="completed") {
-                let patientUploadIntro = "PF\(patient_idValue)-introMediaStatus"
+                let patientUploadIntro = "PF\(patient_idValue)-Introduction Video"
                 uploadSuccessfullyArr.addObject(patientUploadIntro)
             }
             else {
-                let patientUploadIntro = "PF\(patient_idValue)-introMediaStatus"
+                let patientUploadIntro = "PF\(patient_idValue)-Introduction Video"
                 inprogressArr.addObject(patientUploadIntro)
             }
             if(facialMediaStatus=="completed") {
-                let patientUploadFacial = "PF\(patient_idValue)-facialMediaStatus"
+                let patientUploadFacial = "PF\(patient_idValue)-Facial Feature Analysis Video"
                 uploadSuccessfullyArr.addObject(patientUploadFacial)
             }
             else {
-                let patientUploadFacial = "PF\(patient_idValue)-facialMediaStatus"
+                let patientUploadFacial = "PF\(patient_idValue)-Facial Feature Analysis Video"
                 inprogressArr.addObject(patientUploadFacial)
             }
             
             if(headMediaStatus=="completed") {
-                let patientUploadHeadMedia = "PF\(patient_idValue)-headMediaStatus"
+                let patientUploadHeadMedia = "PF\(patient_idValue)-Head Feature Analysis Video"
                 uploadSuccessfullyArr.addObject(patientUploadHeadMedia)
             }
             else {
-                let patientUploadHeadMedia = "PF\(patient_idValue)-headMediaStatus"
+                let patientUploadHeadMedia = "PF\(patient_idValue)-Head Feature Analysis Video"
                 inprogressArr.addObject(patientUploadHeadMedia)
             }
             if(eyeDetectMediaStatus=="completed") {
-                let patientUploadEyeDetectMediaStatus = "PF\(patient_idValue)-eyeDetectMediaStatus"
+                let patientUploadEyeDetectMediaStatus = "PF\(patient_idValue)-Eye Feature Analysis Video"
                 uploadSuccessfullyArr.addObject(patientUploadEyeDetectMediaStatus)
             }
             else {
-                let patientUploadEyeDetectMediaStatus = "PF\(patient_idValue)-eyeDetectMediaStatus"
+                let patientUploadEyeDetectMediaStatus = "PF\(patient_idValue)-Eye Feature Analysis Video"
                 inprogressArr.addObject(patientUploadEyeDetectMediaStatus)
             }
         }

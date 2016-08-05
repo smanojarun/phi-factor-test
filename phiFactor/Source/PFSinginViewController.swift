@@ -9,9 +9,10 @@
 import UIKit
 import Alamofire
 import AVFoundation
+import MessageUI
 
 /// Getting the mandatory and non mandatory details of the patient.
-class PFSinginViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPopoverPresentationControllerDelegate, UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource {
+class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UITableViewDataSource, UIPopoverPresentationControllerDelegate, UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource, ABPadLockScreenSetupViewControllerDelegate, ABPadLockScreenViewControllerDelegate, MFMailComposeViewControllerDelegate {
 
     @IBOutlet var tapGuest: UITapGestureRecognizer!
     @IBOutlet weak var PFSHbackrongimage: UIImageView!
@@ -32,7 +33,11 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
     @IBOutlet weak var pickerview: UIPickerView!
     @IBOutlet var imageActivityView: UIImageView!
     @IBOutlet var popView: UIView!
-
+    @IBOutlet var docScanSwitch: SevenSwitch!
+  
+    private(set) var thePin: String?
+    var unlocked = false;
+    var pinUnlockTimer: NSTimer!
     var canShowVideoUploadAlert = false
     var rowcount: NSInteger=0
     var cameraModel: PFCameraScreenModel?
@@ -63,9 +68,22 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("PatientScreen viewDidLoad begin")
+        pinUnlockTimer = NSTimer.scheduledTimerWithTimeInterval(60.0, target: self, selector: #selector(PFSinginViewController.resetUnlockFlag), userInfo: nil, repeats: true)
+        self.screenName = PFSinginViewControllerScreenName
         if canShowVideoUploadAlert {
             showUploadStatusAlert()
         }
+        let isDocScanOn = NSUserDefaults.standardUserDefaults().boolForKey("isDocScanOn")
+        if isDocScanOn != false
+        {
+            docScanSwitch.setOn(true, animated: false)
+        }
+        else
+        {
+            docScanSwitch.setOn(false, animated: false)
+        }
+        print("PatientScreen viewDidLoad end")
     }
 
     /**
@@ -75,6 +93,7 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
      */
 
     @IBAction func tapAction(sender: AnyObject) {
+        print("PatientScreen tapAction begin")
          guestureView.hidden = true
         UIView.animateWithDuration(0.5, animations: {
             self.popView.frame = CGRectMake(self.popView.frame.origin.x, self.popView.frame.origin.y, self.popView.frame.width, 0)
@@ -84,6 +103,7 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
                 }
         })
         UIView.commitAnimations()
+        print("PatientScreen tapAction end")
     }
 
     /**
@@ -91,7 +111,8 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
      */
 
     @IBAction func presentPopUp() {
-        if self.popView.frame.size.height == 125 {
+        print("PatientScreen presentPopUp begin")
+        if self.popView.frame.size.height == 210 {
             guestureView.hidden = true
             UIView.animateWithDuration(0.5, animations: {
                 self.popView.frame = CGRectMake(self.popView.frame.origin.x, self.popView.frame.origin.y, self.popView.frame.width, 0)
@@ -107,10 +128,11 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
             popView.frame = CGRectMake(popView.frame.origin.x, popView.frame.origin.y, popView.frame.width, 0)
             UIView.animateWithDuration(0.5) {
                 self.popView.hidden = false
-                self.popView.frame = CGRectMake(self.popView.frame.origin.x, self.popView.frame.origin.y, self.popView.frame.width, 125)
+                self.popView.frame = CGRectMake(self.popView.frame.origin.x, self.popView.frame.origin.y, self.popView.frame.width, 210)
             }
             UIView.commitAnimations()
         }
+        print("PatientScreen presentPopUp end")
     }
 
     /**
@@ -121,6 +143,8 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
      */
 
     func loadvalues() {
+        print("PatientScreen loadvalues begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "functionCall", label: "loadValues", value: nil)
         let app_version : Int = Int(NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleVersion") as! String)!
         requestString = "\(baseURL)/load_initial_data?Authorization=\(token_type)&access_token=\(access_token)&app_version=\(app_version)"
         print(requestString)
@@ -138,6 +162,7 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
                     print(httpStatusCode)
                     if(httpStatusCode==401) {
                         print("Invalid access token")
+                        PFGlobalConstants.sendException("InvalidAccessToken", isFatal: false)
                         self.getRefreshToken()
                     }
                 case .Success(let responseObject):
@@ -161,6 +186,7 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
                     self.patientModel?.getResonse(response) // request send to the PFPatientDetailsModel and get the response
                     //                    [self.patientdetails]
                 }
+                print("PatientScreen loadvalues end")
         }
     }
 
@@ -411,7 +437,8 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
 //        self.pfsHowtoTakeVideoView.layer.insertSublayer(avPlayerLayer1, atIndex: 0)
 //        avPlayerLayer1.frame = self.pfsHowtoTakeVideoView.bounds
 //        avPlayer1.pause()
-
+        print("PatientScreen howtotakevideo begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "HowToTakeVideo", value: nil)
         let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("VideoPreviewView") as! VideoPreviewView
         nextViewController.modalPresentationStyle = UIModalPresentationStyle.FormSheet
@@ -420,6 +447,7 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
         nextViewController.itemUrl = url
         nextViewController.isPresentedView = true
         self.presentViewController(nextViewController, animated: true, completion: nil)
+        print("PatientScreen howtotakevideo end")
     }
 
     /**
@@ -587,6 +615,7 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
       }
 
     override func viewDidAppear(animated: Bool) {
+        print("PatientScreen viewDidAppear begin")
         guestureView.hidden = true
         UIView.animateWithDuration(0.0) {
             self.popView.frame = CGRectMake(self.popView.frame.origin.x, self.popView.frame.origin.y, self.popView.frame.width, 0)
@@ -604,10 +633,13 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
         UIView.commitAnimations()
         self.popView.clipsToBounds = true
         self.popView.layer.masksToBounds = true
+        print("PatientScreen viewDidAppear end")
     }
 
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
+        print("PatientScreen viewWillAppear begin")
+        unlocked = false
         // Start the playback
         self.popView.hidden = true
         closePicker.hidden=true
@@ -637,6 +669,7 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
         let imageData = NSData(contentsOfURL: NSBundle.mainBundle().URLForResource("loading", withExtension: "gif")!)
         imageActivityView.image = UIImage.gifWithData(imageData!)
         imageActivityView.hidden = true
+        print("PatientScreen viewWillAppear begin")
     }
 
     override func viewDidDisappear(animated: Bool) {
@@ -685,6 +718,7 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
      */
 
     @IBAction func startvedioaction(sender: AnyObject) {
+        print("PatientScreen startvedioaction begin")
         startvedio.hidden = true
         dispatch_async(dispatch_get_main_queue()) { 
             var valid: Bool!
@@ -822,14 +856,27 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1), dispatch_get_main_queue(), {
                     //            let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
                     //            let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
-                    self.navigationController?.pushViewController(IOViewController(), animated: false)
+                    let isDocScanOn = NSUserDefaults.standardUserDefaults().boolForKey("isDocScanOn")
+                    if isDocScanOn == true
+                    {
+                        self.navigationController?.pushViewController(IOViewController(), animated: false)
+
+                    }
+                    else
+                    {
+                        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                        let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
+                        self.navigationController?.pushViewController(nextViewController, animated: false)
+                    }
                     self.startvedio.hidden = false
+                    print("PatientScreen startvedioaction end")
                 })
                 return
             }
             else {
                 print("Validation fails")
                 self.startvedio.hidden = false
+                print("PatientScreen startvedioaction end")
             }
         }
         
@@ -1117,11 +1164,13 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
      */
 
     @IBAction func UploadStatusAction(sender: AnyObject) {
-        print("UploadStatusAction tapped")
+        print("PatientScreen UploadStatusAction begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "PresentUploadStatusView", value: nil)
         let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFUploadstatusViewController") as! PFUploadstatusViewController
         nextViewController.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
         self.presentViewController(nextViewController, animated: true, completion: nil)
+        print("PatientScreen UploadStatusAction end")
     }
 
     /**
@@ -1131,12 +1180,14 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
      */
 
     @IBAction func LogoutAction(sender: AnyObject) {
-        print("LogoutAction tapped")
+        print("PatientScreen LogoutAction begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "LogOut", value: nil)
         let defaults = NSUserDefaults.standardUserDefaults()
         // defaults.setBool(true, forKey: "UseTouchID")
         defaults.setInteger(1, forKey: "logout")
         defaults.setObject ("", forKey: "access_token")
         defaults.setObject("", forKey: "token_type")
+        defaults
         let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PhiFactorIntro") as! PhiFactorIntro
         nextViewController.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
@@ -1147,8 +1198,10 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
         UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
             appDelegaet!.window?.backgroundColor = UIColor.whiteColor()
             appDelegaet!.window?.rootViewController = nav
-
+            
             }) { (isCompleted) in
+                NSUserDefaults.standardUserDefaults().removeObjectForKey("PF_Passcode")
+                print("PatientScreen LogoutAction end")
         }
     }
 
@@ -1158,11 +1211,14 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
      - parameter sender: faq button from inteface.
      */
     @IBAction func faqAction(sender: AnyObject) {
+        print("PatientScreen faqAction begin")
+        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "Faq", value: nil)
         let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let faqWebView = storyBoard.instantiateViewControllerWithIdentifier("PFWebView") as! PFWebView
         faqWebView.url = NSURL(string: faqURL)
         faqWebView.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
         self.presentViewController(faqWebView, animated: true, completion: nil)
+        print("PatientScreen faqAction end")
     }
     /**
      Showing the alert from the top and automatically close after 2 seconds.
@@ -1201,6 +1257,8 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
      Refresh the access token by sending the already stored access token to the server.
      */
     func getRefreshToken() {
+        print("PatientScreen getRefreshToken begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "functionCall", label: "refreshToken", value: nil)
         let defaults = NSUserDefaults.standardUserDefaults()
         let refresh_token = defaults.stringForKey("refresh_token")! as String
         requestString = "\(baseURL)/login"
@@ -1228,7 +1286,150 @@ class PFSinginViewController: UIViewController, UITableViewDelegate, UITableView
                     defaults.setObject(refresh_token, forKey: "refresh_token")
                     self.loadvalues()
                 }
+                print("PatientScreen getRefreshToken end")
         }
     }
 
+    @IBAction func docScanSwitcAction(sender: SevenSwitch) {
+        print("PatientScreen docScanSwitcAction begin")
+        let defaults = NSUserDefaults.standardUserDefaults()
+        if docScanSwitch.isOn()
+        {
+            defaults.setBool(true, forKey: "isDocScanOn")
+            defaults.synchronize()
+            print("isDocScanOn switched On")
+        }
+        else
+        {
+            defaults.setBool(false, forKey: "isDocScanOn")
+            defaults.synchronize()
+            print("isDocScanOn switched On")
+        }
+        print("PatientScreen docScanSwitcAction end")
+    }
+    @IBAction func setPasscodeAction(sender: AnyObject) {
+        
+        print("PatientScreen setPasscodeAction begin")
+        let defaults = NSUserDefaults.standardUserDefaults()
+        if let passcode = defaults.objectForKey("PF_Passcode") as? String
+        {
+            thePin = passcode
+            if !unlocked
+            {
+                let lockScreen = ABPadLockScreenViewController(delegate: self, complexPin: false)
+                lockScreen.setAllowedAttempts(3)
+                lockScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
+                lockScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
+                presentViewController(lockScreen, animated: true, completion: nil)
+            }
+            else
+            {
+                let lockSetupScreen = ABPadLockScreenSetupViewController(delegate: self, complexPin: false, subtitleLabelText: "Select a pin")
+                lockSetupScreen.tapSoundEnabled = true
+                lockSetupScreen.errorVibrateEnabled = true
+                lockSetupScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
+                lockSetupScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
+                presentViewController(lockSetupScreen, animated: true, completion: nil)
+            }
+        }
+        else {
+            let lockSetupScreen = ABPadLockScreenSetupViewController(delegate: self, complexPin: false, subtitleLabelText: "Select a pin")
+            lockSetupScreen.tapSoundEnabled = true
+            lockSetupScreen.errorVibrateEnabled = true
+            lockSetupScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
+            lockSetupScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
+            presentViewController(lockSetupScreen, animated: true, completion: nil)
+        }
+        print("PatientScreen setPasscodeAction end")
+    }
+    
+    @IBAction func sendReport(sender: AnyObject) {
+        print("PatientScreen sendReport begin")
+        if( MFMailComposeViewController.canSendMail() ) {
+            print("Can send email.")
+            
+            let mailComposer = MFMailComposeViewController()
+            mailComposer.mailComposeDelegate = self
+            
+            //Set the subject and message of the email
+            mailComposer.setSubject("Appliction log report")
+            mailComposer.setMessageBody("", isHTML: false)
+            
+            var paths: Array = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
+            let documentsDirectory: String = paths[0]
+            let logPath: String = documentsDirectory.stringByAppendingString("/console.log")
+            if NSFileManager.defaultManager().fileExistsAtPath(logPath) {
+                if let fileData = NSData(contentsOfFile: logPath) {
+                    print("File data loaded.")
+                    mailComposer.addAttachmentData(fileData, mimeType: "text/x-log", fileName: "console")
+                }
+            }
+//            if let filePath = NSBundle.mainBundle().pathForResource("console", ofType: "log") {
+//                print("File path loaded.")
+//                
+//                if let fileData = NSData(contentsOfFile: filePath) {
+//                    print("File data loaded.")
+//                    mailComposer.addAttachmentData(fileData, mimeType: "text/x-log", fileName: "console")
+//                }
+//            }
+            self.presentViewController(mailComposer, animated: true, completion: nil)
+            print("PatientScreen sendReport begin")
+        }
+        else
+        {
+            print("Email accounts not configured.")
+            print("PatientScreen sendReport begin")
+        }
+    }
+    
+    func mailComposeController(controller: MFMailComposeViewController, didFinishWithResult result: MFMailComposeResult, error: NSError?) {
+        self.dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    //MARK: Lock Screen Setup Delegate
+    func pinSet(pin: String!, padLockScreenSetupViewController padLockScreenViewController: ABPadLockScreenSetupViewController!) {
+        thePin = pin
+        NSUserDefaults.standardUserDefaults().setObject(pin, forKey: "PF_Passcode")
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    func unlockWasCancelledForSetupViewController(padLockScreenViewController: ABPadLockScreenAbstractViewController!) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    //MARK: Lock Screen Delegate
+    func padLockScreenViewController(padLockScreenViewController: ABPadLockScreenViewController!, validatePin pin: String!) -> Bool {
+        print("Validating Pin \(pin)")
+        return thePin == pin
+    }
+    
+    func unlockWasSuccessfulForPadLockScreenViewController(padLockScreenViewController: ABPadLockScreenViewController!) {
+        print("Unlock Successful!")
+        pinUnlockTimer = NSTimer.scheduledTimerWithTimeInterval(60.0, target: self, selector: #selector(PFSinginViewController.resetUnlockFlag), userInfo: nil, repeats: true)
+        unlocked = true;
+        dismissViewControllerAnimated(true, completion: nil)
+        let lockSetupScreen = ABPadLockScreenSetupViewController(delegate: self, complexPin: false, subtitleLabelText: "Select a pin")
+        lockSetupScreen.tapSoundEnabled = true
+        lockSetupScreen.errorVibrateEnabled = true
+        lockSetupScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
+        lockSetupScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
+        presentViewController(lockSetupScreen, animated: true, completion: nil)
+    }
+    
+    func unlockWasUnsuccessful(falsePin: String!, afterAttemptNumber attemptNumber: Int, padLockScreenViewController: ABPadLockScreenViewController!) {
+        print("Failed Attempt \(attemptNumber) with incorrect pin \(falsePin)")
+        if attemptNumber == 3
+        {
+            dismissViewControllerAnimated(true, completion: nil)
+        }
+    }
+    
+    func unlockWasCancelledForPadLockScreenViewController(padLockScreenViewController: ABPadLockScreenViewController!) {
+        print("Unlock Cancled")
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    func resetUnlockFlag() {
+        unlocked = false
+    }
+    
 }

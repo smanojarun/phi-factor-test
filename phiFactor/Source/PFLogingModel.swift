@@ -30,6 +30,7 @@ class PFLogingModel: NSObject {
     
     func param (user:NSString,pass: NSString, grandType: NSString, url: NSMutableURLRequest
         ) -> NSMutableURLRequest {
+        print("PFLogingModel param begin")
         let app_version : Int = Int(NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleVersion") as! String)!
         let parameters1 = [
                            "username": user,
@@ -46,6 +47,7 @@ class PFLogingModel: NSObject {
     } catch {
     print("JSON serialization Error!")
     }
+        print("PFLogingModel param end")
     return urlRequest
     }
     
@@ -60,6 +62,7 @@ class PFLogingModel: NSObject {
      */
     
     func resetPasswordParam(old:NSString,new:NSString,uuid:NSString) ->NSMutableURLRequest{
+        print("PFLogingModel resetPasswordParam begin")
         let parameters1 = ["old_password": old, "new_password": new, "uuid":uuid]
         do {
             urlRequest.HTTPBody = try NSJSONSerialization.dataWithJSONObject(parameters1,options: NSJSONWritingOptions())
@@ -67,6 +70,42 @@ class PFLogingModel: NSObject {
         } catch {
             print("JSON serialization Error!")
         }
+        print("PFLogingModel resetPasswordParam end")
+        return urlRequest
+    }
+    
+    func getRegisterDeviceParams(emailId : String) -> NSMutableURLRequest {
+        let accessToken : String = NSUserDefaults.standardUserDefaults().objectForKey("deviceToken") as! String
+        print("PFLogingModel getRegisterDeviceParams begin")
+        let deviceId : String = (UIDevice.currentDevice().identifierForVendor?.UUIDString)!
+        let parameters1 = [
+                            "email_id": emailId,
+                            "access_token": accessToken,
+                            "device_id": deviceId
+                            ]
+        do {
+            urlRequest.HTTPBody = try NSJSONSerialization.dataWithJSONObject(parameters1,options: NSJSONWritingOptions())
+            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        } catch {
+            print("JSON serialization Error!")
+        }
+        print("PFLogingModel getRegisterDeviceParams end")
+        return urlRequest
+    }
+    
+    func getPushLoginParams(uuidFromserver : String) -> NSMutableURLRequest {
+        print("PFLogingModel getPushLoginParams begin")
+        let parameters1 = [
+            "push_status": "YES",
+            "uuid": uuidFromserver
+        ]
+        do {
+            urlRequest.HTTPBody = try NSJSONSerialization.dataWithJSONObject(parameters1,options: NSJSONWritingOptions())
+            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        } catch {
+            print("JSON serialization Error!")
+        }
+        print("PFLogingModel getPushLoginParams end")
         return urlRequest
     }
 
