@@ -31,10 +31,34 @@ class PFUploadStatusModel: NSObject {
             let patientIndex =  patientDetailsArray.objectAtIndex(i)
             let patient_idValue =  (patientIndex.objectForKey("patient_mrn_id")) as! String
             let patientIndexValue =  patientIndex.objectForKey("patient_media") as! NSArray
-            let introMediaStatus = patientIndexValue.objectAtIndex(0).objectForKey("media_status") as! String
-            let facialMediaStatus = patientIndexValue.objectAtIndex(1).objectForKey("media_status") as! String
-            let headMediaStatus = patientIndexValue.objectAtIndex(2).objectForKey("media_status") as! String
-            let eyeDetectMediaStatus = patientIndexValue.objectAtIndex(3).objectForKey("media_status") as! String
+            
+            var introMediaStatus = "N/A"
+            var facialMediaStatus = "N/A"
+            var headMediaStatus = "N/A"
+            var eyeDetectMediaStatus = "N/A"
+            switch patientIndexValue.count {
+            case 1:
+                introMediaStatus = (patientIndexValue.objectAtIndex(0).objectForKey("media_status") as? String)!
+                break
+            case 2:
+                introMediaStatus = (patientIndexValue.objectAtIndex(0).objectForKey("media_status") as? String)!
+                facialMediaStatus = (patientIndexValue.objectAtIndex(1).objectForKey("media_status") as? String)!
+                break
+            case 3:
+                introMediaStatus = (patientIndexValue.objectAtIndex(0).objectForKey("media_status") as? String)!
+                facialMediaStatus = (patientIndexValue.objectAtIndex(1).objectForKey("media_status") as? String)!
+                headMediaStatus = (patientIndexValue.objectAtIndex(2).objectForKey("media_status") as? String)!
+                break
+            case 4:
+                introMediaStatus = (patientIndexValue.objectAtIndex(0).objectForKey("media_status") as? String)!
+                facialMediaStatus = (patientIndexValue.objectAtIndex(1).objectForKey("media_status") as? String)!
+                headMediaStatus = (patientIndexValue.objectAtIndex(2).objectForKey("media_status") as? String)!
+                eyeDetectMediaStatus = (patientIndexValue.objectAtIndex(3).objectForKey("media_status") as? String)!
+                break
+            default:
+                break
+            }
+            
 
             if(introMediaStatus=="completed") {
                 let patientUploadIntro = "PF\(patient_idValue)-Introduction Video"

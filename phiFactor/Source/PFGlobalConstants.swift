@@ -20,12 +20,17 @@ var videoStatus4: String!
 let baseURL: NSString = "https://dev-api.phifactor.com"
 //let baseURL: NSString = "https://api.phifactor.com"
 //let baseURL: NSString = "https://staging-api.phifactor.com"
+//let baseURL: NSString = "http://10.10.1.18:9001"
+
 let introVideoInstruction = "The sky is blue."
 let facialVideoInstruction = "Capture face from left to right."
 let headVideoInstruction = "Capture from top to bottom."
 let eyeVideoInstruction = "Capture Eye from left to right"
 let battryAlertText = "Battery level below 40%. Please connect the charger."
 let documentUploadingAlertText = "Document upload in progress."
+let videoUploadingAlertText = "Recording process has completed, upload videos inprogress."
+let networkErrorAlertText = "Network not available. Please check your internet connections."
+let noValuesAlert = "Content may expired or not assigned yet. Contact admin for more details."
 let faqURL = "https://phifactor.com/7f29385ba747553b17043dd57841cbc761099136/faq.html"
 let APP_DELEGATE = UIApplication.sharedApplication().delegate as? AppDelegate
 var canShowBatteryAlert = true
@@ -39,6 +44,9 @@ let PhiFactorIntroScreenName = "PhiFactorIntro"
 let VideoPreviewViewScreenName = "PFVideoPreviewView"
 let PF_USERNAME = "pfUserName"
 let PF_PASSWORD = "pfPassword"
+let PF_QUALITYCHECK = "isQualityCheckOn"
+let PF_PatientIDOnDB = "pfPatientIDOnDB"
+let PF_ResumeVideoCount = "pfResumeVideoCount"
 
 enum authenticateStatus {
     case authorized
@@ -128,7 +136,7 @@ class PFGlobalConstants: NSObject {
         var error: NSError?
         
         // Set the reason string that will appear on the authentication alert.
-        var reasonString = "Authentication is needed to access your notes."
+        var reasonString = "Authentication is needed to access your data."
         
         // Check if the device can evaluate the policy.
         if context.canEvaluatePolicy(LAPolicy.DeviceOwnerAuthenticationWithBiometrics, error: &error) {
@@ -188,7 +196,7 @@ class PFGlobalConstants: NSObject {
             case .Failure(let error):
                 let err = error as NSError
                 if err.code == -1009 {
-//                    self.netwrkAlertLabel.text = "Unable to connect.Check your network connection."
+//                    self.netwrkAlertLabel.text = networkErrorAlertText
 //                    self.networkAlertViewAction()
                 }
                 else {
@@ -232,6 +240,10 @@ class PFGlobalConstants: NSObject {
         APP_DELEGATE?.gaiInstance.dispatch()
     }
 
+    class func setResumeVideoCount(count: Int) {
+        NSUserDefaults.standardUserDefaults().setInteger(count, forKey: PF_ResumeVideoCount)
+        NSUserDefaults.standardUserDefaults().synchronize()
+    }
 
 }
 extension Double {

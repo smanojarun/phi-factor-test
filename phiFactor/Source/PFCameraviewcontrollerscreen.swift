@@ -148,6 +148,9 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
     var batteryCheckTimer :NSTimer!
     var isBatteryAlertShowing = false
     var isDocumentAlert = false
+    var qualityCheck = true
+    var resumeVideoCount : Int!
+    var isResumeCameraViewEnabled = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -242,9 +245,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         pfcDeletePreviousVideoButton.hidden = true
         counterview.hidden=true
         playerlayer=false
-        // hiding button
-        pfCameraStartButton.hidden=true
-        pfCameraStop.hidden=true
+        
         // Video store button hide
         pfPlaySubView1.hidden=true
         pfPlaySubView2.hidden=true
@@ -275,7 +276,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             arrayOfImages.append(UIImage(named: image)!)
         }
         pfcFaceAnimationImageView.animationImages = arrayOfImages
-        pfcFaceAnimationImageView.animationDuration = 15
+        pfcFaceAnimationImageView.animationDuration = 5
         pfcFaceAnimationImageView.animationRepeatCount = 1
         var arrayOfImagesstrainghtdot: [UIImage] = []
         for i in 1..<18 {
@@ -326,6 +327,20 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         pfcPreviewSlider.minimumValue = 0.0
         pfcPreviewSlider.continuous = true
         closeInfoVideoButton.hidden = true
+        let isQualityCheckOn = NSUserDefaults.standardUserDefaults().objectForKey(PF_QUALITYCHECK)?.boolValue
+        if isQualityCheckOn != nil && isQualityCheckOn?.boolValue == false
+        {
+            qualityCheck = false
+        }
+        // hiding button
+        if qualityCheck {
+            pfCameraStartButton.hidden=true
+            pfCameraStop.hidden=true
+        }
+        if isResumeCameraViewEnabled
+        {
+            self.updateViewForResumeAction()
+        }
         print("CameraScreen viewDidLoad end")
 
     }
@@ -351,8 +366,11 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
     override func viewWillAppear(animated: Bool) {
         print("CameraScreen viewWillAppear begin")
         self.pfcCameraInstructionlabel.hidden = false
+        if qualityCheck {
+            self.pfCameraStartButton.enabled = false
+        }
         self.pfCameraStop.enabled = false
-        self.pfCameraStartButton.enabled = false
+
         dispatch_async(self.sessionQueue, {
             self.addObserver(self, forKeyPath: "sessionRunningAndDeviceAuthorized", options: [.Old , .New] , context: &self.sessionRunningAndDeviceAuthorizedContext)
             self.addObserver(self, forKeyPath: "stillImageOutput.capturingStillImage", options: [.Old , .New], context: &self.capturingStillImageContext)
@@ -416,6 +434,9 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
                 let connection: AVCaptureConnection? = movieFileOutput!.connectionWithMediaType(AVMediaTypeVideo)
                 let stab = connection?.supportsVideoStabilization
                 if (stab != nil) {
+                    if connection?.supportsVideoStabilization == true {
+                        connection?.preferredVideoStabilizationMode = AVCaptureVideoStabilizationMode.Cinematic
+                    }
                     //                    connection!.enablesVideoStabilizationWhenAvailable = true
                 }
                     //                self.movieFileOutput = movieFileOutput
@@ -770,14 +791,6 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
                     }
                     if someInts[i] == 1 && i != 12 {
                         dispatch_async(dispatch_get_main_queue()) {
-                            if self.videoCount == 1
-                            {
-                               self.pfcFaceAnimationImageView.animationDuration = 5
-                            }
-                            else
-                            {
-                                self.pfcFaceAnimationImageView.animationDuration = 15
-                            }
                             self.pfCameraStartButtonaction(nil)
                             self.showGreenColor()
                         }
@@ -877,6 +890,14 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
     @IBAction func pfCameraStartButtonaction(sender: AnyObject? = nil) {
         print("CameraScreen pfCameraStartButtonaction begin")
         PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "pfCameraStartButtonaction", value: nil)
+        if self.videoCount == 1
+        {
+            self.pfcFaceAnimationImageView.animationDuration = 5
+        }
+        else
+        {
+            self.pfcFaceAnimationImageView.animationDuration = 15
+        }
         self.isRotationErrorOccured = false
         backButtonCancel()
         self.pfInfoselectButton.hidden = true
@@ -886,7 +907,15 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         pfcToggleCameraButton.hidden = true
         pfcCameraArrow.hidden = true
         pfcDeletePreviousVideoButton.hidden = true
-        self.pfCameraStartButton.hidden=true
+        if !qualityCheck {
+            self.pfCameraStartButton.hidden=true
+            self.pfCameraStop.hidden = false
+        }
+        else {
+            self.pfCameraStartButton.hidden=true
+            self.pfCameraStop.hidden = true
+        }
+        
         // check the accelerometer
         if(isFaceorEyeDected == false) {
             pfcEyeAnimationImageView.hidden=true
@@ -996,6 +1025,10 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
     @IBAction func pfc_preview_retakeaction(sender: AnyObject) {
         print("CameraScreen pfc_preview_retakeaction begin")
         PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "retakeAction", value: nil)
+        if !qualityCheck
+        {
+            pfCameraStartButton.hidden = false
+        }
         self.pfInfoselectButton.hidden = false
         previewBackground.hidden = true
         self.previewView.hidden = false
@@ -1003,7 +1036,9 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         retakeVideoCount = 1
         canShowErrorMsg = true
         self.pfcCameraArrow.hidden = false
-        self.backButtonView.hidden = false
+        if !isResumeCameraViewEnabled {
+            self.backButtonView.hidden = false
+        }
         avPlayer.pause()
         self.avPlayerLayer.hidden = true
         // preview hidden
@@ -1029,6 +1064,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             else {
                 pfcDeletePreviousVideoButton.hidden=true
                 self.pfcCameraCountdownLabel.text = "5"
+                hideDeletePreviousVideoButtonIfResumeCount(videoCount)
             }
         }
         let currentVideoDevice: AVCaptureDevice = self.videoDeviceInput!.device
@@ -1062,7 +1098,9 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         slider.hidden=true
         closeInfoVideoButton.hidden = true
         self.pfcCameraArrow.hidden = false
-        self.backButtonView.hidden = false
+        if !isResumeCameraViewEnabled {
+            self.backButtonView.hidden = false
+        }
         self.previewBackground.hidden = true
         self.previewView.hidden = false
         self.pfInfoselectButton.hidden = false
@@ -1086,7 +1124,9 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         self.pfcPreviewSlider.hidden = true
         self.contentView.hidden = false
         self.pfcAcleometer.hidden = false
-        
+        if !qualityCheck {
+            pfCameraStartButton.hidden = false
+        }
         self.pfcCameraInstructionlabel.hidden=false
         // disable the button
         self.canShowErrorMsg = true
@@ -1100,6 +1140,19 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         {
             self.pfCameraFaceDetectedImageView.hidden=false
             self.pfCameraFaceNotDetectedImageView.hidden=false
+        }
+        if videoCount != nil && videoCount == 0 {
+            pfcDeletePreviousVideoButton.hidden=true
+        }
+        else {
+            
+            if tagvalue != nil {
+                pfcDeletePreviousVideoButton.hidden=false
+                hideDeletePreviousVideoButtonIfResumeCount(videoCount)
+            }
+            else {
+                pfcDeletePreviousVideoButton.hidden=true
+            }
         }
         self.startButtonBackgroundImageView.hidden = false
         self.videoThumbView.hidden = false
@@ -1284,6 +1337,8 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             pfcCameraBackgroundImageView.image = UIImage(named: "main_bg_layer1.png")
             isFaceorEyeDected = false
             videoCount = 1
+            PFGlobalConstants.setResumeVideoCount(videoCount)
+            hideDeletePreviousVideoButtonIfResumeCount(videoCount)
             deleteTempVideo(iteminavPlayer3)
             tagvalue=430
             pfcDeletePreviousVideoButton.hidden = true
@@ -1308,8 +1363,9 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             instructionstring=facialVideoInstruction
             isFaceorEyeDected = false
             videoCount = 2
+            PFGlobalConstants.setResumeVideoCount(videoCount)
+            hideDeletePreviousVideoButtonIfResumeCount(videoCount)
             deleteTempVideo(iteminavPlayer4)
-            pfCameraSview1.hidden=false
             pfCameraSview2.hidden=true
             pfCameraSview3.hidden=true
             pfCameraSview4.hidden=true
@@ -1330,9 +1386,9 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             self.pfcCameraInstructionlabel.text=headVideoInstruction
             instructionstring=headVideoInstruction
             videoCount = 3
+            PFGlobalConstants.setResumeVideoCount(videoCount)
+            hideDeletePreviousVideoButtonIfResumeCount(videoCount)
             deleteTempVideo(iteminavPlayer5)
-            pfCameraSview1.hidden=false
-            pfCameraSview2.hidden=false
             pfCameraSview3.hidden=true
             pfCameraSview4.hidden=true
             pfcVideoTitleLabel.text="Head Feature Analysis Video"
@@ -1348,10 +1404,9 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             pfcCameraBackgroundImageView.image = UIImage(named: "eye_layer.png")
             isFaceorEyeDected = true
             videoCount = 4
+            PFGlobalConstants.setResumeVideoCount(videoCount)
+            hideDeletePreviousVideoButtonIfResumeCount(videoCount)
             deleteTempVideo(iteminavPlayer6)
-            pfCameraSview1.hidden=false
-            pfCameraSview2.hidden=false
-            pfCameraSview3.hidden=false
             pfCameraSview4.hidden=true
             pfcVideoTitleLabel.text="Eye Feature Analysis Video"
             uploadLabel.text = "Video deleted successfully!"
@@ -1449,7 +1504,9 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         if(self.pfcPreviewSubmitButton.tag != 463)
         {
             self.pfcCameraArrow.hidden = false
-            self.backButtonView.hidden = false
+            if !isResumeCameraViewEnabled {
+                self.backButtonView.hidden = false
+            }
             self.previewBackground.hidden = true
             self.previewView.hidden = false
             self.pfInfoselectButton.hidden = false
@@ -1474,6 +1531,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             tagvalue = 420
             let iteration = "1"
             videoCount = 2
+            PFGlobalConstants.setResumeVideoCount(videoCount)
             setThumbImageFor(videothumbImageView1)
             self.pfcPreviewSubmitButton.tag=461
             // vediou play button of stored vediou
@@ -1501,6 +1559,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             let iteration = "2"
             tagvalue = 421
             videoCount = 3
+            PFGlobalConstants.setResumeVideoCount(videoCount)
             setThumbImageFor(videothumbImageView2)
             self.pfcPreviewSubmitButton.tag=462
             // vediou play button of stored vediou
@@ -1529,6 +1588,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             tagvalue = 422
             cameraModel!.nextvideo(iteration)
             videoCount = 4
+            PFGlobalConstants.setResumeVideoCount(videoCount)
             setThumbImageFor(videothumbImageView3)
             self.pfcPreviewSubmitButton.tag=463
             // vediou play button of stored vediou
@@ -1587,7 +1647,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             self.pfCameraFaceNotDetectedImageView.hidden=true
             self.pfcEyeAnimationImageView.hidden=true
             self.isFaceorEyeDected = false
-            self.cameraModel!.registerPatient()
+            self.cameraModel!.updatePatientMediaDetails()
             previewView.removeFromSuperview()
             pfcCameraBackgroundImageView.hidden=true
 
@@ -1619,6 +1679,9 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             // acleometer unhidden
             pfcAcleometer.hidden=false
             contentView.hidden=false
+            if !qualityCheck {
+                pfCameraStartButton.hidden = false
+            }
             // cancel unhidden
             pfcDeletePreviousVideoButton.hidden=false
             pfcBackButton.hidden=false
@@ -1626,6 +1689,9 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             // instruction label hidden
             pfcCameraInstructionlabel.hidden=false
             pfcVideoTitleLabel.hidden=false
+            if !qualityCheck {
+                pfCameraStartButton.hidden = false
+            }
         }
        print("CameraScreen pfcPreviewSubmitButtonaction end")
     }
@@ -1651,6 +1717,8 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             // acleometer hidden
             self.pfcAcleometer.hidden=true
             self.contentView.hidden=true
+            self.pfCameraStartButton.hidden = true
+            self.pfCameraStartButton.hidden = true
             // animation hidden
             self.pfcFaceAnimationImageView.hidden=true
             self.pfcEyeAnimationImageView.hidden=true
@@ -1739,6 +1807,34 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         for device in devices{
             if device.position == preferringPosition{
                 captureDevice = device as! AVCaptureDevice
+                do {
+                    try captureDevice.lockForConfiguration()
+                    captureDevice.automaticallyAdjustsVideoHDREnabled = true
+                    captureDevice.unlockForConfiguration()
+                }
+                catch {
+                    print("Enabling HDR failed")
+                }
+                if captureDevice.isFocusModeSupported(.ContinuousAutoFocus) {
+                    do {
+                        try captureDevice.lockForConfiguration()
+                        captureDevice.focusMode = AVCaptureFocusMode.ContinuousAutoFocus
+                        captureDevice.unlockForConfiguration()
+                    }
+                    catch {
+                        print("Enabling Auto focus failed")
+                    }
+                }
+                if captureDevice.smoothAutoFocusSupported {
+                    do {
+                        try captureDevice.lockForConfiguration()
+                        captureDevice.smoothAutoFocusEnabled = true
+                        captureDevice.unlockForConfiguration()
+                    }
+                    catch {
+                        print("Enabling Auto focus failed")
+                    }
+                }
                 //                captureDevice.automaticallyAdjustsVideoHDREnabled = true
                 break
             }
@@ -1828,6 +1924,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
                 // acleometer hidden
                 self.pfcAcleometer.hidden=true
                 self.contentView.hidden=true
+                self.pfCameraStartButton.hidden = true
                 // animation hidden
                 self.pfcFaceAnimationImageView.hidden=true
                 self.pfcEyeAnimationImageView.hidden=true
@@ -2375,13 +2472,20 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             self.retakeButtonAlertView.frame=setresizenormal
         }) { (completed) in
             self.blurEffectView.removeFromSuperview()
-            self.backButtonView.hidden = false
+            if !self.isResumeCameraViewEnabled {
+                self.backButtonView.hidden = false
+            }
             self.pfcCameraArrow.hidden = false
             self.pfcToggleCameraButton.hidden = false
             self.pfInfoselectButton.hidden = false
             if self.videoCount != 1
             {
                 self.pfcDeletePreviousVideoButton.hidden = false
+                self.hideDeletePreviousVideoButtonIfResumeCount(self.videoCount)
+            }
+            if !self.qualityCheck
+            {
+                self.pfCameraStartButton.hidden = false
             }
         }
     }
@@ -2428,5 +2532,80 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         self.avPlayer.seekToTime(kCMTimeZero)
         self.avPlayerLayer.hidden = false
 
+    }
+    
+    func updateViewForResumeAction()
+    {
+        backButtonView.hidden = true
+        let resumeCount = NSUserDefaults.standardUserDefaults().integerForKey(PF_ResumeVideoCount)
+        if resumeCount != 0 {
+            resumeVideoCount = resumeCount
+            switch resumeCount {
+            case 1:
+                break
+            case 2:
+                pfCameraSview1.hidden=true
+                tagvalue = 420
+                videoCount = 2
+                self.pfcPreviewSubmitButton.tag=461
+                // vediou play button of stored vediou
+                pfPlaySubView1.hidden=true
+                
+                pfcVideoTitleLabel.text="Facial Feature Analysis Video"
+                // universal use
+                self.pfcCameraBackgroundImageView.hidden = false
+                pfcFaceAnimationImageView.hidden=true
+                self.pfcCameraInstructionlabel.text=facialVideoInstruction
+                instructionstring=facialVideoInstruction
+                break
+            case 3:
+                pfCameraSview1.hidden=true
+                pfCameraSview2.hidden=true
+                tagvalue = 421
+                videoCount = 3
+                self.pfcPreviewSubmitButton.tag=462
+                // vediou play button of stored vediou
+                pfPlaySubView2.hidden=true
+                
+                pfcVideoTitleLabel.text="Head Feature Analysis Video"
+                // universal use
+                pfcFaceAnimationImageView.hidden=true
+                self.pfcCameraBackgroundImageView.hidden = false
+                self.pfcCameraInstructionlabel.text=headVideoInstruction
+                instructionstring=headVideoInstruction
+                break
+            case 4:
+                pfCameraSview3.hidden=true
+                tagvalue = 422
+                videoCount = 4
+                self.pfcPreviewSubmitButton.tag=463
+                // vediou play button of stored vediou
+                pfPlaySubView3.hidden=true
+            
+                // isFaceorEyeDected set
+                isFaceorEyeDected = true
+                // setting background image
+                self.pfCameraFaceDetectedImageView.hidden=true
+                self.pfCameraFaceNotDetectedImageView.hidden=true
+                pfcFaceAnimationImageView.hidden=true
+                pfcEyeAnimationImageView.hidden=true
+                self.pfcCameraInstructionlabel.text=eyeVideoInstruction
+                instructionstring=eyeVideoInstruction
+                pfcCameraBackgroundImageView.image = UIImage(named: "eye_layer.png")
+                self.pfcCameraBackgroundImageView.hidden = false
+                self.pfCameraFaceDetectedImageView.hidden=true
+                self.pfCameraFaceNotDetectedImageView.hidden=true
+                pfcFaceAnimationImageView.hidden=true
+                pfcVideoTitleLabel.text="Eye Feature Analysis Video"
+                break
+            default:
+                break
+            }
+        }
+    }
+    func hideDeletePreviousVideoButtonIfResumeCount(count: Int){
+        if isResumeCameraViewEnabled == true && resumeVideoCount == count{
+            self.pfcDeletePreviousVideoButton.hidden = true
+        }
     }
 }

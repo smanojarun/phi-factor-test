@@ -76,6 +76,7 @@ class PFLogingModel: NSObject {
     
     func getRegisterDeviceParams(emailId : String) -> NSMutableURLRequest {
         let accessToken : String = NSUserDefaults.standardUserDefaults().objectForKey("deviceToken") as! String
+        print(accessToken)
         print("PFLogingModel getRegisterDeviceParams begin")
         let deviceId : String = (UIDevice.currentDevice().identifierForVendor?.UUIDString)!
         let parameters1 = [

@@ -84,6 +84,7 @@ import Alamofire
                 switch response.result {
                 case .Failure( let error):
                     print(error)
+                    self.progressbarhidden()
                 case .Success(let responseObject):
                     print(responseObject)
 

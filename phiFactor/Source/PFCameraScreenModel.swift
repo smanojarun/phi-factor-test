@@ -150,35 +150,20 @@ class PFCameraScreenModel: NSObject {
      Uploading the patient details to server at the end of the 4th video recording complition
      */
     
-    func registerPatient() {
+    func updatePatientMediaDetails() {
         print("PFCameraScreenModel registerPatient begin")
         let defaults = NSUserDefaults.standardUserDefaults()
         var access_token: String!
         var token_type: String!
         access_token = defaults.stringForKey("access_token")
         token_type = defaults.stringForKey("token_type")
-        requestString = "\(baseURL)/add_patient_info?Authorization=\(token_type)&access_token=\(access_token)"
+        requestString = "\(baseURL)/add_patient_media?Authorization=\(token_type)&access_token=\(access_token)"
         url1 = NSURL(string: requestString as String)!
         urlRequest = NSMutableURLRequest(URL: url1)
         urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
-        let Gclinical_id: NSNumber!
-        let GPt_id: String!
-        let GPt_age: NSNumber!
-        let GPt_name: String!
-        let Ggender_id: NSNumber!
-        let GEthinicity_id: NSNumber!
-        let Glanguage_id: NSNumber!
-        let GPt_encounterID: String!
-        Gclinical_id = defaults.integerForKey("clinical_id")
-        GPt_name = defaults.stringForKey("patient_name")
-        GPt_id = defaults.stringForKey("patient_id")
-        GPt_age = defaults.integerForKey("patient_age")
-        Ggender_id = defaults.integerForKey("gender_id")
-        GEthinicity_id = defaults.integerForKey("ethen_id")
-        Glanguage_id = defaults.integerForKey("lan_id")
-        GPt_encounterID = defaults.stringForKey("encounterID")
+    
         let patientModel : PFPatientDetailsModel = PFPatientDetailsModel()
-        patientModel.param(Gclinical_id,patient_name: GPt_name,patient_id: GPt_id,age_id: GPt_age,gender_id: Ggender_id,ethinicity_id: GEthinicity_id,language_id: Glanguage_id, encounterID: GPt_encounterID)
+        patientModel.getRequestParameterForAddPatientMediaDetails()
         Alamofire.request(urlRequest)
             .responseJSON { response in
                 // do whatever you want here
@@ -212,7 +197,7 @@ class PFCameraScreenModel: NSObject {
                                     defaults.setObject (access_token ,forKey: "access_token")
                                     defaults.setObject(token_type,forKey: "token_type")
                                     defaults.setObject(refresh_token,forKey: "refresh_token")
-                                    self.registerPatient()
+                                    self.updatePatientMediaDetails()
                                 }
                         }
                     }
@@ -227,6 +212,7 @@ class PFCameraScreenModel: NSObject {
                     defaults.removeObjectForKey("ethen_id")
                     defaults.removeObjectForKey("lan_id")
                     defaults.removeObjectForKey("encounterID")
+                    defaults.removeObjectForKey(PF_PatientIDOnDB)
                 }
                 print("PFCameraScreenModel registerPatient end")
         }

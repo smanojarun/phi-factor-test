@@ -34,6 +34,9 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
     @IBOutlet var imageActivityView: UIImageView!
     @IBOutlet var popView: UIView!
     @IBOutlet var docScanSwitch: SevenSwitch!
+    @IBOutlet var qualityCheckSwitch: SevenSwitch!
+    @IBOutlet var alertMessageLabel: UILabel!
+
   
     private(set) var thePin: String?
     var unlocked = false;
@@ -65,13 +68,15 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
     var patientDetailList: [String] = ["Clinical Trail", "Patient Name", "Patient ID", "Age", "Gender", "Ethnicity", "Language Spoken", "Encounter ID"]
     var warningdetaillist: [String] = ["Enter clinical trail", "Enter patient name", "Enter patient id", "Enter age", "Enter gender", "Enter ethnicity", "Enter language", "Enter Encounter ID"]
     var patientDetailListImage: [String] = ["PFSd_Clinical_Trail", "PFSd_patient_name", "PFSd_patient_id", "PFSd_Age", "PFSd_Gender", "PFSd_Eteniticity", "PFSd_language", "PFSd_language"]
-
+    var isShowingAlert = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         print("PatientScreen viewDidLoad begin")
         pinUnlockTimer = NSTimer.scheduledTimerWithTimeInterval(60.0, target: self, selector: #selector(PFSinginViewController.resetUnlockFlag), userInfo: nil, repeats: true)
         self.screenName = PFSinginViewControllerScreenName
         if canShowVideoUploadAlert {
+            alertMessageLabel.text = videoUploadingAlertText
             showUploadStatusAlert()
         }
         let isDocScanOn = NSUserDefaults.standardUserDefaults().boolForKey("isDocScanOn")
@@ -83,6 +88,16 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
         {
             docScanSwitch.setOn(false, animated: false)
         }
+        let isQualityCheckOn = NSUserDefaults.standardUserDefaults().boolForKey(PF_QUALITYCHECK)
+        if isQualityCheckOn == true
+        {
+            qualityCheckSwitch.setOn(true, animated: false)
+        }
+        else
+        {
+            qualityCheckSwitch.setOn(false, animated: false)
+        }
+        
         print("PatientScreen viewDidLoad end")
     }
 
@@ -112,7 +127,7 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
 
     @IBAction func presentPopUp() {
         print("PatientScreen presentPopUp begin")
-        if self.popView.frame.size.height == 210 {
+        if self.popView.frame.size.height == 245 {
             guestureView.hidden = true
             UIView.animateWithDuration(0.5, animations: {
                 self.popView.frame = CGRectMake(self.popView.frame.origin.x, self.popView.frame.origin.y, self.popView.frame.width, 0)
@@ -128,7 +143,7 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
             popView.frame = CGRectMake(popView.frame.origin.x, popView.frame.origin.y, popView.frame.width, 0)
             UIView.animateWithDuration(0.5) {
                 self.popView.hidden = false
-                self.popView.frame = CGRectMake(self.popView.frame.origin.x, self.popView.frame.origin.y, self.popView.frame.width, 210)
+                self.popView.frame = CGRectMake(self.popView.frame.origin.x, self.popView.frame.origin.y, self.popView.frame.width, 245)
             }
             UIView.commitAnimations()
         }
@@ -164,6 +179,10 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
                         print("Invalid access token")
                         PFGlobalConstants.sendException("InvalidAccessToken", isFatal: false)
                         self.getRefreshToken()
+                    }
+                    else {
+                        self.alertMessageLabel.text = networkErrorAlertText
+                        self.showUploadStatusAlert()
                     }
                 case .Success(let responseObject):
                     print(responseObject)
@@ -353,50 +372,57 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
             }
         }
         else {
-            UIDevice.currentDevice().batteryLevel
-            self.patientdetails.userInteractionEnabled=false
+            if indexPath.row == 0 && clinical_trials_name_arr.count == 0 {
+                self.alertMessageLabel.text = "No clinical trial contents to begin your session. Please contact your admin for more details"
+                self.showUploadStatusAlert()
+            }
+            else
+            {
+                self.patientdetails.userInteractionEnabled=false
                 // pickerview
-            var framepicker2: CGRect!
-            framepicker2=pickerview.frame
-            framepicker2.origin.y=self.view.frame.size.height-pickerview.frame.size.height-150
+                var framepicker2: CGRect!
+                framepicker2=pickerview.frame
+                framepicker2.origin.y=self.view.frame.size.height-pickerview.frame.size.height-150
                 // pickerdone button resize
-            var framepickerbuttonaction2: CGRect!
-            framepickerbuttonaction2=pickerbuttonaction.frame
-            framepickerbuttonaction2.origin.y=self.view.frame.size.height-pickerbuttonaction.frame.size.height
+                var framepickerbuttonaction2: CGRect!
+                framepickerbuttonaction2=pickerbuttonaction.frame
+                framepickerbuttonaction2.origin.y=self.view.frame.size.height-pickerbuttonaction.frame.size.height
                 // picker closebutton resize
-            var frameclosePicker2: CGRect!
-            frameclosePicker2=closePicker.frame
-            frameclosePicker2.origin.y=self.view.frame.size.height-closePicker.frame.size.height
-            UIView.animateWithDuration(0.50, delay: 0, options: UIViewAnimationOptions.TransitionFlipFromBottom, animations: {
+                var frameclosePicker2: CGRect!
+                frameclosePicker2=closePicker.frame
+                frameclosePicker2.origin.y=self.view.frame.size.height-closePicker.frame.size.height
+                UIView.animateWithDuration(0.50, delay: 0, options: UIViewAnimationOptions.TransitionFlipFromBottom, animations: {
                     self.pickerbuttonaction.frame=framepickerbuttonaction2
                     self.pickerview.frame=framepicker2
                     self.closePicker.frame=frameclosePicker2
-                }, completion: nil)
-            pickerview.tag=rowcount
-            pickerview.hidden = false
-            howtotakevedio.hidden=true
-            startvedio.hidden=true
-            pickerview.delegate = self
-            self.view.endEditing(true)
-            pickerbuttonaction.hidden=false
-            closePicker.hidden=false
-            var celltextdetailmoveup: CGRect
-            celltextdetailmoveup = (cell.celltextdetails?.frame)!
-            celltextdetailmoveup.origin.y=0
-            UIView.animateWithDuration(0.40, delay: 0, options: UIViewAnimationOptions.TransitionFlipFromBottom, animations: {
-                cell.celltextdetails?.frame=celltextdetailmoveup
-            }, completion: nil)
-            cell.celltextdetails.font = UIFont(name: "calibri", size: 12)
-            var celltextchossen: CGRect
-            celltextchossen=cell.celltextchossen.frame
-            celltextchossen.origin.y=15
-            celltextchossen.origin.x=(cell.celltextdetails?.frame.origin.x)!
-            celltextchossen.size.width=(cell.celltextdetails?.frame.size.width)!+60
-            UIView.animateWithDuration(0.40, delay: 0, options: UIViewAnimationOptions.TransitionFlipFromBottom, animations: {
-                cell.celltextchossen?.frame=celltextchossen
-                cell.celltextchossen?.translatesAutoresizingMaskIntoConstraints = true
-                cell.celltextdetails?.translatesAutoresizingMaskIntoConstraints = true
-            }, completion: nil)
+                    }, completion: nil)
+                pickerview.tag=rowcount
+                pickerview.hidden = false
+                howtotakevedio.hidden=true
+                startvedio.hidden=true
+                pickerview.delegate = self
+                self.view.endEditing(true)
+                pickerbuttonaction.hidden=false
+                closePicker.hidden=false
+                var celltextdetailmoveup: CGRect
+                celltextdetailmoveup = (cell.celltextdetails?.frame)!
+                celltextdetailmoveup.origin.y=0
+                UIView.animateWithDuration(0.40, delay: 0, options: UIViewAnimationOptions.TransitionFlipFromBottom, animations: {
+                    cell.celltextdetails?.frame=celltextdetailmoveup
+                    }, completion: nil)
+                cell.celltextdetails.font = UIFont(name: "calibri", size: 12)
+                var celltextchossen: CGRect
+                celltextchossen=cell.celltextchossen.frame
+                celltextchossen.origin.y=15
+                celltextchossen.origin.x=(cell.celltextdetails?.frame.origin.x)!
+                celltextchossen.size.width=(cell.celltextdetails?.frame.size.width)!+60
+                UIView.animateWithDuration(0.40, delay: 0, options: UIViewAnimationOptions.TransitionFlipFromBottom, animations: {
+                    cell.celltextchossen?.frame=celltextchossen
+                    cell.celltextchossen?.translatesAutoresizingMaskIntoConstraints = true
+                    cell.celltextdetails?.translatesAutoresizingMaskIntoConstraints = true
+                    }, completion: nil)
+            }
+            
         }
     }
 
@@ -537,51 +563,59 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
 
     func pickerviewdata(sender: UIButton) {
         let indexPath = NSIndexPath(forRow: sender.tag, inSection: 0)
-        let cell = self.patientdetails.cellForRowAtIndexPath(indexPath) as! PFSiginuptablecellTableViewCell
-        pickerview.tag=sender.tag
-        pickerview.hidden = false
-        howtotakevedio.hidden=true
-        startvedio.hidden=true
-        pickerview.delegate = self
-        self.view.endEditing(true)
-        pickerbuttonaction.hidden=false
-        closePicker.hidden=false
-        self.rowcount=sender.tag
-        self.patientdetails.userInteractionEnabled=false
-        // pickerview
-        var framepicker2: CGRect!
-        framepicker2=pickerview.frame
-        framepicker2.origin.y=self.view.frame.size.height-pickerview.frame.size.height-150
-        // pickerdone button resize
-        var framepickerbuttonaction2: CGRect!
-        framepickerbuttonaction2=pickerbuttonaction.frame
-        framepickerbuttonaction2.origin.y=self.view.frame.size.height-pickerbuttonaction.frame.size.height
-        // picker closebutton resize
-        var frameclosePicker2: CGRect!
-        frameclosePicker2=closePicker.frame
-        frameclosePicker2.origin.y=self.view.frame.size.height-closePicker.frame.size.height
-        UIView.animateWithDuration(0.50, delay: 0, options: UIViewAnimationOptions.TransitionFlipFromBottom, animations: {
+        if indexPath.row == 0 && clinical_trials_name_arr.count == 0 {
+            self.alertMessageLabel.text = "No clinical trial contents to begin your session. Please contact your admin for more details"
+            self.showUploadStatusAlert()
+        }
+        else
+        {
+            let cell = self.patientdetails.cellForRowAtIndexPath(indexPath) as! PFSiginuptablecellTableViewCell
+            pickerview.tag=sender.tag
+            pickerview.hidden = false
+            howtotakevedio.hidden=true
+            startvedio.hidden=true
+            pickerview.delegate = self
+            self.view.endEditing(true)
+            pickerbuttonaction.hidden=false
+            closePicker.hidden=false
+            self.rowcount=sender.tag
+            self.patientdetails.userInteractionEnabled=false
+            // pickerview
+            var framepicker2: CGRect!
+            framepicker2=pickerview.frame
+            framepicker2.origin.y=self.view.frame.size.height-pickerview.frame.size.height-150
+            // pickerdone button resize
+            var framepickerbuttonaction2: CGRect!
+            framepickerbuttonaction2=pickerbuttonaction.frame
+            framepickerbuttonaction2.origin.y=self.view.frame.size.height-pickerbuttonaction.frame.size.height
+            // picker closebutton resize
+            var frameclosePicker2: CGRect!
+            frameclosePicker2=closePicker.frame
+            frameclosePicker2.origin.y=self.view.frame.size.height-closePicker.frame.size.height
+            UIView.animateWithDuration(0.50, delay: 0, options: UIViewAnimationOptions.TransitionFlipFromBottom, animations: {
                 self.pickerbuttonaction.frame=framepickerbuttonaction2
                 self.pickerview.frame=framepicker2
                 self.closePicker.frame=frameclosePicker2
-            }, completion: nil)
-        var celltextdetailmoveup: CGRect
-        celltextdetailmoveup = (cell.celltextdetails?.frame)!
-        celltextdetailmoveup.origin.y=0
-        UIView.animateWithDuration(0.40, delay: 0, options: UIViewAnimationOptions.TransitionFlipFromBottom, animations: {
+                }, completion: nil)
+            var celltextdetailmoveup: CGRect
+            celltextdetailmoveup = (cell.celltextdetails?.frame)!
+            celltextdetailmoveup.origin.y=0
+            UIView.animateWithDuration(0.40, delay: 0, options: UIViewAnimationOptions.TransitionFlipFromBottom, animations: {
                 cell.celltextdetails?.frame=celltextdetailmoveup
-            }, completion: nil)
-        cell.celltextdetails.font = UIFont(name: "calibri", size: 12)
-        var celltextchossen: CGRect
-        celltextchossen=cell.celltextchossen.frame
-        celltextchossen.origin.y=15
-        celltextchossen.origin.x=(cell.celltextdetails?.frame.origin.x)!
-        celltextchossen.size.width=(cell.celltextdetails?.frame.size.width)!+60
-        UIView.animateWithDuration(0.40, delay: 0, options: UIViewAnimationOptions.TransitionFlipFromBottom, animations: {
-                        cell.celltextchossen?.frame=celltextchossen
+                }, completion: nil)
+            cell.celltextdetails.font = UIFont(name: "calibri", size: 12)
+            var celltextchossen: CGRect
+            celltextchossen=cell.celltextchossen.frame
+            celltextchossen.origin.y=15
+            celltextchossen.origin.x=(cell.celltextdetails?.frame.origin.x)!
+            celltextchossen.size.width=(cell.celltextdetails?.frame.size.width)!+60
+            UIView.animateWithDuration(0.40, delay: 0, options: UIViewAnimationOptions.TransitionFlipFromBottom, animations: {
+                cell.celltextchossen?.frame=celltextchossen
                 cell.celltextchossen?.translatesAutoresizingMaskIntoConstraints = true
                 cell.celltextdetails?.translatesAutoresizingMaskIntoConstraints = true
-            }, completion: nil)
+                }, completion: nil)
+        }
+        
     }
 
    @IBAction func picker_clse(sender: AnyObject) {
@@ -820,6 +854,7 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
                     }
                 }
                 else {
+                    
                 }
             }
             
@@ -848,30 +883,13 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
                     defaults.setObject (51, forKey: "lan_id")
                 }
                 defaults.setObject(self.encounterID, forKey: "encounterID")
-                
+                defaults.synchronize()
 //                if self.progressview == nil {
 //                    self.progessbar()
 //                }
                 self.imageActivityView.hidden = false
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1), dispatch_get_main_queue(), {
-                    //            let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-                    //            let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
-                    let isDocScanOn = NSUserDefaults.standardUserDefaults().boolForKey("isDocScanOn")
-                    if isDocScanOn == true
-                    {
-                        self.navigationController?.pushViewController(IOViewController(), animated: false)
-
-                    }
-                    else
-                    {
-                        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-                        let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
-                        self.navigationController?.pushViewController(nextViewController, animated: false)
-                    }
-                    self.startvedio.hidden = false
-                    print("PatientScreen startvedioaction end")
-                })
-                return
+                self.registerPatient()
+                
             }
             else {
                 print("Validation fails")
@@ -1187,7 +1205,8 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
         defaults.setInteger(1, forKey: "logout")
         defaults.setObject ("", forKey: "access_token")
         defaults.setObject("", forKey: "token_type")
-        defaults
+        defaults.removeObjectForKey(PF_USERNAME)
+        defaults.removeObjectForKey(PF_PASSWORD)
         let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PhiFactorIntro") as! PhiFactorIntro
         nextViewController.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
@@ -1200,7 +1219,6 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
             appDelegaet!.window?.rootViewController = nav
             
             }) { (isCompleted) in
-                NSUserDefaults.standardUserDefaults().removeObjectForKey("PF_Passcode")
                 print("PatientScreen LogoutAction end")
         }
     }
@@ -1225,32 +1243,40 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
      */
 
     func showUploadStatusAlert() {
-        var uploadframe: CGRect!
-        uploadframe=uploadStatusView.frame
-        uploadframe.origin.x=self.view.frame.origin.x
-        uploadframe.size.width=self.view.frame.size.width
-        uploadframe.size.height=100
-        uploadframe.origin.y=self.view.frame.origin.y-50
-        self.uploadStatusView.frame=uploadframe
-        self.view.addSubview(uploadStatusView)
-        var setresize: CGRect!
-        setresize=self.uploadStatusView.frame
-        setresize.origin.x=self.uploadStatusView.frame.origin.x
-        setresize.origin.y=0
-        setresize.size.width=self.view.frame.size.width
-        setresize.size.height=100
-        UIView.animateWithDuration(0.30, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
-            self.uploadStatusView.frame=setresize
-            }, completion: nil)
-        var setresizenormal: CGRect!
-        setresizenormal=self.uploadStatusView.frame
-        setresizenormal.origin.x=self.uploadStatusView.frame.origin.x
-        setresizenormal.origin.y=0-self.uploadStatusView.frame.size.height
-        setresizenormal.size.width=self.view.frame.size.width
-        setresizenormal.size.height=100
-        UIView.animateWithDuration(0.30, delay: 5.0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
-            self.uploadStatusView.frame=setresizenormal
-            }, completion: nil)
+        if !self.isShowingAlert {
+            var uploadframe: CGRect!
+            uploadframe=uploadStatusView.frame
+            uploadframe.origin.x=self.view.frame.origin.x
+            uploadframe.size.width=self.view.frame.size.width
+            uploadframe.size.height=100
+            uploadframe.origin.y=self.view.frame.origin.y-50
+            self.uploadStatusView.frame=uploadframe
+            self.view.addSubview(uploadStatusView)
+            var setresize: CGRect!
+            setresize=self.uploadStatusView.frame
+            setresize.origin.x=self.uploadStatusView.frame.origin.x
+            setresize.origin.y=0
+            setresize.size.width=self.view.frame.size.width
+            setresize.size.height=100
+            isShowingAlert = true
+            self.pickerbuttonaction.hidden = true
+            self.closePicker.hidden = true
+            UIView.animateWithDuration(0.30, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+                self.uploadStatusView.frame=setresize
+                }, completion: nil)
+            var setresizenormal: CGRect!
+            setresizenormal=self.uploadStatusView.frame
+            setresizenormal.origin.x=self.uploadStatusView.frame.origin.x
+            setresizenormal.origin.y=0-self.uploadStatusView.frame.size.height
+            setresizenormal.size.width=self.view.frame.size.width
+            setresizenormal.size.height=100
+            UIView.animateWithDuration(0.30, delay: 3.0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+                self.uploadStatusView.frame=setresizenormal
+            }) { (completed) in
+                self.isShowingAlert = false
+            }
+        }
+        
     }
 
     /**
@@ -1303,9 +1329,26 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
         {
             defaults.setBool(false, forKey: "isDocScanOn")
             defaults.synchronize()
-            print("isDocScanOn switched On")
+            print("isDocScanOn switched off")
         }
         print("PatientScreen docScanSwitcAction end")
+    }
+    @IBAction func qualityCheckSwitchAction(sender: SevenSwitch) {
+        print("PatientScreen qualityCheckSwitchAction begin")
+        let defaults = NSUserDefaults.standardUserDefaults()
+        if qualityCheckSwitch.isOn()
+        {
+            defaults.setBool(true, forKey: PF_QUALITYCHECK)
+            defaults.synchronize()
+            print("isQualityCheck switched On")
+        }
+        else
+        {
+            defaults.setBool(false, forKey: PF_QUALITYCHECK)
+            defaults.synchronize()
+            print("isQualityCheck switched off")
+        }
+        print("PatientScreen qualityCheckSwitchAction end")
     }
     @IBAction func setPasscodeAction(sender: AnyObject) {
         
@@ -1352,8 +1395,9 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
             mailComposer.mailComposeDelegate = self
             
             //Set the subject and message of the email
-            mailComposer.setSubject("Appliction log report")
+            mailComposer.setSubject("Application log report")
             mailComposer.setMessageBody("", isHTML: false)
+            mailComposer.setToRecipients(["itsupport@hubino.com" , "support@phifactor.com"])
             
             var paths: Array = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
             let documentsDirectory: String = paths[0]
@@ -1378,6 +1422,8 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
         else
         {
             print("Email accounts not configured.")
+            alertMessageLabel.text = "Please configure and enable your email to send application report.."
+            showUploadStatusAlert()
             print("PatientScreen sendReport begin")
         }
     }
@@ -1432,4 +1478,130 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
         unlocked = false
     }
     
+    /**
+     Uploading the patient details to server
+     */
+    
+    func registerPatient() {
+        print("PatientScreen registerPatient begin")
+        let defaults = NSUserDefaults.standardUserDefaults()
+        var access_token: String!
+        var token_type: String!
+        access_token = defaults.stringForKey("access_token")
+        token_type = defaults.stringForKey("token_type")
+        requestString = "\(baseURL)/add_patient_info?Authorization=\(token_type)&access_token=\(access_token)"
+        url1 = NSURL(string: requestString as String)!
+        urlRequest = NSMutableURLRequest(URL: url1)
+        urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
+        let Gclinical_id: NSNumber!
+        let GPt_id: String!
+        let GPt_age: NSNumber!
+        let GPt_name: String!
+        let Ggender_id: NSNumber!
+        let GEthinicity_id: NSNumber!
+        let Glanguage_id: NSNumber!
+        let GPt_encounterID: String!
+        Gclinical_id = defaults.integerForKey("clinical_id")
+        GPt_name = defaults.stringForKey("patient_name")
+        GPt_id = defaults.stringForKey("patient_id")
+        GPt_age = defaults.integerForKey("patient_age")
+        Ggender_id = defaults.integerForKey("gender_id")
+        GEthinicity_id = defaults.integerForKey("ethen_id")
+        Glanguage_id = defaults.integerForKey("lan_id")
+        GPt_encounterID = defaults.stringForKey("encounterID")
+        let patientModel : PFPatientDetailsModel = PFPatientDetailsModel()
+        patientModel.getRequestParameterForRegisterPatientDetails(Gclinical_id, patient_name: GPt_name, patient_id: GPt_id, age_id: GPt_age, gender_id: Ggender_id, ethinicity_id: GEthinicity_id, language_id: Glanguage_id, encounterID: GPt_encounterID)
+        Alamofire.request(urlRequest)
+            .responseJSON { response in
+                // do whatever you want here
+                switch response.result {
+                case .Failure( let error):
+                    let httpStatusCode = response.response?.statusCode
+                    print(httpStatusCode)
+                    if(httpStatusCode==401) {
+                        print("Invalid access token")
+                        let refresh_token = defaults.stringForKey("refresh_token")! as String
+                        requestString = "\(baseURL)/login"
+                        print(requestString)
+                        let client_id = "102216378240-rf6fjt3konig2fr3p1376gq4jrooqcdm"
+                        let client_secret = "bYQU1LQAjaSQ1BH9j3zr7woO"
+                        url1 = NSURL(string: requestString as String)!
+                        urlRequest = NSMutableURLRequest(URL: url1)
+                        urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
+                        patientModel.loadvaluesParam(client_id, client_secret: client_secret, refresh_token: refresh_token, grant_type: "refresh_token")
+                        Alamofire.request(urlRequest)
+                            .responseJSON { response in
+                                switch response.result {
+                                case .Failure( let error):
+                                    print(error)
+                                case .Success(let responseObject):
+                                    print(responseObject)
+                                    let response = responseObject as! NSDictionary
+                                    let access_token = response.objectForKey("access_token")! as! String
+                                    let token_type = response.objectForKey("token_type")! as! String
+                                    let refresh_token = response.objectForKey("refresh_token")! as! String
+                                    let defaults = NSUserDefaults.standardUserDefaults()
+                                    defaults.setObject (access_token ,forKey: "access_token")
+                                    defaults.setObject(token_type,forKey: "token_type")
+                                    defaults.setObject(refresh_token,forKey: "refresh_token")
+                                    self.registerPatient()
+                                }
+                        }
+                    }
+                    else {
+                        self.imageActivityView.hidden = true
+                        self.alertMessageLabel.text = networkErrorAlertText
+                        self.showUploadStatusAlert()
+                    }
+                    print(error)
+                    self.startvedio.hidden = false
+                    print("PatientScreen startvedioaction end")
+                case .Success(let responseObject):
+                    print(responseObject)
+                    let httpStatusCode = response.response?.statusCode
+                    print(httpStatusCode)
+                    
+                    if(httpStatusCode==200) {
+                        let response = responseObject as! NSDictionary
+                        if let patientIDOnDB = response.objectForKey("patient_id") as? String {
+                            defaults.setObject(patientIDOnDB, forKey: PF_PatientIDOnDB)
+                            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1), dispatch_get_main_queue(), {
+                                //            let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                                //            let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
+                                let isDocScanOn = NSUserDefaults.standardUserDefaults().boolForKey("isDocScanOn")
+                                if isDocScanOn == true
+                                {
+                                    self.navigationController?.pushViewController(IOViewController(), animated: false)
+                                    
+                                }
+                                else
+                                {
+                                    let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                                    let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
+                                    self.navigationController?.pushViewController(nextViewController, animated: false)
+                                }
+                                self.imageActivityView.hidden = true
+                                self.startvedio.hidden = false
+                                print("PatientScreen startvedioaction end")
+                            })
+                        }
+                        else {
+                            
+                            self.startvedio.hidden = false
+                            self.imageActivityView.hidden = true
+                            print("PatientScreen startvedioaction end")
+                        }
+                    }
+                    else {
+                        print("No patient_id on response")
+                        self.startvedio.hidden = false
+                        self.imageActivityView.hidden = true
+                        print("PatientScreen startvedioaction end")
+                    }
+                }
+                print("PatientScreen registerPatient end")
+        }
+    }
+    
+   
 }

@@ -79,11 +79,16 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
     @IBOutlet var restPasswordSuccessLabel: UILabel!
     @IBOutlet var email_idwarning: UIButton!
     @IBOutlet var labelAppVersion: UILabel!
-
+    @IBOutlet var resumeSessionAlertView: UIView!
+    @IBOutlet var resumeAlertLabel: UILabel!
+    
     var uuidValue:String!
     var  progressview: UIView!
     var avPlayer1 = AVPlayer()
     var avPlayerLayer1: AVPlayerLayer!
+    var access_token: String!
+    var token_type: String!
+    var blurEffectView = UIView()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -96,7 +101,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                 labelAppVersion.text = String("V \(version).\(bundle_version)")
             }
         }
-        let versionInt : Int = (NSBundle.mainBundle().infoDictionary?["CFBundleShortVersionString"] as? Int)!
+//        let versionInt : Int = (NSBundle.mainBundle().infoDictionary?["CFBundleShortVersionString"] as? Int)!
         cameraModel = PFCameraScreenModel()
         loginModel=PFLogingModel()
 //      default hidden
@@ -218,6 +223,13 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         else {
             print("logout is no")
         }
+//        let defaults = NSUserDefaults.standardUserDefaults()
+        user = defaults.objectForKey(PF_USERNAME) as? String
+        pass = defaults.objectForKey(PF_PASSWORD) as? String
+        if user != nil && pass != nil
+        {
+            self.registerDeviceService(false)
+        }
         print("IntroScreen viewDidLoad end")
     }
     
@@ -284,15 +296,10 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         super.viewWillAppear(animated)
         cameraModel!.avPlayer.play()
         avPlayer1.play()
-//        let defaults = NSUserDefaults.standardUserDefaults()
-//        user = defaults.objectForKey(PF_USERNAME) as? String
-//        pass = defaults.objectForKey(PF_PASSWORD) as? String
-//        if user != nil && pass != nil
-//        {
-//            registerDeviceService()
-//        }
     }
-
+    override func viewDidAppear(animated: Bool) {
+        
+    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
@@ -401,13 +408,13 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
             self.username.resignFirstResponder()
             self.password.resignFirstResponder()
         }
-//        if((device != .iPhone6sPlus) && (device != .iPhoneSE) && (device != .iPhone6s)) {
-//
-//            UIAlertView(title: "", message: "The device doesn't meet the minimum requirements to run the application.", delegate: nil, cancelButtonTitle: "OK").show()
-//            print("DeviceNotMeetMinReq")
-//            PFGlobalConstants.sendException("DeviceNotMeetMinReq", isFatal: false)
-//        }
-//        else {
+        if((device != .iPhone6sPlus) && (device != .iPhoneSE) && (device != .iPhone6s)) {
+
+            UIAlertView(title: "", message: "The device doesn't meet the minimum requirements to run the application.", delegate: nil, cancelButtonTitle: "OK").show()
+            print("DeviceNotMeetMinReq")
+            PFGlobalConstants.sendException("DeviceNotMeetMinReq", isFatal: false)
+        }
+        else {
 
             if(self.username.text==""&&(self.password.text=="")) {
                 self.username.attributedPlaceholder = NSAttributedString(string: "Enter username",
@@ -448,14 +455,14 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                     }
                      else {
 
-                        registerDeviceService()
+                        registerDeviceService(true)
 //                        self.userLoginService()
                     }
                 }
             }
             let defaults = NSUserDefaults.standardUserDefaults()
             defaults.setObject (warningmessage, forKey: "Warning")
-//        }
+        }
         print("IntroScreen signin end")
     }
 
@@ -649,7 +656,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                         case .Failure( let error):
                             let err = error as NSError
                             if err.code == -1009 {
-                                self.netwrkAlertLabel.text = "Network not available. Please check your internet connections."
+                                self.netwrkAlertLabel.text = networkErrorAlertText
                                 self.networkAlertViewAction()
                             }
                              else {
@@ -835,7 +842,9 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
      */
 
     func progessbarshow() {
-        progressview.hidden=false
+        if progressview != nil {
+            progressview.hidden=false
+        }
     }
 
     /**
@@ -843,7 +852,9 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
      */
 
     func progressbarhidden() {
-        progressview.hidden=true
+        if progressview != nil {
+            progressview.hidden=true
+        }
     }
 
     /**
@@ -942,7 +953,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                             print(error)
                             let err = error as NSError
                             if err.code == -1009 {
-                                self.netwrkAlertLabel.text = "Network not available. Please check your internet connections."
+                                self.netwrkAlertLabel.text = networkErrorAlertText
                                 self.networkAlertViewAction()
                             }
                             else {
@@ -1029,7 +1040,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                 case .Failure( let error):
                     let err = error as NSError
                     if err.code == -1009 {
-                        self.netwrkAlertLabel.text = "Unable to connect.Check your network connection."
+                        self.netwrkAlertLabel.text = networkErrorAlertText
                         self.networkAlertViewAction()
                     }
                     else {
@@ -1045,28 +1056,35 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                     print(httpStatusCode)
                     
                     if(httpStatusCode==200) {
-                        
+                        Crashlytics.sharedInstance().setUserEmail(user)
                         let response = responseObject as! NSDictionary
                         let access_token = response.objectForKey("access_token")! as! String
                         let token_type = response.objectForKey("token_type")! as! String
                         let refresh_token = response.objectForKey("refresh_token")! as! String
-                        
+                        self.access_token = access_token
                         let defaults = NSUserDefaults.standardUserDefaults()
                         defaults.setObject (access_token ,forKey: "access_token")
                         defaults.setObject(token_type, forKey: "token_type")
                         defaults.setObject(refresh_token, forKey: "refresh_token")
                         defaults.setObject(user, forKey: PF_USERNAME)
                         defaults.setObject(pass, forKey: PF_PASSWORD)
-                        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-                        let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
-                        let nav = UINavigationController(rootViewController: nextViewController)
-                        nav.navigationBarHidden = true
-                        let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
-                        UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
-                            appDelegaet!.window?.rootViewController = nav
-                        }) { (isCompleted) in
-                            
+                        let patientIDOnDB = defaults.integerForKey(PF_PatientIDOnDB)
+                        if  patientIDOnDB != 0{
+                            self.getPatientDetails(patientIDOnDB)
                         }
+                        else {
+                            let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                            let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
+                            let nav = UINavigationController(rootViewController: nextViewController)
+                            nav.navigationBarHidden = true
+                            let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
+                            UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+                                appDelegaet!.window?.rootViewController = nav
+                            }) { (isCompleted) in
+                                self.view = nil
+                            }
+                        }
+                        
                         
                     }
                     else if(httpStatusCode==400) {
@@ -1165,7 +1183,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         }
     }
     
-    func registerDeviceService() {
+    func registerDeviceService(isFromSignInButton: Bool) {
         PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "RegisterDevice", value: nil)
         self.progessbarshow()
         let registerDeviceUrlString = "\(baseURL)/register_device"
@@ -1179,7 +1197,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
             case .Failure(let error):
                 let err = error as NSError
                 if err.code == -1009 {
-                    self.netwrkAlertLabel.text = "Unable to connect.Check your network connection."
+                    self.netwrkAlertLabel.text = networkErrorAlertText
                     self.networkAlertViewAction()
                 }
                 else {
@@ -1191,7 +1209,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
             case .Success(let responseObject):
                 let httpStatusCode = response.response?.statusCode
                 print(httpStatusCode)
-                
+                print(responseObject)
                 if(httpStatusCode==200) {
                     let defaults = NSUserDefaults.standardUserDefaults()
                     if let passcode = defaults.objectForKey("PF_Passcode") as? String {
@@ -1226,7 +1244,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                                 })
                                 break
                             case .unKnown:
-                                self.warning.text = "Check touch id registered and enabled on your device to begin."
+                                self.warning.text = "Check touch id configured and enabled on your device to begin."
                                 self.warning.textColor = UIColor.redColor()
                                 break
                             case .canceled:
@@ -1236,12 +1254,21 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                     }
                     else
                     {
-                        self.userLoginService()
-                        self.warning.text = ""
-                        self.warning.textColor = UIColor.lightGrayColor()
+                        if isFromSignInButton
+                        {
+                            self.userLoginService()
+                            self.warning.text = ""
+                            self.warning.textColor = UIColor.lightGrayColor()
+                        }
                     }
                 }
                 else if httpStatusCode == 201 {
+                    let response = responseObject as! NSDictionary
+                    let message = response.objectForKey("message")! as! String
+                    self.warning.text = message
+                    self.warning.textColor = UIColor.redColor()
+                }
+                else if httpStatusCode == 400 {
                     let response = responseObject as! NSDictionary
                     let message = response.objectForKey("message")! as! String
                     self.warning.text = message
@@ -1253,6 +1280,181 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         }
         
     }
+    
+    
+    @IBAction func resumeSessionOKButtonAction(sender: AnyObject) {
+        removeResumeSessionAlert()
+        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+        let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
+        nextViewController.isResumeCameraViewEnabled = true
+        let nav = UINavigationController(rootViewController: nextViewController)
+        nav.navigationBarHidden = true
+        let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
+        UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+            appDelegaet!.window?.rootViewController = nav
+        }) { (isCompleted) in
+            self.view = nil
+        }
+    }
+    @IBAction func resumeSessionCancelAction(sender: AnyObject) {
+        removeResumeSessionAlert()
+        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+        let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
+        let nav = UINavigationController(rootViewController: nextViewController)
+        nav.navigationBarHidden = true
+        let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
+        UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+            appDelegaet!.window?.rootViewController = nav
+        }) { (isCompleted) in
+            self.view = nil
+            NSUserDefaults.standardUserDefaults().removeObjectForKey(PF_PatientIDOnDB)
+            NSUserDefaults.standardUserDefaults().removeObjectForKey(PF_ResumeVideoCount)
+        }
+    }
+    
+    func  removeResumeSessionAlert() {
+        var setresizenormal: CGRect!
+        setresizenormal=self.resumeSessionAlertView.frame
+        setresizenormal.origin.x=self.resumeSessionAlertView.frame.origin.x
+        setresizenormal.origin.y=self.resumeSessionAlertView.frame.size.height
+        setresizenormal.size.width=self.view.frame.size.width
+        setresizenormal.size.height=self.resumeSessionAlertView.frame.size.height
+        UIView.animateWithDuration(0.30, delay: 0, options: .CurveEaseInOut, animations: {
+            self.resumeSessionAlertView.frame=setresizenormal
+        }) { (completed) in
+            self.blurEffectView.removeFromSuperview()
+        }
+    }
+    
+    /**
+     Showing the confirmation alert from top while back button is pressed for exit the current session or not.
+     */
+    func showResumeSessionAlertView() {
+        
+        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.Light)
+        blurEffectView = UIVisualEffectView(effect: blurEffect)
+        //always fill the view
+        blurEffectView.frame = self.view.bounds
+        //        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        self.view.addSubview(blurEffectView)
+        resumeSessionAlertView.frame.size.width=self.view.frame.size.width
+        resumeSessionAlertView.frame.size.height=self.view.frame.size.height
+        resumeSessionAlertView.frame.origin.x=0
+        resumeSessionAlertView.frame.origin.y=self.view.frame.size.height
+        self.view.addSubview(resumeSessionAlertView)
+        var setframe=resumeSessionAlertView.frame
+        setframe.size.width=resumeSessionAlertView.frame.size.width
+        setframe.size.height=resumeSessionAlertView.frame.size.height
+        setframe.origin.y=0
+        setframe.origin.x=0
+        UIView.animateWithDuration(0.30, delay: 0, options: UIViewAnimationOptions.TransitionCurlUp, animations: {
+            self.resumeSessionAlertView.frame=setframe
+            }, completion: nil)
+    }
+    
+    /**
+     Loading inial data
+     Service - Rest Service API
+     For Web service Calling - Alamofire Framework used
+     URL Format - "baseURL/load_initial_data?Authorization=token_type&access_token=access_token_value"
+     */
+    
+    func getPatientDetails(patientID: Int) {
+        print("PatientScreen getPatientDetails begin")
+        self.progessbarshow()
+        PFGlobalConstants.sendEventWithCatogory("background", action: "functionCall", label: "loadValues", value: nil)
+        let app_version : Int = Int(NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleVersion") as! String)!
+        requestString = "\(baseURL)/get_patient_details?Authorization=\(token_type)&access_token=\(access_token)&app_version=\(app_version)"
+        print(requestString)
+        url1 = NSURL(string: requestString as String)!
+        urlRequest = NSMutableURLRequest(URL: url1)
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
+        let patientModel = PFPatientDetailsModel()
+        patientModel.getPatientDetailsParameters(patientID)
+        Alamofire.request(urlRequest)
+            .responseJSON { response in
+                // do whatever you want here
+                switch response.result {
+                case .Failure( let error):
+                    print(error)
+                    let httpStatusCode = response.response?.statusCode
+                    print(httpStatusCode)
+                    if(httpStatusCode==401) {
+                        print("Invalid access token")
+                        PFGlobalConstants.sendException("InvalidAccessToken", isFatal: false)
+                        self.getRefreshToken()
+                    }
+                    else {
+                        self.netwrkAlertLabel.text = networkErrorAlertText
+                        self.networkAlertViewAction()
+                    }
+                case .Success(let responseObject):
+                    print(responseObject)
+                    let httpStatusCode = response.response?.statusCode
+                    print(httpStatusCode)
+                    if(httpStatusCode==200) {
+                        let response = responseObject as! NSDictionary
+                        print(response)
+                        if let patientName = response.objectForKey("Patient Name") as? String{
+                            if let patientMrnId = response.objectForKey("Patient_Mrn_id") {
+                                NSUserDefaults.standardUserDefaults().setObject(patientMrnId, forKey: "patient_id")
+                                self.resumeAlertLabel.text = "Do you want to continue the last session for the patient \(patientName)"
+                                self.showResumeSessionAlertView()
+                            }
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                    
+                    
+                }
+                self.progressbarhidden()
+                print("PatientScreen getPatientDetails end")
+        }
+    }
+    
+    /**
+     Refresh the access token by sending the already stored access token to the server.
+     */
+    func getRefreshToken() {
+        print("PatientScreen getRefreshToken begin")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "functionCall", label: "refreshToken", value: nil)
+        let defaults = NSUserDefaults.standardUserDefaults()
+        let patientID = defaults.integerForKey(PF_PatientIDOnDB)
+        let refresh_token = defaults.stringForKey("refresh_token")! as String
+        requestString = "\(baseURL)/login"
+        print(requestString)
+        let clientID = "102216378240-rf6fjt3konig2fr3p1376gq4jrooqcdm"
+        let clientSecret = "bYQU1LQAjaSQ1BH9j3zr7woO"
+        url1 = NSURL(string: requestString as String)!
+        urlRequest = NSMutableURLRequest(URL: url1)
+        urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
+        let patientModel = PFPatientDetailsModel()
+        patientModel.loadvaluesParam(clientID, client_secret: clientSecret, refresh_token: refresh_token, grant_type: "refresh_token")
+        Alamofire.request(urlRequest)
+            .responseJSON { response in
+                switch response.result {
+                case .Failure( let error):
+                    print(error)
+                case .Success(let responseObject):
+                    print(responseObject)
+                    let response = responseObject as! NSDictionary
+                    self.access_token = response.objectForKey("access_token")! as! String
+                    self.token_type = response.objectForKey("token_type")! as! String
+                    let refresh_token = response.objectForKey("refresh_token")! as! String
+                    let defaults = NSUserDefaults.standardUserDefaults()
+                    defaults.setObject (self.access_token, forKey: "access_token")
+                    defaults.setObject(self.token_type, forKey: "token_type")
+                    defaults.setObject(refresh_token, forKey: "refresh_token")
+                    self.getPatientDetails(patientID)
+                }
+                print("PatientScreen getRefreshToken end")
+        }
+    }
+
     
     
     //MARK: Lock Screen Setup Delegate
@@ -1293,4 +1495,6 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         print("Unlock Cancled")
         dismissViewControllerAnimated(true, completion: nil)
     }
+    
+    
 }

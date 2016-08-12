@@ -133,10 +133,55 @@ class PFPatientDetailsModel: NSObject {
      - returns: returns request with the provided parameters
      */
 
-    func param(clinical_trial_id: NSNumber, patient_name: NSString,patient_id: NSString, age_id: NSNumber, gender_id: NSNumber, ethinicity_id: NSNumber, language_id: NSNumber, encounterID: NSString) -> NSMutableURLRequest {
+    func getRequestParameterForRegisterPatientDetails(clinical_trial_id: NSNumber, patient_name: NSString,patient_id: NSString, age_id: NSNumber, gender_id: NSNumber, ethinicity_id: NSNumber, language_id: NSNumber, encounterID: NSString) -> NSMutableURLRequest {
+        print("PFPatientDetailsModel param begin")
+        let parameters1 = [
+            "clinical_trial_id": clinical_trial_id,
+            "patient_name": patient_name,
+            "patient_id": patient_id,
+            "age_id": age_id,
+            "gender_id": gender_id,
+            "ethinicity_id": ethinicity_id,
+            "language_id": language_id,
+            "encounter_id": encounterID,
+            "images": []
+        ]
+        print(parameters1)
+        do {
+            let json = try NSJSONSerialization.dataWithJSONObject(parameters1, options: NSJSONWritingOptions())
+            print(json)
+            urlRequest.HTTPBody = try NSJSONSerialization.dataWithJSONObject(parameters1, options: NSJSONWritingOptions())
+            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        } catch {
+            print("JSON serialization Error!")
+        }
+        print("PFPatientDetailsModel param end")
+        return urlRequest
+    }
+    
+    /**
+     Genrating the NSMutableURLRequest with the requested parameters.
+     
+     - parameter clinical_trial_id: chossen by user
+     - parameter patient_name:      patient name
+     - parameter patient_id:        patient_id
+     - parameter age_id:            patient Age
+     - parameter gender_id:         patient gender
+     - parameter ethinicity_id:     ethinicity_id choosen by user
+     - parameter language_id:       language_id choosen by user
+     
+     - returns: returns request with the provided parameters
+     */
+    
+    func getRequestParameterForAddPatientMediaDetails() -> NSMutableURLRequest {
         print("PFPatientDetailsModel param begin")
         var document_url = ""
+        var patient_id = ""
         let defaults = NSUserDefaults.standardUserDefaults()
+        if let temp = defaults.objectForKey(PF_PatientIDOnDB) as? String
+        {
+            patient_id = temp
+        }
         let awsURLOne = defaults.stringForKey("awsURLOne")
         let awsURLTwo = defaults.stringForKey("awsURLTwo")
         let awsURLThree = defaults.stringForKey("awsURLThree")
@@ -162,12 +207,7 @@ class PFPatientDetailsModel: NSObject {
             videoStatus4 = "In progress"
         }
         let parameters1 = [
-            "clinical_trial_id": clinical_trial_id,
-            "patient_name": patient_name,
             "patient_id": patient_id,
-            "age_id": age_id,
-            "gender_id": gender_id,
-            "ethinicity_id": ethinicity_id,
             "video_url_1": awsURLOne! as NSString,
             "video_url_2": awsURLTwo! as NSString,
             "video_url_3": awsURLThree! as NSString,
@@ -176,10 +216,7 @@ class PFPatientDetailsModel: NSObject {
             "video_status_2": videoStatus2,
             "video_status_3": videoStatus3,
             "video_status_4": videoStatus4,
-            "language_id": language_id,
-            "encounter_id": encounterID,
-            "document_url": document_url,
-            "images": []
+            "document_url": document_url
         ]
         print(parameters1)
         do {
@@ -194,4 +231,25 @@ class PFPatientDetailsModel: NSObject {
         return urlRequest
     }
 
+    /**
+     Genrating the NSMutableURLRequest for getting patient details.
+     
+     - returns: returns mutable request
+     */
+    
+    func getPatientDetailsParameters(patientID: Int) -> NSMutableURLRequest {
+        print("PFLogingModel getPatientDetails begin")
+        let parameters1 = [
+            "patient_id": String(patientID)
+        ]
+        do {
+            print(parameters1)
+            urlRequest.HTTPBody = try NSJSONSerialization.dataWithJSONObject (parameters1,options: NSJSONWritingOptions())
+            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        } catch {
+            print("JSON serialization Error!")
+        }
+        print("PFLogingModel param end")
+        return urlRequest
+    }
 }

@@ -27,7 +27,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         UIApplication.sharedApplication().idleTimerDisabled = true
         UIApplication.sharedApplication().statusBarHidden = true
-//        logIntoFile()
+        UIApplication.sharedApplication().applicationIconBadgeNumber = 0
+        logIntoFile()
         print("AppDelegate didFinishLaunchingWithOptions begin")
         self.loadModelFile()
         if !UIApplication.sharedApplication().isRegisteredForRemoteNotifications() {
@@ -37,9 +38,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
         let isDocScanOn = NSUserDefaults.standardUserDefaults().objectForKey("isDocScanOn")
         if isDocScanOn == nil
         {
-            NSUserDefaults.standardUserDefaults().setBool(false, forKey: "isDocScanOn")
+            NSUserDefaults.standardUserDefaults().setBool(false, forKey: PF_QUALITYCHECK)
+        }
+        let isQualityCheckOn = NSUserDefaults.standardUserDefaults().objectForKey(PF_QUALITYCHECK)
+        if isQualityCheckOn == nil
+        {
+            NSUserDefaults.standardUserDefaults().setBool(true, forKey: PF_QUALITYCHECK)
         }
         Fabric.with([Crashlytics.self])
+        Crashlytics.sharedInstance().setUserIdentifier(UIDevice.currentDevice().identifierForVendor?.UUIDString)
+        
         // Configure tracker from GoogleService-Info.plist.
 //        var configureError:NSError?
 //        GGLContext.sharedInstance().configureWithError(&configureError)
@@ -112,6 +120,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
     }
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject], fetchCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
         print(userInfo)
+        UIApplication.sharedApplication().applicationIconBadgeNumber = 0
         if let notificationDic : NSDictionary = userInfo as NSDictionary
         {
             if var uuidFromServer = notificationDic.objectForKey("uuid") as? String
@@ -141,7 +150,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
                         break
                     case .unKnown:
                         dispatch_async(dispatch_get_main_queue()) {
-                            let alert = UIAlertView(title: "", message: "Check touch id registered and enabled on your device to begin.", delegate: nil, cancelButtonTitle: "Ok")
+                            let alert = UIAlertView(title: "", message: "Check touch id configured and enabled on your device to begin.", delegate: nil, cancelButtonTitle: "Ok")
                             alert.show()
                         }
                         break
@@ -170,6 +179,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
             catch
             {
                 print("Write Failed")
+            }
+        }
+        else {
+            if let data = NSData(contentsOfFile: logPath)
+            {
+                if ((data.length/1024)/1024) >= 50
+                {
+                    do {
+                        try NSFileManager.defaultManager().removeItemAtPath(logPath)
+                    }
+                    catch let err as NSError
+                    {
+                        print(err)
+                    }
+                }
             }
         }
         
