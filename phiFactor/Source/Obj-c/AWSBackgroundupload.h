@@ -15,7 +15,7 @@
 
 #import <UIKit/UIKit.h>
 #import <AWSS3/AWSS3.h>
-
+#import <Foundation/Foundation.h>
 
 @interface AWSBackgroundupload : UIViewController{
     unsigned long long FileSize;

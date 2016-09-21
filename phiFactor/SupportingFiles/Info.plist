@@ -16,6 +16,8 @@
 					<string>us-east-1:a9fdc1f2-c927-408b-9cf7-9587522d9f2b</string>
 					<key>Region</key>
 					<string>AWSRegionUSEast1</string>
+					<key>Staging</key>
+					<string>us-east-1:91e8fa40-f16d-418a-9217-f3b1f494ace3</string>
 				</dict>
 			</dict>
 		</dict>
@@ -50,7 +52,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>7</string>
+	<string>6</string>
 	<key>Fabric</key>
 	<dict>
 		<key>APIKey</key>

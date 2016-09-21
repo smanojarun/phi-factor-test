@@ -746,14 +746,14 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         }
         pfcCameraInstructionlabel.hidden = false
         var someInts: [CInt] = []
-        for i in 0...15 {
+        for i in 0...16 {
             someInts.append(errorCode[i])
         }
         var successValue = 0
         if canShowErrorMsg {
             if canStartRecording == true {
                 self.pfcCameraInstructionlabel.hidden=false
-                for i in 0...12 {
+                for i in 0...14 {
                     if someInts[i] == 1001 {
                         showErrorMessage("Face not detected")
                         showRedColor()
@@ -789,7 +789,12 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
                         successValue = 1
                         showRedColor()
                     }
-                    if someInts[i] == 1 && i != 12 {
+                    if someInts[i] == 1009 {
+                        showErrorMessage("Face not detected due to lighting")
+                        successValue = 1
+                        showRedColor()
+                    }
+                    if someInts[i] == 1 && i != 13 {
                         dispatch_async(dispatch_get_main_queue()) {
                             self.pfCameraStartButtonaction(nil)
                             self.showGreenColor()
@@ -1648,6 +1653,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             self.pfcEyeAnimationImageView.hidden=true
             self.isFaceorEyeDected = false
             self.cameraModel!.updatePatientMediaDetails()
+            PFGlobalConstants.removeResumeVideoCount()
             previewView.removeFromSuperview()
             pfcCameraBackgroundImageView.hidden=true
 
@@ -2604,7 +2610,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         }
     }
     func hideDeletePreviousVideoButtonIfResumeCount(count: Int){
-        if isResumeCameraViewEnabled == true && resumeVideoCount == count{
+        if isResumeCameraViewEnabled == true && resumeVideoCount != nil && resumeVideoCount == count{
             self.pfcDeletePreviousVideoButton.hidden = true
         }
     }

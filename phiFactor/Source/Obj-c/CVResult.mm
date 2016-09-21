@@ -70,8 +70,8 @@
 
 
     algobucket dlb;
-    int *facerect=new int[13];
-     int *logvalue=new int[15];
+    int *facerect=new int[14];
+     int *logvalue=new int[16];
     cv::Mat output;
     cv :: cvtColor(matImage, matImage, CV_BGR2RGB);
     
@@ -87,11 +87,11 @@
     int res=dlb.FaceQualityCheck(matImage, output, facerect, 13,videoCount,0,retakeCount,logvalue);
 
     int errorCode = 0;
-    for(unsigned int i = 0; i < 13; i++)
+    for(unsigned int i = 0; i < 14; i++)
     {
         NSLog(@"Error code : %d",facerect[i]);
     }
-    for(unsigned int p = 0; p < 15; p++)
+    for(unsigned int p = 0; p < 16; p++)
     {
         NSLog(@"log values  : %d",logvalue[p]);
     }

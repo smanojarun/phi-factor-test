@@ -178,7 +178,7 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
                     if(httpStatusCode==401) {
                         print("Invalid access token")
                         PFGlobalConstants.sendException("InvalidAccessToken", isFatal: false)
-                        self.getRefreshToken()
+                        PFGlobalConstants.logoutUser()
                     }
                     else {
                         self.alertMessageLabel.text = networkErrorAlertText
@@ -1207,6 +1207,7 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
         defaults.setObject("", forKey: "token_type")
         defaults.removeObjectForKey(PF_USERNAME)
         defaults.removeObjectForKey(PF_PASSWORD)
+        PFGlobalConstants.removeResumeVideoCount()
         let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PhiFactorIntro") as! PhiFactorIntro
         nextViewController.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve

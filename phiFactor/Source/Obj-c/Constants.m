@@ -18,6 +18,6 @@
 // warning To run this sample correctly, you must set the following constants.
 // NSString *const S3BucketName = @"portal.phifactor.com";
 // NSString *const S3BucketName = @"staging-phifactor";
-NSString *const S3BucketName = @"dev-phifactor";
+// NSString *const S3BucketName = @"dev-phifactor";
 NSString *const S3DownloadKeyName = @"S3DownloadKeyName";
 NSString *const S3UploadKeyName = @"testmay25/Video_May26.mov";

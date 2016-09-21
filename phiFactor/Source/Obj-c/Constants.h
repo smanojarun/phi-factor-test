@@ -16,7 +16,7 @@
 #import <Foundation/Foundation.h>
 @import AWSCore;
 
-FOUNDATION_EXPORT NSString *const S3BucketName;
+//FOUNDATION_EXPORT NSString *const S3BucketName;
 FOUNDATION_EXPORT NSString *const S3DownloadKeyName;
 
 FOUNDATION_EXPORT NSString *const S3UploadKeyName;

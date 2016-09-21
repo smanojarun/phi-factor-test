@@ -27,7 +27,7 @@ class PFCameraScreenModel: NSObject {
     var patientId: String!
     var dateFormatter: String!
     var name: NSString="bg"
-    let S3BucketName: String = "phifactor"
+//    let S3BucketName: String = "phifactor"
     let S3UploadKeyName: String = "uploadfileswift.txt"
     var defaults = NSUserDefaults.standardUserDefaults()
     
@@ -55,7 +55,7 @@ class PFCameraScreenModel: NSObject {
         dateFormatter = formatter.stringFromDate(date)
 
         if(iteratio=="1") {
-            awsURLOne = NSString .localizedStringWithFormat("https://s3-us-west-2.amazonaws.com/dev-phifactor/%@/%@/%@_%@_%@.MOV", patientId!, dateFormatter, patientId!, dateFormatter, iteratio)
+            awsURLOne = NSString .localizedStringWithFormat("\(amazomURL)/%@/%@/%@_%@_%@.MOV", patientId!, dateFormatter, patientId!, dateFormatter, iteratio)
             videoArray.addObject(awsURLOne!)
             let tempUrl = "\(itemtobeplayed),\(patientId),\(iteratio)"
             localUrlarr.addObject(tempUrl)
@@ -81,14 +81,14 @@ class PFCameraScreenModel: NSObject {
         }
         else if(iteratio=="2") {
             
-            awsURLTwo = NSString .localizedStringWithFormat("https://s3-us-west-2.amazonaws.com/dev-phifactor/%@/%@/%@_%@_%@.MOV", patientId!, dateFormatter, patientId!, dateFormatter, iteratio)
+            awsURLTwo = NSString .localizedStringWithFormat("\(amazomURL)/%@/%@/%@_%@_%@.MOV", patientId!, dateFormatter, patientId!, dateFormatter, iteratio)
             videoArray.addObject(awsURLTwo!)
             let tempUrl = "\(itemtobeplayed),\(patientId),\(iteratio)"
             localUrlarr.addObject(tempUrl)
             defaults.setObject (awsURLTwo, forKey: "awsURLTwo")
         }
         else if(iteratio=="3") {
-            awsURLThree = NSString .localizedStringWithFormat("https://s3-us-west-2.amazonaws.com/dev-phifactor/%@/%@/%@_%@_%@.MOV", patientId!, dateFormatter, patientId!, dateFormatter, iteratio)
+            awsURLThree = NSString .localizedStringWithFormat("\(amazomURL)/%@/%@/%@_%@_%@.MOV", patientId!, dateFormatter, patientId!, dateFormatter, iteratio)
             videoArray.addObject(awsURLThree!)
             let tempUrl = "\(itemtobeplayed),\(patientId),\(iteratio)"
             localUrlarr.addObject(tempUrl)
@@ -97,7 +97,7 @@ class PFCameraScreenModel: NSObject {
 
         }
         else if(iteratio=="4") {
-            awsURLFour = NSString .localizedStringWithFormat("https://s3-us-west-2.amazonaws.com/dev-phifactor/%@/%@/%@_%@_%@.MOV", patientId!, dateFormatter, patientId!, dateFormatter, iteratio)
+            awsURLFour = NSString .localizedStringWithFormat("\(amazomURL)/%@/%@/%@_%@_%@.MOV", patientId!, dateFormatter, patientId!, dateFormatter, iteratio)
             videoArray.addObject(awsURLFour!)
             let tempUrl = "\(itemtobeplayed),\(patientId),\(iteratio)"
             localUrlarr.addObject(tempUrl)
@@ -234,7 +234,7 @@ class PFCameraScreenModel: NSObject {
         formatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
         formatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
         dateFormatter = formatter.stringFromDate(date)
-        let doc = NSString .localizedStringWithFormat("https://s3-us-west-2.amazonaws.com/dev-phifactor/%@/%@/%@_%@_Document.jpg", patientId!, dateFormatter, patientId!, dateFormatter)
+        let doc = NSString .localizedStringWithFormat("\(amazomURL)/%@/%@/%@_%@.jpg", patientId!, dateFormatter, patientId!, dateFormatter)
         defaults.setObject (patientIdArray, forKey: "patient")
         
         defaults.setObject (doc, forKey: "doc")
@@ -245,6 +245,6 @@ class PFCameraScreenModel: NSObject {
 }
 
 //    func awsUrl(dateFormatter: String,iteration: String,patient: String) -> String  {
-//        let awsURLOne = NSString .localizedStringWithFormat("https: //s3-us-west-2.amazonaws.com/dev-phifactor/%@/%@/%@_%@_%@.MOV", patient,dateFormatter,patient,dateFormatter,iteration)
+//        let awsURLOne = NSString .localizedStringWithFormat("\(amazomURL)/%@/%@/%@_%@_%@.MOV", patient,dateFormatter,patient,dateFormatter,iteration)
 //    return awsURLOne as String
 //    }

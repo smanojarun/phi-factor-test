@@ -121,7 +121,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         logout = defaults.integerForKey("logout")
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(willEnterForeground), name: UIApplicationWillEnterForegroundNotification, object: nil)
 
-
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(willEnterForeground), name: "KSDIdlingWindowActiveNotification", object: nil)
         if(notoplay==1) {
             getStarted.hidden=false
             self.baseview.insertSubview(playbackgroundview, atIndex: 0)
@@ -793,13 +793,29 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
     }
 
     func textFieldShouldReturn(textField: UITextField) -> Bool {
-        textField.resignFirstResponder()
+        if textField.returnKeyType == UIReturnKeyType.Next
+        {
+            password.becomeFirstResponder()
+        }
+        else if textField.returnKeyType == UIReturnKeyType.Go
+        {
+            textField.resignFirstResponder()
+            istextend=true
+            self.baseview.frame.origin.y += 200
+            self.view.endEditing(true)
+            signin(self)
+        }
+        else
+        {
+            textField.resignFirstResponder()
+            istextend=true
+            self.baseview.frame.origin.y += 200
+            self.view.endEditing(true)
+        }
         currentPasswordTextField.resignFirstResponder()
         newPasswordTextField.resignFirstResponder()
         reEnterPasswordTextField.resignFirstResponder()
-        istextend=true
-        self.baseview.frame.origin.y += 200
-         self.view.endEditing(true)
+        
         return true
     }
 
@@ -1235,12 +1251,19 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                             case .unAuthorized:
                                 self.warning.text = "Touch ID authentication failed."
                                 self.warning.textColor = UIColor.redColor()
-                                dispatch_async(dispatch_get_main_queue(), { 
-                                    let lockScreen = ABPadLockScreenViewController(delegate: self, complexPin: false)
-                                    lockScreen.setAllowedAttempts(3)
-                                    lockScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
-                                    lockScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
-                                    self.presentViewController(lockScreen, animated: true, completion: nil)
+                                dispatch_async(dispatch_get_main_queue(), {
+                                    if(PFGlobalConstants.isPasscodeAvailable()) {
+                                        let lockScreen = ABPadLockScreenViewController(delegate: self, complexPin: false)
+                                        lockScreen.setAllowedAttempts(3)
+                                        lockScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
+                                        lockScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
+                                        isAuthorizationRequesting = true;
+                                        self.presentViewController(lockScreen, animated: true, completion: nil)
+                                    }
+                                    else
+                                    {
+                                        UIAlertView(title: "", message: "No registered passcode found.", delegate: nil, cancelButtonTitle: "Ok").show()
+                                    }
                                 })
                                 break
                             case .unKnown:
@@ -1383,7 +1406,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                     if(httpStatusCode==401) {
                         print("Invalid access token")
                         PFGlobalConstants.sendException("InvalidAccessToken", isFatal: false)
-                        self.getRefreshToken()
+                        PFGlobalConstants.logoutUser()
                     }
                     else {
                         self.netwrkAlertLabel.text = networkErrorAlertText
@@ -1475,6 +1498,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
     
     func unlockWasSuccessfulForPadLockScreenViewController(padLockScreenViewController: ABPadLockScreenViewController!) {
         print("Unlock Successful!")
+        isAuthorizationRequesting = false;
         dismissViewControllerAnimated(true, completion: nil)
         self.userLoginService()
         self.warning.text = ""
@@ -1485,6 +1509,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         print("Failed Attempt \(attemptNumber) with incorrect pin \(falsePin)")
         if attemptNumber == 3
         {
+            isAuthorizationRequesting = false;
             self.warning.text = "Incorrect passcode."
             self.warning.textColor = UIColor.redColor()
             dismissViewControllerAnimated(true, completion: nil)
@@ -1493,6 +1518,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
     
     func unlockWasCancelledForPadLockScreenViewController(padLockScreenViewController: ABPadLockScreenViewController!) {
         print("Unlock Cancled")
+        isAuthorizationRequesting = false;
         dismissViewControllerAnimated(true, completion: nil)
     }
     

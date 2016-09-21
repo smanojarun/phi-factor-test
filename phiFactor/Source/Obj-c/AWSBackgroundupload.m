@@ -14,9 +14,9 @@
  */
 
 #import "AWSBackgroundupload.h"
-#import "Constants.h"
+//#import "Constants.h"
 #import <QuartzCore/QuartzCore.h>
-#import "PhiFactorDEV-Swift.h"
+#import "PhiFactorPRD-Swift.h"
 
 @interface AWSBackgroundupload ()
 
@@ -208,7 +208,7 @@ NSDate *startTime ;
 
     NSString *uploadFolderName = [NSString stringWithFormat:@"%@/%@/%@_%@_%@.MOV",patientId,timestamp,patientId,timestamp,iteration];
     [[transferUtility uploadData:reqVideoData
-                          bucket:S3BucketName
+                          bucket:[PFGlobalConstants getS3BucketName]
                              key:uploadFolderName
                      contentType:@"binary/octet-stream"
                       expression:expression
@@ -286,7 +286,7 @@ NSDate *startTime ;
     
     NSString *uploadFolderName = [NSString stringWithFormat:@"%@/%@/%@_%@.jpg",patientId,timestamp,patientId,timestamp];
     [[transferUtility uploadData:reqVideoData
-                          bucket:S3BucketName
+                          bucket:[PFGlobalConstants getS3BucketName]
                              key:uploadFolderName
                      contentType:@"binary/octet-stream"
                       expression:expression

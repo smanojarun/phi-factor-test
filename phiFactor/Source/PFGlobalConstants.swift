@@ -17,10 +17,9 @@ var videoStatus1: String!
 var videoStatus2: String!
 var videoStatus3: String!
 var videoStatus4: String!
-let baseURL: NSString = "https://dev-api.phifactor.com"
-//let baseURL: NSString = "https://api.phifactor.com"
-//let baseURL: NSString = "https://staging-api.phifactor.com"
-//let baseURL: NSString = "http://10.10.1.18:9001"
+var baseURL: NSString = "https://dev-api.phifactor.com"
+var amazomURL = "https://s3-us-west-2.amazonaws.com/dev-phifactor"
+var S3BucketName = "dev-phifactor"
 
 let introVideoInstruction = "The sky is blue."
 let facialVideoInstruction = "Capture face from left to right."
@@ -47,6 +46,7 @@ let PF_PASSWORD = "pfPassword"
 let PF_QUALITYCHECK = "isQualityCheckOn"
 let PF_PatientIDOnDB = "pfPatientIDOnDB"
 let PF_ResumeVideoCount = "pfResumeVideoCount"
+var isAuthorizationRequesting = false;
 
 enum authenticateStatus {
     case authorized
@@ -54,7 +54,12 @@ enum authenticateStatus {
     case canceled
     case unKnown
 }
-
+enum appEnvironment {
+    case Production
+    case Staging
+    case Development
+    case Local
+}
 class PFGlobalConstants: NSObject {
 
     let device = Device()
@@ -130,55 +135,61 @@ class PFGlobalConstants: NSObject {
     }
     
     class func authenticateUserByTouchID(complition :(status: authenticateStatus) ->()) {
-        let context = LAContext()
-        
-        // Declare a NSError variable.
-        var error: NSError?
-        
-        // Set the reason string that will appear on the authentication alert.
-        var reasonString = "Authentication is needed to access your data."
-        
-        // Check if the device can evaluate the policy.
-        if context.canEvaluatePolicy(LAPolicy.DeviceOwnerAuthenticationWithBiometrics, error: &error) {
-            [context .evaluatePolicy(LAPolicy.DeviceOwnerAuthenticationWithBiometrics, localizedReason: reasonString, reply: { (success: Bool, evalPolicyError: NSError?) -> Void in
-                
-                if success {
-                    complition(status: .authorized)
-                }
-                else{
-                    // If authentication failed then show a message to the console with a short description.
-                    // In case that the error is a user fallback, then show the password alert view.
-                    print(evalPolicyError?.localizedDescription)
-                    
-                    switch evalPolicyError!.code {
-                        
-                    case LAError.SystemCancel.rawValue:
-                        print("Authentication was cancelled by the system")
-                        complition(status: .unAuthorized)
-                        
-                    case LAError.UserCancel.rawValue:
-                        print("Authentication was cancelled by the user")
-                        complition(status: .canceled)
-                        
-                    case LAError.UserFallback.rawValue:
-                        print("User selected to enter custom password")
-                        complition(status: .unAuthorized)
-                        NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
-                        })
-                        
-                    default:
-                        print("Authentication failed")
-                        complition(status: .unAuthorized)
-                        NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
-                        })
-                    }
-                }
-                
-            })]
-        }
-        else
+        if !isAuthorizationRequesting
         {
-            complition(status: .unKnown)
+            let context = LAContext()
+            
+            // Declare a NSError variable.
+            var error: NSError?
+            
+            // Set the reason string that will appear on the authentication alert.
+            var reasonString = "Authentication is needed to access your data."
+            
+            // Check if the device can evaluate the policy.
+            if context.canEvaluatePolicy(LAPolicy.DeviceOwnerAuthenticationWithBiometrics, error: &error) {
+                isAuthorizationRequesting = true;
+                [context .evaluatePolicy(LAPolicy.DeviceOwnerAuthenticationWithBiometrics, localizedReason: reasonString, reply: { (success: Bool, evalPolicyError: NSError?) -> Void in
+                    
+                    if success {
+                        isAuthorizationRequesting = false;
+                        complition(status: .authorized)
+                    }
+                    else{
+                        // If authentication failed then show a message to the console with a short description.
+                        // In case that the error is a user fallback, then show the password alert view.
+                        print(evalPolicyError?.localizedDescription)
+                        
+                        switch evalPolicyError!.code {
+                            
+                        case LAError.SystemCancel.rawValue:
+                            print("Authentication was cancelled by the system")
+                            isAuthorizationRequesting = false;
+                            complition(status: .unAuthorized)
+                            
+                        case LAError.UserCancel.rawValue:
+                            print("Authentication was cancelled by the user")
+                            isAuthorizationRequesting = false;
+                            complition(status: .canceled)
+                            
+                        case LAError.UserFallback.rawValue:
+                            print("User selected to enter custom password")
+                            isAuthorizationRequesting = false;
+                            complition(status: .unAuthorized)
+
+                        default:
+                            print("Authentication failed")
+                            isAuthorizationRequesting = false;
+                            complition(status: .unAuthorized)
+                        }
+                    }
+                    
+                })]
+            }
+            else
+            {
+                isAuthorizationRequesting = false;
+                complition(status: .unKnown)
+            }
         }
     }
     
@@ -244,6 +255,62 @@ class PFGlobalConstants: NSObject {
         NSUserDefaults.standardUserDefaults().setInteger(count, forKey: PF_ResumeVideoCount)
         NSUserDefaults.standardUserDefaults().synchronize()
     }
+    class func removeResumeVideoCount() {
+        NSUserDefaults.standardUserDefaults().removeObjectForKey(PF_ResumeVideoCount)
+        NSUserDefaults.standardUserDefaults().synchronize()
+    }
+    class func logoutUser()
+    {
+        print("PFGlobalConstants logoutUser start")
+        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+        let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PhiFactorIntro") as! PhiFactorIntro
+        nextViewController.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
+        let nav = UINavigationController(rootViewController: nextViewController)
+        nav.navigationBarHidden = true
+        
+        dispatch_async(dispatch_get_main_queue()) { 
+            UIView.transitionWithView((APP_DELEGATE?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+                APP_DELEGATE!.window?.backgroundColor = UIColor.whiteColor()
+                APP_DELEGATE!.window?.rootViewController = nav
+                
+            }) { (isCompleted) in
+                print("PFGlobalConstants logoutUser end")
+            }
+        }
+        
+    }
+    class func isPasscodeAvailable() ->Bool
+    {
+        return NSUserDefaults.standardUserDefaults().stringForKey("PF_Passcode") != nil ? true : false
+    }
+    class func envirnment(environment: appEnvironment) {
+        switch environment {
+        case .Production:
+            baseURL = "https://api.phifactor.com"
+            amazomURL = "https://s3-us-west-2.amazonaws.com/portal.phifactor.com"
+            S3BucketName = "portal.phifactor.com"
+            break
+        case .Staging:
+            baseURL = "https://staging-api.phifactor.com"
+            amazomURL = "https://s3-us-west-2.amazonaws.com/staging-phifactor"
+            S3BucketName = "staging-phifactor"
+            break
+        case .Development:
+            baseURL = "https://dev-api.phifactor.com"
+            amazomURL = "https://s3-us-west-2.amazonaws.com/dev-phifactor"
+            S3BucketName = "dev-phifactor"
+            break
+        case .Local:
+            baseURL = "http://10.10.1.6:9001"
+            amazomURL = "https://s3-us-west-2.amazonaws.com/dev-phifactor"
+            S3BucketName = "dev-phifactor"
+            break
+        }
+    }
+    class func getS3BucketName() -> String {
+        
+        return S3BucketName
+    }
 
 }
 extension Double {
@@ -296,4 +363,29 @@ extension CMSampleBuffer {
         return image
     }
     
+}
+
+extension UIApplication {
+    class func topViewController(base: UIViewController? = UIApplication.sharedApplication().keyWindow?.rootViewController) -> UIViewController? {
+        
+        if let nav = base as? UINavigationController {
+            return topViewController(nav.visibleViewController)
+        }
+        
+        if let tab = base as? UITabBarController {
+            let moreNavigationController = tab.moreNavigationController
+            
+            if let top = moreNavigationController.topViewController where top.view.window != nil {
+                return topViewController(top)
+            } else if let selected = tab.selectedViewController {
+                return topViewController(selected)
+            }
+        }
+        
+        if let presented = base?.presentedViewController {
+            return topViewController(presented)
+        }
+        
+        return base
+    }
 }

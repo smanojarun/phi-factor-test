@@ -19,7 +19,7 @@
             <string>Calibri-Bold</string>
             <string>Calibri-Bold</string>
         </mutableArray>
-        <mutableArray key="Calibri.ttf">
+        <mutableArray key="Calibri.otf">
             <string>Calibri</string>
             <string>Calibri</string>
             <string>Calibri</string>
@@ -65,7 +65,7 @@
         <!--Phi Factor Intro-->
         <scene sceneID="dvg-48-FzX">
             <objects>
-                <viewController storyboardIdentifier="PhiFactorIntro" useStoryboardIdentifierAsRestorationIdentifier="YES" id="za3-I6-79H" customClass="PhiFactorIntro" customModule="PhiFactorDEV" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PhiFactorIntro" useStoryboardIdentifierAsRestorationIdentifier="YES" id="za3-I6-79H" customClass="PhiFactorIntro" customModule="PhiFactorLOC" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="HNf-qz-oNL"/>
                         <viewControllerLayoutGuide type="bottom" id="YjY-g7-fwk"/>
@@ -909,7 +909,7 @@
                                 <textField opaque="NO" clipsSubviews="YES" tag="12" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Password" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="3uJ-zx-7br">
                                     <rect key="frame" x="43" y="20" width="217" height="30"/>
                                     <fontDescription key="fontDescription" name="Calibri" family="Calibri" pointSize="18"/>
-                                    <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" secureTextEntry="YES"/>
+                                    <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="go" secureTextEntry="YES"/>
                                 </textField>
                                 <button hidden="YES" opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jls-ab-ieX">
                                     <rect key="frame" x="233" y="23" width="23" height="23"/>
@@ -1052,7 +1052,7 @@
                                         <constraint firstAttribute="height" constant="30" id="uRJ-Fp-QTu"/>
                                     </constraints>
                                     <fontDescription key="fontDescription" name="Calibri" family="Calibri" pointSize="18"/>
-                                    <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="emailAddress"/>
+                                    <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="emailAddress" returnKeyType="next"/>
                                     <variation key="heightClass=regular-widthClass=compact">
                                         <mask key="constraints">
                                             <exclude reference="CRk-QI-elp"/>
@@ -1676,7 +1676,7 @@
         <!--Cameraviewcontrollerscreen-->
         <scene sceneID="c8g-X3-aBj">
             <objects>
-                <viewController storyboardIdentifier="PFCameraviewcontrollerscreen" useStoryboardIdentifierAsRestorationIdentifier="YES" id="eLi-YQ-hdC" customClass="PFCameraviewcontrollerscreen" customModule="PhiFactorDEV" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PFCameraviewcontrollerscreen" useStoryboardIdentifierAsRestorationIdentifier="YES" id="eLi-YQ-hdC" customClass="PFCameraviewcontrollerscreen" customModule="PhiFactorLOC" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="JE2-FY-SXQ"/>
                         <viewControllerLayoutGuide type="bottom" id="3eb-rD-dGJ"/>
@@ -1685,7 +1685,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="400" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dZq-dl-6Pi" customClass="AVCamPreviewView" customModule="PhiFactorDEV" customModuleProvider="target">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dZq-dl-6Pi" customClass="AVCamPreviewView" customModule="PhiFactorLOC" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                             </view>
@@ -3186,65 +3186,30 @@
                                     <mask key="constraints">
                                         <exclude reference="T2e-vZ-d8D"/>
                                         <exclude reference="etZ-3a-hwL"/>
-                                        <exclude reference="Y7k-Xz-hz4"/>
-                                        <exclude reference="cfU-EA-1JN"/>
-                                        <exclude reference="hsC-5m-KKG"/>
-                                        <exclude reference="otq-i5-deO"/>
-                                        <exclude reference="3mK-1U-uqO"/>
-                                        <exclude reference="MFI-D4-r3c"/>
-                                        <exclude reference="hp0-Na-W33"/>
-                                        <exclude reference="tjH-JU-o2P"/>
-                                        <exclude reference="PP3-mN-yz2"/>
-                                        <exclude reference="fTp-mw-rLF"/>
-                                        <exclude reference="mBd-Xy-mp3"/>
-                                        <exclude reference="szG-o3-J7v"/>
-                                        <exclude reference="hFy-wM-gY2"/>
-                                        <exclude reference="iPl-dR-PZX"/>
-                                        <exclude reference="kTt-rD-lz8"/>
-                                        <exclude reference="z5t-fC-EPr"/>
-                                        <exclude reference="QdF-Ju-ofR"/>
-                                        <exclude reference="fJs-9i-VMe"/>
-                                        <exclude reference="EQF-cp-Z8p"/>
-                                        <exclude reference="ZhL-SJ-kSE"/>
+                                        <exclude reference="0Ol-UK-CHc"/>
                                         <exclude reference="7P9-nH-5eO"/>
                                         <exclude reference="YOK-BS-Ur9"/>
                                         <exclude reference="c5W-vj-Xdd"/>
-                                        <exclude reference="D5J-Pp-Zov"/>
-                                        <exclude reference="GBC-jF-Mr0"/>
-                                        <exclude reference="OBW-r3-Yx5"/>
-                                        <exclude reference="jlB-6M-iVQ"/>
-                                        <exclude reference="GGg-26-xgo"/>
-                                        <exclude reference="d7T-kA-Wx6"/>
-                                        <exclude reference="hX8-a4-a0w"/>
-                                        <exclude reference="Hzd-eD-mgS"/>
-                                        <exclude reference="Kfw-XQ-G5A"/>
-                                        <exclude reference="oSb-7r-zrd"/>
-                                        <exclude reference="Jls-8p-6GB"/>
-                                        <exclude reference="RQz-7l-BbB"/>
-                                        <exclude reference="fuS-X0-zjZ"/>
-                                        <exclude reference="2Nl-36-YQk"/>
-                                        <exclude reference="IhA-yE-Hvi"/>
-                                        <exclude reference="gls-pQ-v8L"/>
                                         <exclude reference="7ZL-zv-1jr"/>
                                         <exclude reference="H3d-4T-0fD"/>
-                                        <exclude reference="053-AO-fU4"/>
-                                        <exclude reference="hcJ-5d-dJJ"/>
-                                        <exclude reference="KIw-LB-OMy"/>
-                                        <exclude reference="sox-Wc-d1n"/>
+                                        <exclude reference="PfN-yB-qWn"/>
+                                        <exclude reference="ExE-dg-dHt"/>
+                                        <exclude reference="Xe3-Jz-EbE"/>
                                         <exclude reference="4mp-Lj-Auy"/>
                                         <exclude reference="8hb-vz-7GQ"/>
                                         <exclude reference="mV4-hg-CuF"/>
+                                        <exclude reference="fVq-fb-X7f"/>
+                                        <exclude reference="o75-vb-3JO"/>
                                         <exclude reference="47N-YB-iUN"/>
                                         <exclude reference="Sd6-ep-ldp"/>
                                         <exclude reference="TaR-6J-1uR"/>
                                         <exclude reference="lby-tJ-QHS"/>
                                         <exclude reference="vOx-ia-7c4"/>
                                         <exclude reference="pHg-D9-Rvd"/>
-                                        <exclude reference="4JM-7l-2cA"/>
-                                        <exclude reference="bac-lg-2Cc"/>
-                                        <exclude reference="qXB-3X-25Q"/>
-                                        <exclude reference="wI8-i1-6tR"/>
-                                        <exclude reference="Aff-4Z-rOL"/>
+                                        <exclude reference="UWn-vx-5AZ"/>
+                                        <exclude reference="VAi-D1-w3W"/>
+                                        <exclude reference="EQF-cp-Z8p"/>
+                                        <exclude reference="ZhL-SJ-kSE"/>
                                         <exclude reference="9hD-A3-6hG"/>
                                         <exclude reference="AVP-ML-nqL"/>
                                         <exclude reference="KTM-K9-vh1"/>
@@ -3253,8 +3218,13 @@
                                         <exclude reference="ZhU-an-vym"/>
                                         <exclude reference="iLB-1H-Gcc"/>
                                         <exclude reference="xaX-CF-bb2"/>
-                                        <exclude reference="UWn-vx-5AZ"/>
-                                        <exclude reference="VAi-D1-w3W"/>
+                                        <exclude reference="D5J-Pp-Zov"/>
+                                        <exclude reference="GBC-jF-Mr0"/>
+                                        <exclude reference="OBW-r3-Yx5"/>
+                                        <exclude reference="jlB-6M-iVQ"/>
+                                        <exclude reference="Qbz-WL-i07"/>
+                                        <exclude reference="gYG-B5-t76"/>
+                                        <exclude reference="ymQ-Jx-ss6"/>
                                         <exclude reference="5LW-bT-Mjt"/>
                                         <exclude reference="6WF-pk-oC8"/>
                                         <exclude reference="AUb-Zs-Oqg"/>
@@ -3263,16 +3233,46 @@
                                         <exclude reference="g9A-MT-aEs"/>
                                         <exclude reference="qTI-dA-tAq"/>
                                         <exclude reference="uu7-by-flk"/>
-                                        <exclude reference="Qbz-WL-i07"/>
-                                        <exclude reference="gYG-B5-t76"/>
-                                        <exclude reference="ymQ-Jx-ss6"/>
-                                        <exclude reference="ExE-dg-dHt"/>
-                                        <exclude reference="Xe3-Jz-EbE"/>
-                                        <exclude reference="fVq-fb-X7f"/>
-                                        <exclude reference="o75-vb-3JO"/>
-                                        <exclude reference="PfN-yB-qWn"/>
-                                        <exclude reference="0Ol-UK-CHc"/>
+                                        <exclude reference="Jls-8p-6GB"/>
+                                        <exclude reference="RQz-7l-BbB"/>
+                                        <exclude reference="fuS-X0-zjZ"/>
+                                        <exclude reference="Y7k-Xz-hz4"/>
+                                        <exclude reference="cfU-EA-1JN"/>
+                                        <exclude reference="hsC-5m-KKG"/>
+                                        <exclude reference="otq-i5-deO"/>
+                                        <exclude reference="2Nl-36-YQk"/>
+                                        <exclude reference="IhA-yE-Hvi"/>
+                                        <exclude reference="gls-pQ-v8L"/>
+                                        <exclude reference="4JM-7l-2cA"/>
+                                        <exclude reference="bac-lg-2Cc"/>
+                                        <exclude reference="qXB-3X-25Q"/>
+                                        <exclude reference="wI8-i1-6tR"/>
+                                        <exclude reference="3mK-1U-uqO"/>
+                                        <exclude reference="MFI-D4-r3c"/>
+                                        <exclude reference="hp0-Na-W33"/>
+                                        <exclude reference="tjH-JU-o2P"/>
+                                        <exclude reference="Hzd-eD-mgS"/>
+                                        <exclude reference="Kfw-XQ-G5A"/>
+                                        <exclude reference="oSb-7r-zrd"/>
+                                        <exclude reference="053-AO-fU4"/>
+                                        <exclude reference="hcJ-5d-dJJ"/>
+                                        <exclude reference="PP3-mN-yz2"/>
+                                        <exclude reference="fTp-mw-rLF"/>
+                                        <exclude reference="mBd-Xy-mp3"/>
+                                        <exclude reference="szG-o3-J7v"/>
+                                        <exclude reference="hFy-wM-gY2"/>
+                                        <exclude reference="iPl-dR-PZX"/>
+                                        <exclude reference="kTt-rD-lz8"/>
+                                        <exclude reference="z5t-fC-EPr"/>
+                                        <exclude reference="GGg-26-xgo"/>
+                                        <exclude reference="d7T-kA-Wx6"/>
+                                        <exclude reference="hX8-a4-a0w"/>
                                         <exclude reference="qb6-QO-62K"/>
+                                        <exclude reference="QdF-Ju-ofR"/>
+                                        <exclude reference="fJs-9i-VMe"/>
+                                        <exclude reference="KIw-LB-OMy"/>
+                                        <exclude reference="sox-Wc-d1n"/>
+                                        <exclude reference="Aff-4Z-rOL"/>
                                     </mask>
                                 </variation>
                                 <variation key="heightClass=regular-widthClass=compact">
@@ -3310,65 +3310,30 @@
                                     <mask key="constraints">
                                         <include reference="T2e-vZ-d8D"/>
                                         <include reference="etZ-3a-hwL"/>
-                                        <include reference="Y7k-Xz-hz4"/>
-                                        <include reference="cfU-EA-1JN"/>
-                                        <include reference="hsC-5m-KKG"/>
-                                        <include reference="otq-i5-deO"/>
-                                        <include reference="3mK-1U-uqO"/>
-                                        <include reference="MFI-D4-r3c"/>
-                                        <include reference="hp0-Na-W33"/>
-                                        <include reference="tjH-JU-o2P"/>
-                                        <include reference="PP3-mN-yz2"/>
-                                        <include reference="fTp-mw-rLF"/>
-                                        <include reference="mBd-Xy-mp3"/>
-                                        <include reference="szG-o3-J7v"/>
-                                        <include reference="hFy-wM-gY2"/>
-                                        <include reference="iPl-dR-PZX"/>
-                                        <include reference="kTt-rD-lz8"/>
-                                        <include reference="z5t-fC-EPr"/>
-                                        <include reference="QdF-Ju-ofR"/>
-                                        <include reference="fJs-9i-VMe"/>
-                                        <include reference="EQF-cp-Z8p"/>
-                                        <include reference="ZhL-SJ-kSE"/>
+                                        <include reference="0Ol-UK-CHc"/>
                                         <include reference="7P9-nH-5eO"/>
                                         <include reference="YOK-BS-Ur9"/>
                                         <include reference="c5W-vj-Xdd"/>
-                                        <include reference="D5J-Pp-Zov"/>
-                                        <include reference="GBC-jF-Mr0"/>
-                                        <include reference="OBW-r3-Yx5"/>
-                                        <include reference="jlB-6M-iVQ"/>
-                                        <include reference="GGg-26-xgo"/>
-                                        <include reference="d7T-kA-Wx6"/>
-                                        <include reference="hX8-a4-a0w"/>
-                                        <include reference="Hzd-eD-mgS"/>
-                                        <include reference="Kfw-XQ-G5A"/>
-                                        <include reference="oSb-7r-zrd"/>
-                                        <include reference="Jls-8p-6GB"/>
-                                        <include reference="RQz-7l-BbB"/>
-                                        <include reference="fuS-X0-zjZ"/>
-                                        <include reference="2Nl-36-YQk"/>
-                                        <include reference="IhA-yE-Hvi"/>
-                                        <include reference="gls-pQ-v8L"/>
                                         <include reference="7ZL-zv-1jr"/>
                                         <include reference="H3d-4T-0fD"/>
-                                        <include reference="053-AO-fU4"/>
-                                        <include reference="hcJ-5d-dJJ"/>
-                                        <include reference="KIw-LB-OMy"/>
-                                        <include reference="sox-Wc-d1n"/>
+                                        <include reference="PfN-yB-qWn"/>
+                                        <include reference="ExE-dg-dHt"/>
+                                        <include reference="Xe3-Jz-EbE"/>
                                         <include reference="4mp-Lj-Auy"/>
                                         <include reference="8hb-vz-7GQ"/>
                                         <include reference="mV4-hg-CuF"/>
+                                        <include reference="fVq-fb-X7f"/>
+                                        <include reference="o75-vb-3JO"/>
                                         <include reference="47N-YB-iUN"/>
                                         <include reference="Sd6-ep-ldp"/>
                                         <include reference="TaR-6J-1uR"/>
                                         <exclude reference="lby-tJ-QHS"/>
                                         <exclude reference="vOx-ia-7c4"/>
                                         <include reference="pHg-D9-Rvd"/>
-                                        <include reference="4JM-7l-2cA"/>
-                                        <include reference="bac-lg-2Cc"/>
-                                        <include reference="qXB-3X-25Q"/>
-                                        <include reference="wI8-i1-6tR"/>
-                                        <include reference="Aff-4Z-rOL"/>
+                                        <include reference="UWn-vx-5AZ"/>
+                                        <include reference="VAi-D1-w3W"/>
+                                        <include reference="EQF-cp-Z8p"/>
+                                        <include reference="ZhL-SJ-kSE"/>
                                         <include reference="9hD-A3-6hG"/>
                                         <include reference="AVP-ML-nqL"/>
                                         <include reference="KTM-K9-vh1"/>
@@ -3377,8 +3342,13 @@
                                         <include reference="ZhU-an-vym"/>
                                         <include reference="iLB-1H-Gcc"/>
                                         <include reference="xaX-CF-bb2"/>
-                                        <include reference="UWn-vx-5AZ"/>
-                                        <include reference="VAi-D1-w3W"/>
+                                        <include reference="D5J-Pp-Zov"/>
+                                        <include reference="GBC-jF-Mr0"/>
+                                        <include reference="OBW-r3-Yx5"/>
+                                        <include reference="jlB-6M-iVQ"/>
+                                        <include reference="Qbz-WL-i07"/>
+                                        <include reference="gYG-B5-t76"/>
+                                        <include reference="ymQ-Jx-ss6"/>
                                         <include reference="5LW-bT-Mjt"/>
                                         <include reference="6WF-pk-oC8"/>
                                         <include reference="AUb-Zs-Oqg"/>
@@ -3387,16 +3357,46 @@
                                         <include reference="g9A-MT-aEs"/>
                                         <include reference="qTI-dA-tAq"/>
                                         <include reference="uu7-by-flk"/>
-                                        <include reference="Qbz-WL-i07"/>
-                                        <include reference="gYG-B5-t76"/>
-                                        <include reference="ymQ-Jx-ss6"/>
-                                        <include reference="ExE-dg-dHt"/>
-                                        <include reference="Xe3-Jz-EbE"/>
-                                        <include reference="fVq-fb-X7f"/>
-                                        <include reference="o75-vb-3JO"/>
-                                        <include reference="PfN-yB-qWn"/>
-                                        <include reference="0Ol-UK-CHc"/>
+                                        <include reference="Jls-8p-6GB"/>
+                                        <include reference="RQz-7l-BbB"/>
+                                        <include reference="fuS-X0-zjZ"/>
+                                        <include reference="Y7k-Xz-hz4"/>
+                                        <include reference="cfU-EA-1JN"/>
+                                        <include reference="hsC-5m-KKG"/>
+                                        <include reference="otq-i5-deO"/>
+                                        <include reference="2Nl-36-YQk"/>
+                                        <include reference="IhA-yE-Hvi"/>
+                                        <include reference="gls-pQ-v8L"/>
+                                        <include reference="4JM-7l-2cA"/>
+                                        <include reference="bac-lg-2Cc"/>
+                                        <include reference="qXB-3X-25Q"/>
+                                        <include reference="wI8-i1-6tR"/>
+                                        <include reference="3mK-1U-uqO"/>
+                                        <include reference="MFI-D4-r3c"/>
+                                        <include reference="hp0-Na-W33"/>
+                                        <include reference="tjH-JU-o2P"/>
+                                        <include reference="Hzd-eD-mgS"/>
+                                        <include reference="Kfw-XQ-G5A"/>
+                                        <include reference="oSb-7r-zrd"/>
+                                        <include reference="053-AO-fU4"/>
+                                        <include reference="hcJ-5d-dJJ"/>
+                                        <include reference="PP3-mN-yz2"/>
+                                        <include reference="fTp-mw-rLF"/>
+                                        <include reference="mBd-Xy-mp3"/>
+                                        <include reference="szG-o3-J7v"/>
+                                        <include reference="hFy-wM-gY2"/>
+                                        <include reference="iPl-dR-PZX"/>
+                                        <include reference="kTt-rD-lz8"/>
+                                        <include reference="z5t-fC-EPr"/>
+                                        <include reference="GGg-26-xgo"/>
+                                        <include reference="d7T-kA-Wx6"/>
+                                        <include reference="hX8-a4-a0w"/>
                                         <include reference="qb6-QO-62K"/>
+                                        <include reference="QdF-Ju-ofR"/>
+                                        <include reference="fJs-9i-VMe"/>
+                                        <include reference="KIw-LB-OMy"/>
+                                        <include reference="sox-Wc-d1n"/>
+                                        <include reference="Aff-4Z-rOL"/>
                                     </mask>
                                 </variation>
                             </view>
@@ -4139,7 +4139,7 @@
         <!--Web View-->
         <scene sceneID="HWH-Xx-OiR">
             <objects>
-                <viewController storyboardIdentifier="PFWebView" useStoryboardIdentifierAsRestorationIdentifier="YES" id="3gI-Lb-ark" customClass="PFWebView" customModule="PhiFactorDEV" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PFWebView" useStoryboardIdentifierAsRestorationIdentifier="YES" id="3gI-Lb-ark" customClass="PFWebView" customModule="PhiFactorLOC" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="jMv-PJ-GPr"/>
                         <viewControllerLayoutGuide type="bottom" id="a0l-Df-06b"/>
@@ -4366,7 +4366,7 @@
         <!--Video Preview View-->
         <scene sceneID="obZ-EF-U4k">
             <objects>
-                <viewController storyboardIdentifier="VideoPreviewView" useStoryboardIdentifierAsRestorationIdentifier="YES" id="d2L-Qc-3mH" customClass="VideoPreviewView" customModule="PhiFactorDEV" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="VideoPreviewView" useStoryboardIdentifierAsRestorationIdentifier="YES" id="d2L-Qc-3mH" customClass="VideoPreviewView" customModule="PhiFactorLOC" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="VF8-iR-f7t"/>
                         <viewControllerLayoutGuide type="bottom" id="spi-dD-tFu"/>
@@ -4623,7 +4623,7 @@
         <!--Singin View Controller-->
         <scene sceneID="jWC-3h-BG4">
             <objects>
-                <viewController storyboardIdentifier="PFSinginViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="oQ1-v6-TWp" customClass="PFSinginViewController" customModule="PhiFactorDEV" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PFSinginViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="oQ1-v6-TWp" customClass="PFSinginViewController" customModule="PhiFactorLOC" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="6mW-gX-oO8"/>
                         <viewControllerLayoutGuide type="bottom" id="1mu-SQ-rA6"/>
@@ -4917,7 +4917,7 @@
                                             <constraint firstAttribute="width" constant="300" id="qYN-HB-p8d"/>
                                         </constraints>
                                         <prototypes>
-                                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" restorationIdentifier="PFSiginuptablecellTableViewCell" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="cell" rowHeight="45" id="8Gh-4h-PEo" customClass="PFSiginuptablecellTableViewCell" customModule="PhiFactorDEV" customModuleProvider="target">
+                                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" restorationIdentifier="PFSiginuptablecellTableViewCell" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="cell" rowHeight="45" id="8Gh-4h-PEo" customClass="PFSiginuptablecellTableViewCell" customModule="PhiFactorLOC" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="28" width="300" height="45"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="8Gh-4h-PEo" id="LQr-Bh-cV7">
@@ -5419,7 +5419,7 @@
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ICf-hn-Idx">
                                         <rect key="frame" x="-11" y="172" width="222" height="78"/>
                                         <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Send Report" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXJ-1L-BKN">
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Submit Crash Report" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXJ-1L-BKN">
                                                 <rect key="frame" x="62" y="23" width="140" height="35"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                 <fontDescription key="fontDescription" name="Calibri" family="Calibri" pointSize="16"/>
@@ -5625,7 +5625,7 @@
                                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wOr-WY-ggt" customClass="SevenSwitch" customModule="PhiFactorDEV" customModuleProvider="target">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wOr-WY-ggt" customClass="SevenSwitch" customModule="PhiFactorLOC" customModuleProvider="target">
                                                 <rect key="frame" x="161" y="27" width="40" height="20"/>
                                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                                 <constraints>
@@ -5727,7 +5727,7 @@
                                                     </mask>
                                                 </variation>
                                             </imageView>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Faq" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XLS-jP-56Q">
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="FAQ" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XLS-jP-56Q">
                                                 <rect key="frame" x="62" y="20" width="140" height="35"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                 <fontDescription key="fontDescription" name="Calibri" family="Calibri" pointSize="16"/>
@@ -5823,7 +5823,7 @@
                                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4RN-aB-bTH" customClass="SevenSwitch" customModule="PhiFactorDEV" customModuleProvider="target">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4RN-aB-bTH" customClass="SevenSwitch" customModule="PhiFactorLOC" customModuleProvider="target">
                                                 <rect key="frame" x="161" y="27" width="40" height="20"/>
                                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                                 <constraints>
@@ -6494,7 +6494,7 @@
         <!--Uploadstatus View Controller-->
         <scene sceneID="iDL-Gk-ztT">
             <objects>
-                <viewController storyboardIdentifier="PFUploadstatusViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Spq-CX-WlF" customClass="PFUploadstatusViewController" customModule="PhiFactorDEV" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PFUploadstatusViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Spq-CX-WlF" customClass="PFUploadstatusViewController" customModule="PhiFactorLOC" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="OQG-Bd-aCp"/>
                         <viewControllerLayoutGuide type="bottom" id="tZG-xL-w3M"/>
@@ -6624,7 +6624,7 @@
                                         </constraints>
                                         <color key="separatorColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                         <prototypes>
-                                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" restorationIdentifier="PFUploadTableViewCell1" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="upload" rowHeight="62" id="eYI-FA-gZX" customClass="PFUploadTableViewCell" customModule="PhiFactorDEV" customModuleProvider="target">
+                                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" restorationIdentifier="PFUploadTableViewCell1" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="upload" rowHeight="62" id="eYI-FA-gZX" customClass="PFUploadTableViewCell" customModule="PhiFactorLOC" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="28" width="300" height="62"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="eYI-FA-gZX" id="l6B-hQ-SE0">
@@ -6816,7 +6816,7 @@
                                         </constraints>
                                         <color key="separatorColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                         <prototypes>
-                                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" restorationIdentifier="PFUploadTableViewCell" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="upload" rowHeight="62" id="BXt-nF-j5L" customClass="PFUploadTableViewCell" customModule="PhiFactorDEV" customModuleProvider="target">
+                                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" restorationIdentifier="PFUploadTableViewCell" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="upload" rowHeight="62" id="BXt-nF-j5L" customClass="PFUploadTableViewCell" customModule="PhiFactorLOC" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="28" width="308" height="62"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="BXt-nF-j5L" id="Ik3-2W-VJR">

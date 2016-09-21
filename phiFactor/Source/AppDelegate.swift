@@ -11,7 +11,7 @@ import AWSS3
 import Fabric
 import Crashlytics
 
-@UIApplicationMain
+//@UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewControllerDelegate {
 
     var window: UIWindow?
@@ -28,7 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
         UIApplication.sharedApplication().idleTimerDisabled = true
         UIApplication.sharedApplication().statusBarHidden = true
         UIApplication.sharedApplication().applicationIconBadgeNumber = 0
-        logIntoFile()
+      logIntoFile()
         print("AppDelegate didFinishLaunchingWithOptions begin")
         self.loadModelFile()
         if !UIApplication.sharedApplication().isRegisteredForRemoteNotifications() {
@@ -58,9 +58,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
         gaiInstance.trackerWithTrackingId(googleTrackingID)
         gaiInstance.dispatchInterval = 0
         gaiInstance.trackUncaughtExceptions = true  // report uncaught exceptions
-        gaiInstance.logger.logLevel = GAILogLevel.Verbose  // remove before app release
+//        gaiInstance.logger.logLevel = GAILogLevel.Verbose  // remove before app release
         
-        
+        PFGlobalConstants.envirnment(.Production)
         
         print("AppDelegate didFinishLaunchingWithOptions end")
         return true
@@ -135,17 +135,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
                         PFGlobalConstants.authenticateUserForwebLogin(self.remoteNotifyUUID)
                         break
                     case .unAuthorized:
-//                        NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
-//                            let alert = UIAlertView(title: "", message: "Touch ID authentication failed.", delegate: nil, cancelButtonTitle: "Ok")
-//                            alert.show()
-//                        })
                         dispatch_async(dispatch_get_main_queue()) {
-                            let lockScreen = ABPadLockScreenViewController(delegate: self, complexPin: false)
-                            lockScreen.setAllowedAttempts(3)
-                            lockScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
-                            lockScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
-                            UIApplication.sharedApplication().keyWindow?.rootViewController!.presentViewController(lockScreen, animated: true, completion: nil)
-                            
+                            if(PFGlobalConstants.isPasscodeAvailable()) {
+                                let lockScreen = ABPadLockScreenViewController(delegate: self, complexPin: false)
+                                lockScreen.setAllowedAttempts(3)
+                                lockScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
+                                lockScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
+                                isAuthorizationRequesting = true;
+                                UIApplication.sharedApplication().keyWindow?.rootViewController!.presentViewController(lockScreen, animated: true, completion: nil)
+                            }
+                            else
+                            {
+                                UIAlertView(title: "", message: "No registered passcode found.", delegate: nil, cancelButtonTitle: "Ok").show()
+                            }
                         }
                         break
                     case .unKnown:
@@ -236,15 +238,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
     func unlockWasSuccessfulForPadLockScreenViewController(padLockScreenViewController: ABPadLockScreenViewController!) {
         print("Unlock Successful!")
         PFGlobalConstants.authenticateUserForwebLogin(self.remoteNotifyUUID)
+        isAuthorizationRequesting = false;
         UIApplication.sharedApplication().keyWindow?.rootViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
     
     func unlockWasUnsuccessful(falsePin: String!, afterAttemptNumber attemptNumber: Int, padLockScreenViewController: ABPadLockScreenViewController!) {
         print("Failed Attempt \(attemptNumber) with incorrect pin \(falsePin)")
+        if attemptNumber == 3
+        {
+            isAuthorizationRequesting = false;
+            UIApplication.sharedApplication().keyWindow?.rootViewController!.dismissViewControllerAnimated(true, completion: nil)
+        }
     }
     
     func unlockWasCancelledForPadLockScreenViewController(padLockScreenViewController: ABPadLockScreenViewController!) {
         print("Unlock Cancled")
+        isAuthorizationRequesting = false;
         UIApplication.sharedApplication().keyWindow?.rootViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
 }
