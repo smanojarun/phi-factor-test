@@ -382,7 +382,7 @@ import Alamofire
         let defaults = NSUserDefaults.standardUserDefaults()
         defaults.setObject(videoStatus1, forKey: "completedVideoStatus1")
         let urlString = notification.userInfo!["videoUrl"] as! NSURL
-        let url: String = urlString.absoluteString
+        let url: String = urlString.absoluteString!
         print(url)
         completed_video_update_status(videoStatus1, url: url)
         NSNotificationCenter.defaultCenter().removeObserver(self, name: "videoStatus1", object: nil)
@@ -400,7 +400,7 @@ import Alamofire
         let defaults = NSUserDefaults.standardUserDefaults()
         defaults.setObject(videoStatus2, forKey: "completedVideoStatus2")
         let urlString = notification.userInfo!["videoUrl"] as! NSURL
-        let url: String = urlString.absoluteString
+        let url: String = urlString.absoluteString!
         print(url)
         completed_video_update_status(videoStatus2, url: url)
         NSNotificationCenter.defaultCenter().removeObserver(self, name: "videoStatus2", object: nil)
@@ -417,7 +417,7 @@ import Alamofire
         let defaults = NSUserDefaults.standardUserDefaults()
         defaults.setObject(videoStatus3, forKey: "completedVideoStatus3")
         let urlString = notification.userInfo!["videoUrl"] as! NSURL
-        let url: String = urlString.absoluteString
+        let url: String = urlString.absoluteString!
         print(url)
         completed_video_update_status(videoStatus3, url: url)
         NSNotificationCenter.defaultCenter().removeObserver(self, name: "videoStatus3", object: nil)
@@ -434,7 +434,7 @@ import Alamofire
         let defaults = NSUserDefaults.standardUserDefaults()
         defaults.setObject(videoStatus4, forKey:"completedVideoStatus4")
         let urlString = notification.userInfo!["videoUrl"] as! NSURL
-        let url: String = urlString.absoluteString
+        let url: String = urlString.absoluteString!
         print(url)
         completed_video_update_status(videoStatus4,url: url)
         NSNotificationCenter.defaultCenter().removeObserver(self, name:"videoStatus4", object:nil)

@@ -1,10 +1,10 @@
 PODS:
-  - Alamofire (3.4.1)
-  - AWSCore (2.4.6)
-  - AWSS3 (2.4.6):
-    - AWSCore (= 2.4.6)
-  - DeviceKit (0.3.2)
-  - GoogleAnalytics (3.14.0)
+  - Alamofire (3.5.1)
+  - AWSCore (2.4.11)
+  - AWSS3 (2.4.11):
+    - AWSCore (= 2.4.11)
+  - DeviceKit (0.3.4)
+  - GoogleAnalytics (3.17.0)
 
 DEPENDENCIES:
   - Alamofire (~> 3.4)
@@ -13,12 +13,12 @@ DEPENDENCIES:
   - GoogleAnalytics (~> 3.14)
 
 SPEC CHECKSUMS:
-  Alamofire: 01a82e2f6c0f860ade35534c8dd88be61bdef40c
-  AWSCore: 402048153597591f2ec54b0f650b88dfb3a1b6ef
-  AWSS3: 3ded64fc949e6b95e4ad80d8bee3a97199033c4e
-  DeviceKit: 79182140c0aa8daaf4f4b3920e0b079f5fa9db79
-  GoogleAnalytics: 9be1afdb8deeac4bb5f13ca7f7d3b9db2a1f43dc
+  Alamofire: 0dfba1184a543e2aa160f4e39cac4e8aba48d223
+  AWSCore: e66b0f50d68f9897cc9e68471062f0cb5379eec5
+  AWSS3: 2f90735901744687eaeb91621fa62ee921db6510
+  DeviceKit: b414b210c225ae19b77a47e64cb04f187c1c4f9a
+  GoogleAnalytics: f42cc53a87a51fe94334821868d9c8481ff47a7b
 
-PODFILE CHECKSUM: 75fb0cbf6a08556a60d11f084345a635871e0aa7
+PODFILE CHECKSUM: fafbc27b30da4d3ead2d5366eb78ae98c31c08cb
 
-COCOAPODS: 1.0.1
+COCOAPODS: 1.1.1

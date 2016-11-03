@@ -30,7 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
         UIApplication.sharedApplication().idleTimerDisabled = true
         UIApplication.sharedApplication().statusBarHidden = true
         UIApplication.sharedApplication().applicationIconBadgeNumber = 0
-//        logIntoFile()
+        logIntoFile()
         print("AppDelegate didFinishLaunchingWithOptions begin")
         self.loadModelFile()
         if !UIApplication.sharedApplication().isRegisteredForRemoteNotifications() {

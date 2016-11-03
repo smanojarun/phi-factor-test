@@ -357,7 +357,7 @@ extension CMSampleBuffer {
         // Get a CMSampleBuffer's Core Video image buffer for the media data
         let imageBuffer = CMSampleBufferGetImageBuffer(self)
         // Lock the base address of the pixel buffer
-        CVPixelBufferLockBaseAddress(imageBuffer!, 0)
+        CVPixelBufferLockBaseAddress(imageBuffer!, CVPixelBufferLockFlags(rawValue: CVOptionFlags(0)))
         // Get the number of bytes per row for the pixel buffer
         let baseAddress = CVPixelBufferGetBaseAddress(imageBuffer!)
         // Get the number of bytes per row for the pixel buffer
@@ -370,9 +370,9 @@ extension CMSampleBuffer {
         // Create a bitmap graphics context with the sample buffer data
         let context = CGBitmapContextCreate(baseAddress, width, height, 8, bytesPerRow, colorSpace, CGImageAlphaInfo.PremultipliedFirst.rawValue | CGBitmapInfo.ByteOrder32Little.rawValue)
         // Create a Quartz image from the pixel data in the bitmap graphics context
-        let quartzImage = CGBitmapContextCreateImage(context)
+        let quartzImage = CGBitmapContextCreateImage(context!)
         // Unlock the pixel buffer
-        CVPixelBufferUnlockBaseAddress(imageBuffer!, 0)
+        CVPixelBufferUnlockBaseAddress(imageBuffer!, CVPixelBufferLockFlags(rawValue: CVOptionFlags(0)))
         // Create an image object from the Quartz image
         let image = UIImage(CGImage: quartzImage!)
         return image
