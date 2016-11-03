@@ -14,7 +14,7 @@ import CoreMotion
 import Alamofire
 
 /// Recording video by front and rear camera with flash availability. Presenting the preview for each video after the recording complition. Also provide the option to retake the video.
-class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutputRecordingDelegate, UIAccelerometerDelegate,AVCaptureVideoDataOutputSampleBufferDelegate {
+class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutputRecordingDelegate, UIAccelerometerDelegate,AVCaptureVideoDataOutputSampleBufferDelegate, AppInactiveDelegate {
     // Back button alert
     @IBOutlet var backButtonAlertCancel: UIButton!
     @IBOutlet var backButtonAlert: UIButton!
@@ -151,6 +151,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
     var qualityCheck = true
     var resumeVideoCount : Int!
     var isResumeCameraViewEnabled = false
+    var isShowingAlert = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -365,6 +366,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
 
     override func viewWillAppear(animated: Bool) {
         print("CameraScreen viewWillAppear begin")
+        APP_DELEGATE?.inactiveDelegate = self
         self.pfcCameraInstructionlabel.hidden = false
         if qualityCheck {
             self.pfCameraStartButton.enabled = false
@@ -894,44 +896,51 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
     
     @IBAction func pfCameraStartButtonaction(sender: AnyObject? = nil) {
         print("CameraScreen pfCameraStartButtonaction begin")
-        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "pfCameraStartButtonaction", value: nil)
-        if self.videoCount == 1
-        {
-            self.pfcFaceAnimationImageView.animationDuration = 5
-        }
-        else
-        {
-            self.pfcFaceAnimationImageView.animationDuration = 15
-        }
-        self.isRotationErrorOccured = false
-        backButtonCancel()
-        self.pfInfoselectButton.hidden = true
-        self.backButtonView.hidden = true
-        // counter start and unhidden
-        counterview.hidden=false
-        pfcToggleCameraButton.hidden = true
-        pfcCameraArrow.hidden = true
-        pfcDeletePreviousVideoButton.hidden = true
-        if !qualityCheck {
-            self.pfCameraStartButton.hidden=true
-            self.pfCameraStop.hidden = false
+        if self.pfCameraStartButton.userInteractionEnabled {
+            PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "pfCameraStartButtonaction", value: nil)
+            if self.videoCount == 1
+            {
+                self.pfcFaceAnimationImageView.animationDuration = 5
+                self.pfcCameraCountdownLabel.text = "5"
+            }
+            else
+            {
+                self.pfcFaceAnimationImageView.animationDuration = 15
+                self.pfcCameraCountdownLabel.text = "15"
+            }
+            self.isRotationErrorOccured = false
+            backButtonCancel()
+            self.pfInfoselectButton.hidden = true
+            self.backButtonView.hidden = true
+            // counter start and unhidden
+            counterview.hidden=false
+            pfcToggleCameraButton.hidden = true
+            pfcCameraArrow.hidden = true
+            pfcDeletePreviousVideoButton.hidden = true
+            if !qualityCheck {
+                self.pfCameraStartButton.hidden=true
+                self.pfCameraStop.hidden = false
+            }
+            else {
+                self.pfCameraStartButton.hidden=true
+                self.pfCameraStop.hidden = true
+            }
+            
+            // check the accelerometer
+            if(isFaceorEyeDected == false) {
+                pfcEyeAnimationImageView.hidden=true
+                pfcFaceAnimationImageView.hidden=false
+            }
+            else {
+                
+                pfcFaceAnimationImageView.hidden=true
+                pfcEyeAnimationImageView.hidden=false
+            }
+            self.removeCameraDataAndAddMovieoutput()
         }
         else {
-            self.pfCameraStartButton.hidden=true
-            self.pfCameraStop.hidden = true
+            print("Camera toggling is on progress.")
         }
-        
-        // check the accelerometer
-        if(isFaceorEyeDected == false) {
-            pfcEyeAnimationImageView.hidden=true
-            pfcFaceAnimationImageView.hidden=false
-        }
-        else {
-
-            pfcFaceAnimationImageView.hidden=true
-            pfcEyeAnimationImageView.hidden=false
-        }
-        self.removeCameraDataAndAddMovieoutput()
         print("CameraScreen pfCameraStartButtonaction end")
     }
 
@@ -966,7 +975,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
                     let moviePath = NSString .localizedStringWithFormat("phifactor_%@.MOV", dateFormatter)
                     let outputFilePath  =
                     NSURL(fileURLWithPath: NSTemporaryDirectory()).URLByAppendingPathComponent(moviePath as String)
-                    self.movieFileOutput!.startRecordingToOutputFileURL (outputFilePath, recordingDelegate: self)
+                    self.movieFileOutput?.startRecordingToOutputFileURL (outputFilePath, recordingDelegate: self)
                 switch(self.videoCount) {
                 case 1:
                     self.pfcCameraInstructionlabel.text = introVideoInstruction
@@ -997,29 +1006,34 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
      - parameter sender: Stop button from interface
      */
     @IBAction func pfCameraStopaction(sender: AnyObject) {
-        print("CameraScreen pfCameraStopaction begin")
-        PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "pfCameraStopaction", value: nil)
-        self.myTimer.invalidate()
-        pfcFaceAnimationImageView.stopAnimating()
-        pfcEyeAnimationImageView.stopAnimating()
-        pfcFaceAnimationImageView.hidden=true
-        pfcEyeAnimationImageView.hidden = true
-
-        self.movieFileOutput!.stopRecording()
-        self.pfInfoselectButton.hidden = true
-        count=0-1
-        // hideing button
-        pfCameraStartButton.hidden=true
-        pfCameraStop.hidden=true
-        counterview.hidden = true
-        pfcCameraCountdownLabel.text = "15"
-        self.pfCameraFaceDetectedImageView.hidden=true
-        self.pfCameraFaceNotDetectedImageView.hidden=true
-        self.pfcEyeNotDetectedImageView.hidden=true
-        self.pfcEyeDetectedImageView.hidden=true
-        pfcToggleCameraButton.hidden = true
-        pfcCameraArrow.hidden = true
-        print("CameraScreen pfCameraStopaction end")
+        if self.movieFileOutput?.recording == true {
+            print("CameraScreen pfCameraStopaction begin")
+            PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "pfCameraStopaction", value: nil)
+            self.myTimer.invalidate()
+            pfcFaceAnimationImageView.stopAnimating()
+            pfcEyeAnimationImageView.stopAnimating()
+            pfcFaceAnimationImageView.hidden=true
+            pfcEyeAnimationImageView.hidden = true
+            
+            self.movieFileOutput!.stopRecording()
+            self.pfInfoselectButton.hidden = true
+            count=0-1
+            // hideing button
+            pfCameraStartButton.hidden=true
+            pfCameraStop.hidden=true
+            counterview.hidden = true
+            pfcCameraCountdownLabel.text = "15"
+            self.pfCameraFaceDetectedImageView.hidden=true
+            self.pfCameraFaceNotDetectedImageView.hidden=true
+            self.pfcEyeNotDetectedImageView.hidden=true
+            self.pfcEyeDetectedImageView.hidden=true
+            pfcToggleCameraButton.hidden = true
+            pfcCameraArrow.hidden = true
+            print("CameraScreen pfCameraStopaction end")
+        }
+        else {
+            print("MovieFileOutput recording is stopped.")
+        }
     }
 
     /**
@@ -1190,7 +1204,10 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
     @IBAction func pfcp_pcameraselete_action(sender: UIButton) {
         print("CameraScreen pfcp_pcameraselete_action begin")
         PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "toggleCamera", value: nil)
-        self.activityImageView.hidden = false
+        dispatch_async(dispatch_get_main_queue()) { 
+            self.activityImageView.hidden = false
+        }
+        self.pfCameraStartButton.userInteractionEnabled = false
         sender.enabled = false
         self.pfcToggleCameraButton.hidden = true
         self.pfcCameraArrow.hidden = true
@@ -1257,6 +1274,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
                 self.activityImageView.hidden = true
                 self.pfcToggleCameraButton.hidden = false
                 self.pfcCameraArrow.hidden = false
+                self.pfCameraStartButton.userInteractionEnabled = true
             })
             print("CameraScreen pfcp_pcameraselete_action end")
         }
@@ -2612,6 +2630,48 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
     func hideDeletePreviousVideoButtonIfResumeCount(count: Int){
         if isResumeCameraViewEnabled == true && resumeVideoCount != nil && resumeVideoCount == count{
             self.pfcDeletePreviousVideoButton.hidden = true
+        }
+    }
+    func remainingTime(time: String) {
+        if !isShowingAlert {
+            self.uploadLabel.text = time
+            var uploadframe: CGRect!
+            uploadframe=uploadstatus.frame
+            uploadframe.origin.x=self.view.frame.origin.x
+            uploadframe.size.width=self.view.frame.size.width
+            uploadframe.size.height=100
+            uploadframe.origin.y=self.view.frame.origin.y-50
+            self.uploadstatus.frame=uploadframe
+            self.view.addSubview(uploadstatus)
+            self.uploadLabel.text = time
+            var setresize: CGRect!
+            setresize=self.uploadstatus.frame
+            setresize.origin.x=self.uploadstatus.frame.origin.x
+            setresize.origin.y=0
+            setresize.size.width=self.view.frame.size.width
+            setresize.size.height=100
+            isShowingAlert = true
+            
+            UIView.animateWithDuration(0.30, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+                self.uploadstatus.frame=setresize
+                }, completion: nil)
+        }
+        else {
+            self.uploadLabel.text = time
+        }
+        
+    }
+    func hideInactiveAlert() {
+        var setresizenormal: CGRect!
+        setresizenormal=self.uploadstatus.frame
+        setresizenormal.origin.x=self.uploadstatus.frame.origin.x
+        setresizenormal.origin.y=0-self.uploadstatus.frame.size.height
+        setresizenormal.size.width=self.view.frame.size.width
+        setresizenormal.size.height=100
+        UIView.animateWithDuration(0.30, delay: 3.0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+            self.uploadstatus.frame=setresizenormal
+        }) { (completed) in
+            self.isShowingAlert = false
         }
     }
 }

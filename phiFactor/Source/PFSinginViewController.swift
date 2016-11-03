@@ -12,7 +12,7 @@ import AVFoundation
 import MessageUI
 
 /// Getting the mandatory and non mandatory details of the patient.
-class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UITableViewDataSource, UIPopoverPresentationControllerDelegate, UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource, ABPadLockScreenSetupViewControllerDelegate, ABPadLockScreenViewControllerDelegate, MFMailComposeViewControllerDelegate {
+class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UITableViewDataSource, UIPopoverPresentationControllerDelegate, UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource, ABPadLockScreenSetupViewControllerDelegate, ABPadLockScreenViewControllerDelegate, MFMailComposeViewControllerDelegate, AppInactiveDelegate {
 
     @IBOutlet var tapGuest: UITapGestureRecognizer!
     @IBOutlet weak var PFSHbackrongimage: UIImageView!
@@ -69,6 +69,8 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
     var warningdetaillist: [String] = ["Enter clinical trail", "Enter patient name", "Enter patient id", "Enter age", "Enter gender", "Enter ethnicity", "Enter language", "Enter Encounter ID"]
     var patientDetailListImage: [String] = ["PFSd_Clinical_Trail", "PFSd_patient_name", "PFSd_patient_id", "PFSd_Age", "PFSd_Gender", "PFSd_Eteniticity", "PFSd_language", "PFSd_language"]
     var isShowingAlert = false
+    var isShowingInactiveAlert = false
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -673,6 +675,7 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         print("PatientScreen viewWillAppear begin")
+        APP_DELEGATE?.inactiveDelegate = self
         unlocked = false
         // Start the playback
         self.popView.hidden = true
@@ -857,7 +860,15 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
                     
                 }
             }
-            
+            if let deviceMemory = PFGlobalConstants.deviceRemainingFreeSpaceInBytes() {
+                let mb = (deviceMemory/(1024*1024))
+                if  mb < 500 {
+                    valid = false
+                    print("Not enough device storage to begin your session.")
+                    self.alertMessageLabel.text = "Not enough device storage to begin your session."
+                    self.showUploadStatusAlert()
+                }
+            }
             
             if(valid==true) {
                 
@@ -1210,13 +1221,14 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
         PFGlobalConstants.removeResumeVideoCount()
         let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PhiFactorIntro") as! PhiFactorIntro
+        nextViewController.isFromLogout = true
         nextViewController.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
         let nav = UINavigationController(rootViewController: nextViewController)
         nav.navigationBarHidden = true
         let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
 
         UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
-            appDelegaet!.window?.backgroundColor = UIColor.whiteColor()
+            appDelegaet!.window?.backgroundColor = UIColor.blackColor()
             appDelegaet!.window?.rootViewController = nav
             
             }) { (isCompleted) in
@@ -1259,23 +1271,27 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
             setresize.origin.y=0
             setresize.size.width=self.view.frame.size.width
             setresize.size.height=100
-            isShowingAlert = true
+            self.isShowingAlert = true
             self.pickerbuttonaction.hidden = true
             self.closePicker.hidden = true
             UIView.animateWithDuration(0.30, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
                 self.uploadStatusView.frame=setresize
-                }, completion: nil)
-            var setresizenormal: CGRect!
-            setresizenormal=self.uploadStatusView.frame
-            setresizenormal.origin.x=self.uploadStatusView.frame.origin.x
-            setresizenormal.origin.y=0-self.uploadStatusView.frame.size.height
-            setresizenormal.size.width=self.view.frame.size.width
-            setresizenormal.size.height=100
-            UIView.animateWithDuration(0.30, delay: 3.0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
-                self.uploadStatusView.frame=setresizenormal
-            }) { (completed) in
-                self.isShowingAlert = false
-            }
+
+                }, completion: { (complition) in
+                    var setresizenormal: CGRect!
+                    setresizenormal=self.uploadStatusView.frame
+                    setresizenormal.origin.x=self.uploadStatusView.frame.origin.x
+                    setresizenormal.origin.y=0-self.uploadStatusView.frame.size.height
+                    setresizenormal.size.width=self.view.frame.size.width
+                    setresizenormal.size.height=100
+                    UIView.animateWithDuration(0.30, delay: 3.0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+                        self.uploadStatusView.frame=setresizenormal
+                    }) { (completed) in
+                        self.isShowingAlert = false
+                    }
+            })
+           
+            
         }
         
     }
@@ -1288,7 +1304,7 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
         PFGlobalConstants.sendEventWithCatogory("background", action: "functionCall", label: "refreshToken", value: nil)
         let defaults = NSUserDefaults.standardUserDefaults()
         let refresh_token = defaults.stringForKey("refresh_token")! as String
-        requestString = "\(baseURL)/login"
+        requestString = "\(baseURL)/login_dup"
         print(requestString)
         let clientID = "102216378240-rf6fjt3konig2fr3p1376gq4jrooqcdm"
         let clientSecret = "bYQU1LQAjaSQ1BH9j3zr7woO"
@@ -1522,7 +1538,7 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
                     if(httpStatusCode==401) {
                         print("Invalid access token")
                         let refresh_token = defaults.stringForKey("refresh_token")! as String
-                        requestString = "\(baseURL)/login"
+                        requestString = "\(baseURL)/login_dup"
                         print(requestString)
                         let client_id = "102216378240-rf6fjt3konig2fr3p1376gq4jrooqcdm"
                         let client_secret = "bYQU1LQAjaSQ1BH9j3zr7woO"
@@ -1604,5 +1620,49 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
         }
     }
     
+    func remainingTime(time: String) {
+        if !self.isShowingInactiveAlert && !self.isShowingAlert {
+            var uploadframe: CGRect!
+            uploadframe=uploadStatusView.frame
+            uploadframe.origin.x=self.view.frame.origin.x
+            uploadframe.size.width=self.view.frame.size.width
+            uploadframe.size.height=100
+            uploadframe.origin.y=self.view.frame.origin.y-50
+            self.uploadStatusView.frame=uploadframe
+            self.view.addSubview(uploadStatusView)
+            self.alertMessageLabel.text = time
+            var setresize: CGRect!
+            setresize=self.uploadStatusView.frame
+            setresize.origin.x=self.uploadStatusView.frame.origin.x
+            setresize.origin.y=0
+            setresize.size.width=self.view.frame.size.width
+            setresize.size.height=100
+            isShowingInactiveAlert = true
+            self.pickerbuttonaction.hidden = true
+            self.closePicker.hidden = true
+            UIView.animateWithDuration(0.30, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+                self.uploadStatusView.frame=setresize
+                }, completion: nil)
+        }
+        else {
+            self.alertMessageLabel.text = time
+        }
+    }
+    func hideInactiveAlert() {
+        if isShowingInactiveAlert {
+            var setresizenormal: CGRect!
+            setresizenormal=self.uploadStatusView.frame
+            setresizenormal.origin.x=self.uploadStatusView.frame.origin.x
+            setresizenormal.origin.y=0-self.uploadStatusView.frame.size.height
+            setresizenormal.size.width=self.view.frame.size.width
+            setresizenormal.size.height=100
+            UIView.animateWithDuration(0.30, delay: 3.0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+                self.uploadStatusView.frame=setresizenormal
+            }) { (completed) in
+                self.isShowingInactiveAlert = false
+            }
+        }
+        
+    }
    
 }

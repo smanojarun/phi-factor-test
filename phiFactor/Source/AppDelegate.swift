@@ -16,6 +16,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
 
     var window: UIWindow?
     let gaiInstance = GAI.sharedInstance()
+    var inactiveDelegate : AppInactiveDelegate?
+
     var remoteNotifyUUID = ""
     func application(application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: () -> Void) {
         /*
@@ -28,7 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
         UIApplication.sharedApplication().idleTimerDisabled = true
         UIApplication.sharedApplication().statusBarHidden = true
         UIApplication.sharedApplication().applicationIconBadgeNumber = 0
-      logIntoFile()
+//        logIntoFile()
         print("AppDelegate didFinishLaunchingWithOptions begin")
         self.loadModelFile()
         if !UIApplication.sharedApplication().isRegisteredForRemoteNotifications() {
@@ -60,7 +62,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
         gaiInstance.trackUncaughtExceptions = true  // report uncaught exceptions
 //        gaiInstance.logger.logLevel = GAILogLevel.Verbose  // remove before app release
         
-        PFGlobalConstants.envirnment(.Production)
+        PFGlobalConstants.envirnment(.Development)
         
         print("AppDelegate didFinishLaunchingWithOptions end")
         return true

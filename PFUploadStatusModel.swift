@@ -10,7 +10,14 @@ import UIKit
 
 var uploadSuccessfullyArr = NSMutableArray()
 var mediaStatusArr = NSMutableArray()
+var completedArr = NSMutableArray()
 var inprogressArr = NSMutableArray()
+var notAvailableArr = NSMutableArray()
+var introMediaDate:String!
+var facialMediaDate:String!
+var headMediaDate:String!
+var eyeDetectMediaDate:String!
+
 
 /// Manipulating the response from and to the server of Upload status details.
 class PFUploadStatusModel: NSObject {
@@ -20,12 +27,14 @@ class PFUploadStatusModel: NSObject {
     var videoId: String!
     var iteration: String!
     var dateFormatter: String!
-    var instanceOfCustomObject: AWSBackgroundupload = AWSBackgroundupload()
+        var instanceOfCustomObject: AWSBackgroundupload = AWSBackgroundupload()
 
     /**
      Itreating the response From getPatientVideoStatus and loading into the table
      */
     class func getpatientVideoStatusResponse(patientDetailsArray: NSArray)  {
+        uploadSuccessfullyArr.removeAllObjects()
+        completedArr.removeAllObjects()
         for i in (0..<patientDetailsArray.count).reverse(){
             
             let patientIndex =  patientDetailsArray.objectAtIndex(i)
@@ -36,63 +45,135 @@ class PFUploadStatusModel: NSObject {
             var facialMediaStatus = "N/A"
             var headMediaStatus = "N/A"
             var eyeDetectMediaStatus = "N/A"
+                        for item in patientIndexValue {
+                print(item)
+                
+                
+            }
+            
             switch patientIndexValue.count {
             case 1:
                 introMediaStatus = (patientIndexValue.objectAtIndex(0).objectForKey("media_status") as? String)!
+                if let introDate = patientIndexValue.objectAtIndex(0).objectForKey("inserted_date") as? String {
+                    introMediaDate = introDate
+                }
                 break
             case 2:
                 introMediaStatus = (patientIndexValue.objectAtIndex(0).objectForKey("media_status") as? String)!
                 facialMediaStatus = (patientIndexValue.objectAtIndex(1).objectForKey("media_status") as? String)!
+                if let introDate = patientIndexValue.objectAtIndex(0).objectForKey("inserted_date") as? String {
+                    introMediaDate = introDate
+                }
+                if let facialDate = patientIndexValue.objectAtIndex(1).objectForKey("inserted_date") as? String {
+                    facialMediaDate = facialDate
+                }
                 break
             case 3:
                 introMediaStatus = (patientIndexValue.objectAtIndex(0).objectForKey("media_status") as? String)!
                 facialMediaStatus = (patientIndexValue.objectAtIndex(1).objectForKey("media_status") as? String)!
                 headMediaStatus = (patientIndexValue.objectAtIndex(2).objectForKey("media_status") as? String)!
+                if let introDate = patientIndexValue.objectAtIndex(0).objectForKey("inserted_date") as? String {
+                    introMediaDate = introDate
+                }
+                if let facialDate = patientIndexValue.objectAtIndex(1).objectForKey("inserted_date") as? String {
+                    facialMediaDate = facialDate
+                }
+                if let headDate = patientIndexValue.objectAtIndex(2).objectForKey("inserted_date") as? String {
+                    headMediaDate = headDate
+                }
                 break
             case 4:
                 introMediaStatus = (patientIndexValue.objectAtIndex(0).objectForKey("media_status") as? String)!
                 facialMediaStatus = (patientIndexValue.objectAtIndex(1).objectForKey("media_status") as? String)!
                 headMediaStatus = (patientIndexValue.objectAtIndex(2).objectForKey("media_status") as? String)!
                 eyeDetectMediaStatus = (patientIndexValue.objectAtIndex(3).objectForKey("media_status") as? String)!
+                if let introDate = patientIndexValue.objectAtIndex(0).objectForKey("inserted_date") as? String {
+                    introMediaDate = introDate
+                }
+                if let facialDate = patientIndexValue.objectAtIndex(1).objectForKey("inserted_date") as? String {
+                    facialMediaDate = facialDate
+                }
+                if let headDate = patientIndexValue.objectAtIndex(2).objectForKey("inserted_date") as? String {
+                    headMediaDate = headDate
+                }
+                if let eyeDate = patientIndexValue.objectAtIndex(3).objectForKey("inserted_date") as? String {
+                    eyeDetectMediaDate = eyeDate
+                }
                 break
             default:
                 break
             }
             
-
+            
             if(introMediaStatus=="completed") {
-                let patientUploadIntro = "PF\(patient_idValue)-Introduction Video"
+                let patientUploadIntro = "PF\(patient_idValue)\("|")\(introMediaDate)\("|")\(introMediaStatus)|Introduction Video"
                 uploadSuccessfullyArr.addObject(patientUploadIntro)
+                completedArr.addObject(patientUploadIntro)
             }
-            else {
-                let patientUploadIntro = "PF\(patient_idValue)-Introduction Video"
+            if(introMediaStatus=="inprogress")
+ {
+                let patientUploadIntro = "PF\(patient_idValue)\("|")\(introMediaDate)\("|")\(introMediaStatus)|Introduction Video"
+                uploadSuccessfullyArr.addObject(patientUploadIntro)
                 inprogressArr.addObject(patientUploadIntro)
             }
-            if(facialMediaStatus=="completed") {
-                let patientUploadFacial = "PF\(patient_idValue)-Facial Feature Analysis Video"
-                uploadSuccessfullyArr.addObject(patientUploadFacial)
+            if(introMediaStatus=="N/A") {
+                let patientUploadIntro = "PF\(patient_idValue)\("|")\(introMediaDate)\("|")\(introMediaStatus)|Introduction Video"
+                uploadSuccessfullyArr.addObject(patientUploadIntro)
+                notAvailableArr.addObject(patientUploadIntro)
             }
-            else {
-                let patientUploadFacial = "PF\(patient_idValue)-Facial Feature Analysis Video"
+
+            if(facialMediaStatus=="completed") {
+                let patientUploadFacial = "PF\(patient_idValue)\("|")\(facialMediaDate)\("|")\(facialMediaStatus)|Facial Feature"
+
+                //let patientUploadFacial = "PF\(patient_idValue)-Facial Feature Analysis Video"
+                uploadSuccessfullyArr.addObject(patientUploadFacial)
+                completedArr.addObject(patientUploadFacial)
+            }
+            if(facialMediaStatus=="inprogress")
+            {
+                let patientUploadFacial = "PF\(patient_idValue)\("|")\(facialMediaDate)\("|")\(facialMediaStatus)|Facial Feature"
+                uploadSuccessfullyArr.addObject(patientUploadFacial)
                 inprogressArr.addObject(patientUploadFacial)
             }
+            if(facialMediaStatus=="N/A")
+            {
+                let patientUploadFacial = "PF\(patient_idValue)\("|")\(facialMediaDate)\("|")\(facialMediaStatus)|Facial Feature"
+                uploadSuccessfullyArr.addObject(patientUploadFacial)
+                notAvailableArr.addObject(patientUploadFacial)
+            }
+
             
             if(headMediaStatus=="completed") {
-                let patientUploadHeadMedia = "PF\(patient_idValue)-Head Feature Analysis Video"
+                let patientUploadHeadMedia = "PF\(patient_idValue)\("|")\(headMediaDate)\("|")\(headMediaStatus)|Head Feature"
+
+                //let patientUploadHeadMedia = "PF\(patient_idValue)-Head Feature Analysis Video"
                 uploadSuccessfullyArr.addObject(patientUploadHeadMedia)
+                completedArr.addObject(patientUploadHeadMedia)
             }
-            else {
-                let patientUploadHeadMedia = "PF\(patient_idValue)-Head Feature Analysis Video"
-                inprogressArr.addObject(patientUploadHeadMedia)
+            
+            if(headMediaStatus=="N/A") {
+                let patientUploadHeadMedia = "PF\(patient_idValue)\("|")\(headMediaDate)\("|")\(headMediaStatus)|Head Feature"
+                uploadSuccessfullyArr.addObject(patientUploadHeadMedia)
+                notAvailableArr.addObject(patientUploadHeadMedia)
             }
-            if(eyeDetectMediaStatus=="completed") {
-                let patientUploadEyeDetectMediaStatus = "PF\(patient_idValue)-Eye Feature Analysis Video"
+if(eyeDetectMediaStatus=="completed") {
+                let patientUploadEyeDetectMediaStatus = "PF\(patient_idValue)\("|")\(eyeDetectMediaDate)\("|")\(eyeDetectMediaStatus)|Eye Feature"
+
+//                let patientUploadEyeDetectMediaStatus = "PF\(patient_idValue)-Eye Feature Analysis Video"
                 uploadSuccessfullyArr.addObject(patientUploadEyeDetectMediaStatus)
+                completedArr.addObject(patientUploadEyeDetectMediaStatus)
             }
-            else {
-                let patientUploadEyeDetectMediaStatus = "PF\(patient_idValue)-Eye Feature Analysis Video"
+            if(eyeDetectMediaStatus=="inprogress") {
+                let patientUploadEyeDetectMediaStatus = "PF\(patient_idValue)\("|")\(eyeDetectMediaDate)\("|")\(eyeDetectMediaStatus)|Eye Feature"
+                uploadSuccessfullyArr.addObject(patientUploadEyeDetectMediaStatus)
                 inprogressArr.addObject(patientUploadEyeDetectMediaStatus)
             }
+            if(eyeDetectMediaStatus=="N/A") {
+                let patientUploadEyeDetectMediaStatus = "PF\(patient_idValue)\("|")\(eyeDetectMediaDate)\("|")\(eyeDetectMediaStatus)|Eye Feature"
+                uploadSuccessfullyArr.addObject(patientUploadEyeDetectMediaStatus)
+                notAvailableArr.addObject(patientUploadEyeDetectMediaStatus)
+            }
+
         }
     }
 

@@ -89,7 +89,8 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
     var access_token: String!
     var token_type: String!
     var blurEffectView = UIView()
-
+    var isFromLogout = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         print("IntroScreen viewDidLoad begin")
@@ -104,7 +105,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
 //        let versionInt : Int = (NSBundle.mainBundle().infoDictionary?["CFBundleShortVersionString"] as? Int)!
         cameraModel = PFCameraScreenModel()
         loginModel=PFLogingModel()
-//      default hidden
+        //      default hidden
         getStarted.hidden=true
         self.getStarted.enabled=true
         self.username.delegate=self
@@ -224,11 +225,14 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
             print("logout is no")
         }
 //        let defaults = NSUserDefaults.standardUserDefaults()
-        user = defaults.objectForKey(PF_USERNAME) as? String
-        pass = defaults.objectForKey(PF_PASSWORD) as? String
-        if user != nil && pass != nil
-        {
-            self.registerDeviceService(false)
+//        user = defaults.objectForKey(PF_USERNAME) as? String
+//        pass = defaults.objectForKey(PF_PASSWORD) as? String
+//        if user != nil && pass != nil
+//        {
+//            self.registerDeviceService(false)
+//        }
+        if isFromLogout {
+            self.getStarted.hidden = true
         }
         print("IntroScreen viewDidLoad end")
     }
@@ -408,7 +412,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
             self.username.resignFirstResponder()
             self.password.resignFirstResponder()
         }
-        if((device != .iPhone6sPlus) && (device != .iPhoneSE) && (device != .iPhone6s)) {
+        if(!PFGlobalConstants().isDeviceCompatibile()) {
 
             UIAlertView(title: "", message: "The device doesn't meet the minimum requirements to run the application.", delegate: nil, cancelButtonTitle: "OK").show()
             print("DeviceNotMeetMinReq")
@@ -416,12 +420,12 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         }
         else {
 
-            if(self.username.text==""&&(self.password.text=="")) {
+            if(self.username.text=="") {
                 self.username.attributedPlaceholder = NSAttributedString(string: "Enter username",
                                                                          attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
-                self.password.attributedPlaceholder = NSAttributedString(string: "Enter password",
-                                                                         attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
-                self.password.shake(4, withDelta: 5)
+//                self.password.attributedPlaceholder = NSAttributedString(string: "Enter password",
+//                                                                         attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
+//                self.password.shake(4, withDelta: 5)
                 self.username.shake(4, withDelta: 5)
 
             }
@@ -431,12 +435,12 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                 self.username.shake(4, withDelta: 5)
 
             }
-            else if(self.password.text=="") {
-                self.password.attributedPlaceholder = NSAttributedString(string: "Enter password",
-                                                                         attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
-                self.password.shake(4, withDelta: 5)
-
-            }
+//            else if(self.password.text=="") {
+//                self.password.attributedPlaceholder = NSAttributedString(string: "Enter password",
+//                                                                         attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
+//                self.password.shake(4, withDelta: 5)
+//
+//            }
              else {
                 user=username.text!
                 pass=password.text!
@@ -1039,7 +1043,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         print("IntroScreen userLoginService begin")
         PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "UserLoginService", value: nil)
         self.progessbarshow()
-        requestString = "\(baseURL)/login"
+        requestString = "\(baseURL)/login_dup"
         print(requestString)
         url1 = NSURL(string: requestString as String)!
         
@@ -1084,23 +1088,32 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                         defaults.setObject(refresh_token, forKey: "refresh_token")
                         defaults.setObject(user, forKey: PF_USERNAME)
                         defaults.setObject(pass, forKey: PF_PASSWORD)
-                        let patientIDOnDB = defaults.integerForKey(PF_PatientIDOnDB)
-                        if  patientIDOnDB != 0{
-                            self.getPatientDetails(patientIDOnDB)
+//                        let patientIDOnDB = defaults.integerForKey(PF_PatientIDOnDB)
+//                        if  patientIDOnDB != 0{
+//                            self.getPatientDetails(patientIDOnDB)
+//                        }
+//                        else {
+//                            let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+//                            let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
+//                            let nav = UINavigationController(rootViewController: nextViewController)
+//                            nav.navigationBarHidden = true
+//                            let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
+//                            UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+//                                appDelegaet!.window?.rootViewController = nav
+//                            }) { (isCompleted) in
+//                                self.view = nil
+//                            }
+//                        }
+                        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                        let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
+                        let nav = UINavigationController(rootViewController: nextViewController)
+                        nav.navigationBarHidden = true
+                        let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
+                        UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+                            appDelegaet!.window?.rootViewController = nav
+                        }) { (isCompleted) in
+                            self.view = nil
                         }
-                        else {
-                            let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-                            let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
-                            let nav = UINavigationController(rootViewController: nextViewController)
-                            nav.navigationBarHidden = true
-                            let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
-                            UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
-                                appDelegaet!.window?.rootViewController = nav
-                            }) { (isCompleted) in
-                                self.view = nil
-                            }
-                        }
-                        
                         
                     }
                     else if(httpStatusCode==400) {
@@ -1279,9 +1292,50 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                     {
                         if isFromSignInButton
                         {
-                            self.userLoginService()
-                            self.warning.text = ""
-                            self.warning.textColor = UIColor.lightGrayColor()
+                            PFGlobalConstants.authenticateUserByTouchID({ (status) in
+                                switch status{
+                                case .authorized:
+                                    let response = responseObject as! NSDictionary
+                                    let result = response.objectForKey("result")! as! String
+                                    let message = response.objectForKey("message")! as! String
+                                    if result == "Success"
+                                    {
+                                        self.userLoginService()
+                                        self.warning.text = ""
+                                        self.warning.textColor = UIColor.lightGrayColor()
+                                    }
+                                    else
+                                    {
+                                        self.warning.text = message
+                                        self.warning.textColor = UIColor.redColor()
+                                    }
+                                    break
+                                case .unAuthorized:
+                                    self.warning.text = "Touch ID authentication failed."
+                                    self.warning.textColor = UIColor.redColor()
+                                    dispatch_async(dispatch_get_main_queue(), {
+                                        if(PFGlobalConstants.isPasscodeAvailable()) {
+                                            let lockScreen = ABPadLockScreenViewController(delegate: self, complexPin: false)
+                                            lockScreen.setAllowedAttempts(3)
+                                            lockScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
+                                            lockScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
+                                            isAuthorizationRequesting = true;
+                                            self.presentViewController(lockScreen, animated: true, completion: nil)
+                                        }
+                                        else
+                                        {
+                                            UIAlertView(title: "", message: "No registered passcode found.", delegate: nil, cancelButtonTitle: "Ok").show()
+                                        }
+                                    })
+                                    break
+                                case .unKnown:
+                                    self.warning.text = "Check touch id configured and enabled on your device to begin."
+                                    self.warning.textColor = UIColor.redColor()
+                                    break
+                                case .canceled:
+                                    break
+                                }
+                            })
                         }
                     }
                 }
@@ -1448,7 +1502,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         let defaults = NSUserDefaults.standardUserDefaults()
         let patientID = defaults.integerForKey(PF_PatientIDOnDB)
         let refresh_token = defaults.stringForKey("refresh_token")! as String
-        requestString = "\(baseURL)/login"
+        requestString = "\(baseURL)/login_dup"
         print(requestString)
         let clientID = "102216378240-rf6fjt3konig2fr3p1376gq4jrooqcdm"
         let clientSecret = "bYQU1LQAjaSQ1BH9j3zr7woO"
@@ -1521,6 +1575,4 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         isAuthorizationRequesting = false;
         dismissViewControllerAnimated(true, completion: nil)
     }
-    
-    
 }

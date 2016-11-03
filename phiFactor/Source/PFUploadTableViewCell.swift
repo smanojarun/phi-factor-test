@@ -13,7 +13,10 @@ class PFUploadTableViewCell: UITableViewCell {
     @IBOutlet var uploadButton: UIButton!
     @IBOutlet var uploadStatus: UILabel!
     @IBOutlet var patientIdLabel: UILabel!
-    @IBOutlet var videoStatusLabel: UILabel!
+    @IBOutlet var videoName: UILabel!
+    @IBOutlet weak var statusLabel: UILabel!
+    @IBOutlet weak var dateLabel: UILabel!
+    @IBOutlet weak var statusIcon: UIImageView!
 
     override func awakeFromNib() {
         super.awakeFromNib()

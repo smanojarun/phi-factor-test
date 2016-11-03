@@ -174,7 +174,7 @@ class PFCameraScreenModel: NSObject {
                     if(httpStatusCode==401) {
                         print("Invalid access token")
                         let refresh_token = defaults.stringForKey("refresh_token")! as String
-                        requestString = "\(baseURL)/login"
+                        requestString = "\(baseURL)/login_dup"
                         print(requestString)
                         let client_id = "102216378240-rf6fjt3konig2fr3p1376gq4jrooqcdm"
                         let client_secret = "bYQU1LQAjaSQ1BH9j3zr7woO"

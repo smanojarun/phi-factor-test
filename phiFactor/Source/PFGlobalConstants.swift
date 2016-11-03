@@ -46,6 +46,8 @@ let PF_PASSWORD = "pfPassword"
 let PF_QUALITYCHECK = "isQualityCheckOn"
 let PF_PatientIDOnDB = "pfPatientIDOnDB"
 let PF_ResumeVideoCount = "pfResumeVideoCount"
+let PF_MinimumTimeLimit = 60.0
+let PF_MaximumTimeLimit = 300.0
 var isAuthorizationRequesting = false;
 
 enum authenticateStatus {
@@ -69,7 +71,7 @@ class PFGlobalConstants: NSObject {
         if (device == .iPhone6sPlus)||(device == .iPhoneSE) || (device == .iPhone6s) {
             return true
         } else {
-            return false
+            return true
         }
     }
 
@@ -270,7 +272,7 @@ class PFGlobalConstants: NSObject {
         
         dispatch_async(dispatch_get_main_queue()) { 
             UIView.transitionWithView((APP_DELEGATE?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
-                APP_DELEGATE!.window?.backgroundColor = UIColor.whiteColor()
+                APP_DELEGATE!.window?.backgroundColor = UIColor.blackColor()
                 APP_DELEGATE!.window?.rootViewController = nav
                 
             }) { (isCompleted) in
@@ -310,6 +312,19 @@ class PFGlobalConstants: NSObject {
     class func getS3BucketName() -> String {
         
         return S3BucketName
+    }
+    class func deviceRemainingFreeSpaceInBytes() -> Int64? {
+        let documentDirectoryPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
+        if let systemAttributes = try? NSFileManager.defaultManager().attributesOfFileSystemForPath(documentDirectoryPath.last!) {
+            if let freeSize = systemAttributes[NSFileSystemFreeSize] as? NSNumber {
+//              let strValue = NSByteCountFormatter.stringFromByteCount(freeSize.longLongValue, countStyle: NSByteCountFormatterCountStyle.File)
+//                let bsfj = NSNumber.aws_numberFromString(strValue)
+//                let dfbnjk = Int(strValue)
+                return freeSize.longLongValue
+            }
+        }
+        // something failed
+        return nil
     }
 
 }

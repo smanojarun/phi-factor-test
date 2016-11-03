@@ -9,16 +9,28 @@
 import UIKit
 import Foundation
 import Alamofire
-
 /// Showing the details about uploaded video as list.
-@objc class PFUploadstatusViewController: GAITrackedViewController, UITableViewDelegate, UITableViewDataSource {
+@objc class PFUploadstatusViewController: GAITrackedViewController, UITableViewDelegate, UITableViewDataSource,AppInactiveDelegate {
 
+    @IBOutlet weak var calendarView: UIView!
+    
+    @IBOutlet var statusButton: UIButton!
+   
+    @IBOutlet weak var statusView: UIView!
+    @IBOutlet var searchDateAlert: UIView!
+    @IBOutlet  var startDateCalendar:FSCalendar!
+    @IBOutlet var endDatecalendar: FSCalendar!
+    @IBOutlet var datePicker: UIButton!
+    @IBOutlet weak var completedButton: UIButton!
     @IBOutlet var allVideoUpload: UIButton!
     @IBOutlet weak var uploadtable: UITableView!
+    @IBOutlet weak var inprogressButton: UIButton!
     @IBOutlet var completedTableView: UITableView!
+    @IBOutlet weak var backButton: UIButton!
     @IBOutlet var customSectionHeaderInprogress: UIView!
     @IBOutlet var customSectionHeaderComplete: UIView!
 
+    @IBOutlet weak var calendarSearchButton: UIButton!
     var patientId : NSMutableArray!
     var global: PFCameraScreenModel?
     var defults = NSUserDefaults.standardUserDefaults()
@@ -26,20 +38,32 @@ import Alamofire
     var patient = NSArray()
     var Status = NSMutableArray()
     var  progressview: UIView!
-
+    var  startDate:String!
+    var endDate:String!
+    var date=NSDate()
+    var displayTableContents: Int!
+    var isShowingAlert = false
     @IBOutlet var nodataLabelInprogeress: UILabel!
     @IBOutlet var noDataLabel: UILabel!
 
+    @IBOutlet var alertMessageLabel: UILabel!
     override func viewDidLoad() {
+        backButton.hidden = true
+
+        displayTableContents = 0
+        self.statusView.alpha = 0
+        calendarView.hidden = true
         print("UploadStatus viewDidLoad begin")
         self.screenName = PFUploadstatusViewControllerScreenName
         super.viewDidLoad()
         nodataLabelInprogeress.hidden=true
-        noDataLabel.hidden=true
+        //noDataLabel.hidden=true
         Status = ["InProgress", "Completed"]
         global = PFCameraScreenModel()
         uploadtable.hidden = true
-        completedTableView.hidden = true
+        
+
+//        completedTableView.hidden = true
         getPatientVideoStatus()
 
         if((defults.objectForKey("patient") as? NSMutableArray) != nil) {
@@ -49,7 +73,171 @@ import Alamofire
         print("UploadStatus viewDidLoad end")
         // Do any additional setup after loading the view.
     }
+    override func viewWillAppear(animated: Bool) {
+        APP_DELEGATE?.inactiveDelegate = self
+    }
+@IBAction func datePickerAction(sender:AnyObject){
+    
+    calendarView.hidden = false
+    self.statusView.alpha = 0
 
+    
+    }
+    
+    @IBAction func statusButtonAction(sender:AnyObject){
+        UIView.animateWithDuration(0.5, delay: 0.4, options: .CurveEaseOut, animations: {
+            self.statusView.hidden = false
+            self.statusView.alpha = 1
+            }, completion: nil)
+        calendarView.hidden = true
+
+    }
+    @IBAction func backButtonAction(sender:AnyObject){
+        self.startDate = nil
+        self.endDate = nil
+        getPatientVideoStatus()
+        self.uploadtable.hidden = false
+        self.nodataLabelInprogeress.hidden=true
+        self.calendarSearchButton.hidden = false
+        backButton.hidden = true
+
+
+    }
+    @IBAction func completedButtonAction(sender:AnyObject){
+        if(completedArr.count==0){
+            self.nodataLabelInprogeress.hidden = false
+            self.uploadtable.hidden = true
+            self.statusView.hidden = true
+            backButton.hidden = false
+
+            self.calendarSearchButton.hidden = true
+        }
+        else{
+            self.uploadtable.hidden = false
+        self.statusView.hidden = true
+        displayTableContents = 1
+        self.uploadtable.reloadData()
+        }
+    }
+    @IBAction func notAvailableAction(sender:AnyObject){
+        if(notAvailableArr.count==0){
+            self.nodataLabelInprogeress.hidden = false
+            self.uploadtable.hidden = true
+            self.statusView.hidden = true
+            self.calendarSearchButton.hidden = true
+            backButton.hidden = false
+
+        }
+        else{
+        displayTableContents = 3
+        self.uploadtable.hidden = false
+        self.statusView.hidden = true
+        self.uploadtable.reloadData()
+        }
+    }
+    @IBAction func inprogressButtonAction(sender:AnyObject){
+        if(inprogressArr.count==0){
+            self.calendarSearchButton.hidden = true
+            backButton.hidden = false
+
+            self.nodataLabelInprogeress.hidden = false
+            self.statusView.hidden = true
+            self.uploadtable.hidden = true
+            
+        }
+        else{
+            self.uploadtable.hidden = false
+            self.statusView.hidden = true
+            displayTableContents = 2
+            self.uploadtable.reloadData()
+
+            
+        }
+            }
+
+
+    @IBAction func calendarSearchAction(sender:AnyObject){
+        if(startDate==nil || endDate==nil){
+            self.alertMessageLabel.text = "Please select start date and end date to search"
+            showUploadStatusAlert()
+        }
+        else{
+        self.calendarSearchButton.hidden = true
+        getPatientVideoStatus()
+        calendarView.hidden = true
+        backButton.hidden = false
+        }
+        
+    }
+    func calendar(calendar: FSCalendar, didSelectDate date: NSDate!) {
+        if(calendar.tag==1){
+        NSLog("calendar did select date \(endDatecalendar.stringFromDate(date))")
+        startDate = endDatecalendar.stringFromDate(date)
+            
+        }
+        else{
+            NSLog("calendar did select date \(endDatecalendar.stringFromDate(date))")
+            endDate = endDatecalendar.stringFromDate(date)
+        }
+        if(endDate != nil){
+            print(endDate)
+        }
+        if(startDate != nil){
+            print(startDate)
+ 
+        }
+
+    }
+    
+    func showUploadStatusAlert() {
+        if !self.isShowingAlert {
+            var uploadframe: CGRect!
+            uploadframe=searchDateAlert.frame
+            uploadframe.origin.x=self.view.frame.origin.x
+            uploadframe.size.width=self.view.frame.size.width
+            uploadframe.size.height=100
+            uploadframe.origin.y=self.view.frame.origin.y-50
+            self.searchDateAlert.frame=uploadframe
+            self.view.addSubview(searchDateAlert)
+            var setresize: CGRect!
+            setresize=self.searchDateAlert.frame
+            setresize.origin.x=self.searchDateAlert.frame.origin.x
+            setresize.origin.y=0
+            setresize.size.width=self.view.frame.size.width
+            setresize.size.height=100
+            isShowingAlert = true
+            UIView.animateWithDuration(0.30, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+                self.searchDateAlert.frame=setresize
+                }, completion: nil)
+            var setresizenormal: CGRect!
+            setresizenormal=self.searchDateAlert.frame
+            setresizenormal.origin.x=self.searchDateAlert.frame.origin.x
+            setresizenormal.origin.y=0-self.searchDateAlert.frame.size.height
+            setresizenormal.size.width=self.view.frame.size.width
+            setresizenormal.size.height=100
+            UIView.animateWithDuration(0.30, delay: 3.0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+                self.searchDateAlert.frame=setresizenormal
+            }) { (completed) in
+                self.isShowingAlert = false
+            }
+        }
+        
+    }
+
+    
+    
+//    func calendar(endDatecalendar: FSCalendar, didSelectDate date: NSDate) {
+//        NSLog("calendar did select date \(endDatecalendar.stringFromDate(date))")
+//       startDate = endDatecalendar.stringFromDate(date)
+//    
+//    }
+//    func calendar(startDateCalendar: FSCalendar, didSelectDate date: NSDate) {
+//        NSLog("calendar did select date \(startDateCalendar.stringFromDate(date))")
+//        startDate = startDateCalendar.stringFromDate(date)
+//        
+//    }
+//
+    
     /**
      GetPatientVideoStatus : Using Rest Service Get The Uploaded Media Status
 
@@ -59,6 +247,7 @@ import Alamofire
 
     func getPatientVideoStatus()  {
         print("UploadStatus getPatientVideoStatus begin")
+        displayTableContents = 0
         PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "getPatientVideoStatus", value: nil)
         self.progessbar(self.view)
         self.progessbarshow()
@@ -73,9 +262,14 @@ import Alamofire
         let delay2 = seconds2 * Double(NSEC_PER_SEC)  // nanoseconds per seconds
         let dispatchTime2 = dispatch_time(DISPATCH_TIME_NOW, Int64(delay2))
         dispatch_after(dispatchTime2, dispatch_get_main_queue(), {
-        requestString = "\(baseURL)/get_patient_video_status?Authorization=\(token_type)&access_token=\(access_token)";
+            if(self.startDate != nil && self.endDate != nil) {
+        requestString = "\(baseURL)/get_patient_video_status?start_date=\(self.startDate)&end_date=\(self.endDate)&Authorization=\(token_type)&access_token=\(access_token)";
+            }
+            else{
+                 requestString = "\(baseURL)/get_patient_video_status?Authorization=\(token_type)&access_token=\(access_token)";
+            }
             
-        url1 = NSURL(string: requestString as String)!;
+            url1 = NSURL(string: requestString as String)!;
         urlRequest = NSMutableURLRequest(URL: url1);
         urlRequest.HTTPMethod = Alamofire.Method.GET.rawValue;
             
@@ -90,20 +284,33 @@ import Alamofire
 
                     let response = responseObject as! NSDictionary
                     print(response)
-                    self.patient = response.objectForKey("patients") as! NSArray
-                    PFUploadStatusModel.getpatientVideoStatusResponse(self.patient)
-                    
-                    if(self.patient.count==0) {
-                        self.nodataLabelInprogeress.hidden=false
-                        self.noDataLabel.hidden=false
-
+                    if let responseArray = response.objectForKey("patients") as? NSArray {
+                        self.patient = responseArray
+                        PFUploadStatusModel.getpatientVideoStatusResponse(self.patient)
+                        
+                        if(self.patient.count==0) {
+                            self.uploadtable.reloadData()
+                            self.uploadtable.hidden = true
+                            self.calendarSearchButton.hidden = true
+                            self.nodataLabelInprogeress.hidden=false
+                            //self.noDataLabel.hidden=false
+                            
+                        }
+                        else {
+                            self.uploadtable.hidden = false
+                            //self.completedTableView.hidden = false
+                            self.uploadtable.reloadData()
+                            //self.completedTableView.reloadData()
+                        }
                     }
                     else {
-                        self.uploadtable.hidden = false
-                        self.completedTableView.hidden = false
-                        self.uploadtable.reloadData()
-                        self.completedTableView.reloadData()
+                        self.uploadtable.hidden = true
+                        //self.completedTableView.hidden = false
+                        self.calendarSearchButton.hidden = true
+                        self.nodataLabelInprogeress.hidden = false
+//                        self.uploadtable.reloadData()
                     }
+                    
                     self.progressbarhidden()
                 }
                 print("UploadStatus getPatientVideoStatus end")
@@ -297,81 +504,222 @@ import Alamofire
     
     func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
 
-        return 81.0
+        return 60.0
     }
 
     func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        if(tableView==uploadtable) {
-            return customSectionHeaderInprogress
-        }
-        else {
-            return customSectionHeaderComplete
-        }
+        
+           return customSectionHeaderComplete
+//        }
+//        else {
+//            return customSectionHeaderComplete
+//        }
+        
     }
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
 
+        calendarView.hidden = true
+        UIView.animateWithDuration(0.5, delay: 0.4, options: .CurveEaseOut, animations: {
+            self.statusView.alpha = 0
+            }, completion: nil)
+    }
     func tableView(tableView: UITableView, estimatedHeightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         return 100
     }
 
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if(tableView==uploadtable) {
-            return  inprogressArr.count
+        if(displayTableContents==0){
+            return  uploadSuccessfullyArr.count
         }
-        else if(tableView==completedTableView) {
-            return uploadSuccessfullyArr.count
+        else if(displayTableContents==1){
+            return completedArr.count
         }
+        else if(displayTableContents==2){
+            return inprogressArr.count
+        }
+        else if(displayTableContents==3){
+            return notAvailableArr.count
+        }
+        
+
         return 0
     }
 
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = self.uploadtable.dequeueReusableCellWithIdentifier("upload")! as! PFUploadTableViewCell
-        if(tableView==uploadtable && inprogressArr.count != 0){
-          let obj = inprogressArr[indexPath.row]
-                let videoStatus = obj
-                let delimiter = "-"
-                var seprator = videoStatus.componentsSeparatedByString(delimiter)
-                let patientId = seprator[0]
-                let videoName = seprator[1]
+       
+        if(uploadSuccessfullyArr.count != 0 && displayTableContents==0){
+         let  obj = uploadSuccessfullyArr[indexPath.row]
+            let videoStatus = obj
+            let delimiter = "|"
+            var seprator = videoStatus.componentsSeparatedByString(delimiter)
+            let patientId = seprator[0]
+            let videoDate = seprator[1]
+            let Status = seprator[2]
+            let videoName = seprator[3]
+            let delimiterForDate = " "
+            if(videoDate != "nil"){
+                var dateTimeSeprator = videoDate.componentsSeparatedByString(delimiterForDate)
+                let dateValue = dateTimeSeprator[0]
+                let time = dateTimeSeprator[1]
+                //                let dateFormatter = NSDateFormatter()
+                //                dateFormatter.dateFormat = "dd-MM-yyyy"
+                //            date = dateFormatter.dateFromString(dateValue)!
+                //                print(date)
+                //let dateString = dateFormatter.stringFromDate(date)
+                cell.dateLabel.text = dateValue
+            }
+            else{
+                cell.dateLabel.text = videoDate
+            }
             cell.patientIdLabel.text = patientId
-            cell.videoStatusLabel.text = videoName
-            if(indexPath.row % 2==0) {
-                cell.backgroundColor=UIColor .clearColor()
+            cell.videoName.text = videoName
+            cell.statusLabel.text = Status
+            if(Status=="completed"){
+                cell.statusIcon.image = UIImage(named: "complete_icon.png")
+
             }
-            else {
-                cell.backgroundColor=UIColor .whiteColor()
+            else{
+                cell.statusIcon.image = UIImage(named: "inprogress_icon.png")
+
             }
+        }
+        else if(completedArr.count != 0 && displayTableContents==1){
+          let  obj = completedArr[indexPath.row]
+            let videoStatus = obj
+            let delimiter = "|"
+            var seprator = videoStatus.componentsSeparatedByString(delimiter)
+            let patientId = seprator[0]
+            let videoDate = seprator[1]
+            let Status = seprator[2]
+            let videoName = seprator[3]
+            let delimiterForDate = " "
+            if(videoDate != "nil"){
+                var dateTimeSeprator = videoDate.componentsSeparatedByString(delimiterForDate)
+                let dateValue = dateTimeSeprator[0]
+                let time = dateTimeSeprator[1]
+                //                let dateFormatter = NSDateFormatter()
+                //                dateFormatter.dateFormat = "dd-MM-yyyy"
+                //            date = dateFormatter.dateFromString(dateValue)!
+                //                print(date)
+                //let dateString = dateFormatter.stringFromDate(date)
+                cell.dateLabel.text = dateValue
+            }
+            else{
+                cell.dateLabel.text = videoDate
+            }
+            cell.patientIdLabel.text = patientId
+            cell.videoName.text = videoName
+            cell.statusLabel.text = Status
+            cell.statusIcon.image = UIImage(named: "complete_icon.png")
 
         }
-         if(tableView==completedTableView && uploadSuccessfullyArr.count != 0){
-            let obj = uploadSuccessfullyArr[indexPath.row]
-                let videoStatus = obj
-                let delimiter = "-"
-                var seprator = videoStatus.componentsSeparatedByString(delimiter)
-                let patientId = seprator[0]
-                let videoName = seprator[1]
-                cell.patientIdLabel.text = patientId
-                cell.videoStatusLabel.text = videoName
-            if(indexPath.row % 2==0) {
-                cell.backgroundColor=UIColor .clearColor()
+        else if(inprogressArr.count != 0 && displayTableContents==2){
+          let  obj = inprogressArr[indexPath.row]
+            let videoStatus = obj
+            let delimiter = "|"
+            var seprator = videoStatus.componentsSeparatedByString(delimiter)
+            let patientId = seprator[0]
+            let videoDate = seprator[1]
+            let Status = seprator[2]
+            let videoName = seprator[3]
+            let delimiterForDate = " "
+            if(videoDate != "nil"){
+                var dateTimeSeprator = videoDate.componentsSeparatedByString(delimiterForDate)
+                let dateValue = dateTimeSeprator[0]
+                let time = dateTimeSeprator[1]
+                //                let dateFormatter = NSDateFormatter()
+                //                dateFormatter.dateFormat = "dd-MM-yyyy"
+                //            date = dateFormatter.dateFromString(dateValue)!
+                //                print(date)
+                //let dateString = dateFormatter.stringFromDate(date)
+                cell.dateLabel.text = dateValue
             }
-            else {
-                cell.backgroundColor=UIColor .whiteColor()
+            else{
+                cell.dateLabel.text = videoDate
             }
+            cell.patientIdLabel.text = patientId
+            cell.videoName.text = videoName
+            cell.statusLabel.text = Status
+            cell.statusIcon.image = UIImage(named: "inprogress_icon.png")
 
         }
-        if(inprogressArr==0) {
+        else if(notAvailableArr.count != 0 && displayTableContents==3){
+            let  obj = notAvailableArr[indexPath.row]
+            let videoStatus = obj
+            let delimiter = "|"
+            var seprator = videoStatus.componentsSeparatedByString(delimiter)
+            let patientId = seprator[0]
+            let videoDate = seprator[1]
+            let Status = seprator[2]
+            let videoName = seprator[3]
+            let delimiterForDate = " "
+            if(videoDate != "nil"){
+                var dateTimeSeprator = videoDate.componentsSeparatedByString(delimiterForDate)
+                let dateValue = dateTimeSeprator[0]
+                let time = dateTimeSeprator[1]
+                //                let dateFormatter = NSDateFormatter()
+                //                dateFormatter.dateFormat = "dd-MM-yyyy"
+                //            date = dateFormatter.dateFromString(dateValue)!
+                //                print(date)
+                //let dateString = dateFormatter.stringFromDate(date)
+                cell.dateLabel.text = dateValue
+            }
+            else{
+                cell.dateLabel.text = videoDate
+            }
+            cell.patientIdLabel.text = patientId
+            cell.videoName.text = videoName
+            cell.statusLabel.text = Status
+            cell.statusIcon.image = UIImage(named: "inprogress_icon.png")
+
+        }
+            
+        else{
             self.nodataLabelInprogeress.hidden=false
         }
-        else {
-            self.nodataLabelInprogeress.hidden=true
-        }
-        if(uploadSuccessfullyArr==0) {
-            self.noDataLabel.hidden=false
-        }
-        else {
-            self.noDataLabel.hidden=true
-        }
-        cell.backgroundColor=UIColor .clearColor()
+        
+            
+            if(indexPath.row % 2==0) {
+                //cell.backgroundColor=UIColor(red:204.0, green: 204.0, blue: 204.0, alpha: 1.0)
+                cell.backgroundColor = UIColor.clearColor()
+
+            }
+            else {
+                cell.backgroundColor=UIColor.whiteColor()
+            }
+
+        
+//         if(tableView==completedTableView && uploadSuccessfullyArr.count != 0){
+//            let obj = uploadSuccessfullyArr[indexPath.row]
+//                let videoStatus = obj
+//                let delimiter = "-"
+//                var seprator = videoStatus.componentsSeparatedByString(delimiter)
+//                let patientId = seprator[0]
+//                let videoName = seprator[1]
+//                cell.patientIdLabel.text = patientId
+//                cell.videoStatusLabel.text = videoName
+//            if(indexPath.row % 2==0) {
+//                cell.backgroundColor=UIColor .clearColor()
+//            }
+//            else {
+//                cell.backgroundColor=UIColor .whiteColor()
+//            }
+//
+//        }
+//        if(inprogressArr.count==0 || up) {
+//            self.nodataLabelInprogeress.hidden=false
+//        }
+//        else {
+//            self.nodataLabelInprogeress.hidden=true
+//        }
+//        if(uploadSuccessfullyArr==0) {
+//            self.noDataLabel.hidden=false
+//        }
+//        else {
+//            self.noDataLabel.hidden=true
+//        }
+       // cell.backgroundColor=UIColor .clearColor()
         return cell
     }
 
@@ -426,6 +774,47 @@ import Alamofire
 
     func progressbarhidden() {
         progressview.hidden=true
+    }
+    
+    func remainingTime(time: String) {
+        if !isShowingAlert {
+            var uploadframe: CGRect!
+            uploadframe=searchDateAlert.frame
+            uploadframe.origin.x=self.view.frame.origin.x
+            uploadframe.size.width=self.view.frame.size.width
+            uploadframe.size.height=100
+            uploadframe.origin.y=self.view.frame.origin.y-50
+            self.searchDateAlert.frame=uploadframe
+            self.view.addSubview(searchDateAlert)
+            var setresize: CGRect!
+            setresize=self.searchDateAlert.frame
+            setresize.origin.x=self.searchDateAlert.frame.origin.x
+            setresize.origin.y=0
+            setresize.size.width=self.view.frame.size.width
+            setresize.size.height=100
+            isShowingAlert = true
+            self.alertMessageLabel.text = time
+            UIView.animateWithDuration(0.30, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+                self.searchDateAlert.frame=setresize
+                }, completion: nil)
+        }
+        else {
+            self.alertMessageLabel.text = time
+        }
+        
+    }
+    func hideInactiveAlert() {
+        var setresizenormal: CGRect!
+        setresizenormal=self.searchDateAlert.frame
+        setresizenormal.origin.x=self.searchDateAlert.frame.origin.x
+        setresizenormal.origin.y=0-self.searchDateAlert.frame.size.height
+        setresizenormal.size.width=self.view.frame.size.width
+        setresizenormal.size.height=100
+        UIView.animateWithDuration(0.30, delay: 3.0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+            self.searchDateAlert.frame=setresizenormal
+        }) { (completed) in
+            self.isShowingAlert = false
+        }
     }
 
 }

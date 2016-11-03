@@ -9,7 +9,7 @@
 import UIKit
 import AVFoundation
 
-class VideoPreviewView: GAITrackedViewController {
+class VideoPreviewView: GAITrackedViewController, AppInactiveDelegate {
 
     @IBOutlet var videoPreviewLayer: UIView!
     @IBOutlet var playButton: UIButton!
@@ -17,6 +17,8 @@ class VideoPreviewView: GAITrackedViewController {
     @IBOutlet var closeViewButton: UIButton!
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var slider: UISlider!
+    @IBOutlet var alertView: UIView!
+    @IBOutlet var alertMessageLabel: UILabel!
     var avPlayer : AVPlayer!
     var avPlayerLayer : AVPlayerLayer!
     var itemUrl : NSURL!
@@ -28,6 +30,7 @@ class VideoPreviewView: GAITrackedViewController {
     var myTimer: NSTimer!
     var titleString : String!
     var isPresentedView = false
+    var isShowingAlert = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -76,6 +79,9 @@ class VideoPreviewView: GAITrackedViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    override func viewWillAppear(animated: Bool) {
+        APP_DELEGATE?.inactiveDelegate = self
     }
     
     override func viewWillDisappear(animated: Bool) {
@@ -192,5 +198,48 @@ class VideoPreviewView: GAITrackedViewController {
             self.removeFromParentViewController()
         }
         print("videoPreviewView closeViewAction end")
+    }
+    
+    func remainingTime(time: String) {
+        if !self.isShowingAlert {
+            var alertViewFrame: CGRect!
+            alertViewFrame=alertView.frame
+            alertViewFrame.origin.x=self.view.frame.origin.x
+            alertViewFrame.size.width=self.view.frame.size.width
+            alertViewFrame.size.height=100
+            alertViewFrame.origin.y=self.view.frame.origin.y-50
+            self.alertView.frame=alertViewFrame
+            self.view.addSubview(alertView)
+            self.alertMessageLabel.text = time
+            var setresize: CGRect!
+            setresize=self.alertView.frame
+            setresize.origin.x=self.alertView.frame.origin.x
+            setresize.origin.y=0
+            setresize.size.width=self.view.frame.size.width
+            setresize.size.height=100
+            isShowingAlert = true
+            UIView.animateWithDuration(0.30, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+                self.alertView.frame=setresize
+                }, completion: nil)
+        }
+        else {
+            self.alertMessageLabel.text = time
+        }
+    }
+    func hideInactiveAlert() {
+        if isShowingAlert {
+            var setresizenormal: CGRect!
+            setresizenormal=self.alertView.frame
+            setresizenormal.origin.x=self.alertView.frame.origin.x
+            setresizenormal.origin.y=0-self.alertView.frame.size.height
+            setresizenormal.size.width=self.view.frame.size.width
+            setresizenormal.size.height=100
+            UIView.animateWithDuration(0.30, delay: 3.0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+                self.alertView.frame=setresizenormal
+            }) { (completed) in
+                self.isShowingAlert = false
+            }
+        }
+        
     }
 }
