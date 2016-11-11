@@ -16,7 +16,7 @@
 #import "AWSBackgroundupload.h"
 //#import "Constants.h"
 #import <QuartzCore/QuartzCore.h>
-#import "PhiFactorDEV-Swift.h"
+#import "PhiFactorPROD-Swift.h"
 
 @interface AWSBackgroundupload ()
 
@@ -131,9 +131,8 @@ NSDate *startTime ;
  *  @param videoUrl     video URL to be uploaded on the given URL
  *  @param timestamp    video was recorded at the given timpStamp
  */
-- (void)uploadData:(NSData *)reqVideoData : (NSString*)patientId : (NSString*)iteration : (NSURL*)videoUrl : (NSString*)timestamp{
-    NSLog(@"Patient ID : %@",patientId);
-    
+- (void)uploadVideo:(NSData *)data : (NSURL*)videoUrl : (NSString*)awsURL : (NSString*) s3BaseURL {
+
     NSLog(@"video: %@",videoUrl);
 
     __weak AWSBackgroundupload *weakSelf = self;
@@ -143,33 +142,9 @@ NSDate *startTime ;
                 NSLog(@"Error in uploading video : %@",error);
             } else {
                 
-                NSDictionary* dict = [NSDictionary dictionaryWithObject:videoUrl forKey:@"videoUrl"];
-                NSLog(@"%@",dict);
-                
                 PFGlobalConstants *global = [[PFGlobalConstants alloc] init];
-                NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+                [global completed_video_update_status:@"completed" url:awsURL];
 
-                if([iteration isEqualToString:@"1"]){
-                    NSString *urlString = [defaults objectForKey:@"awsURLOne"];
-                    NSURL * url = [[NSURL alloc] initWithString:urlString];
-                    [global videoStatus:url iteration:iteration];
-                }
-                else if([iteration isEqualToString:@"2"]){
-                    NSString *urlString = [defaults objectForKey:@"awsURLTwo"];
-                    NSURL * url = [[NSURL alloc] initWithString:urlString];
-                    [global videoStatus:url iteration:iteration];
-                }
-                else if([iteration isEqualToString:@"3"]){
-                    NSString *urlString = [defaults objectForKey:@"awsURLThree"];
-                    NSURL * url = [[NSURL alloc] initWithString:urlString];
-                    [global videoStatus:url iteration:iteration];
-                }
-                else if([iteration isEqualToString:@"4"]){
-                    NSString *urlString = [defaults objectForKey:@"awsURLFour"];
-                    NSURL * url = [[NSURL alloc] initWithString:urlString];
-                    [global videoStatus:url iteration:iteration];
-
-                }
 
               PFCameraviewcontrollerscreen *cam = [PFCameraviewcontrollerscreen alloc];
                 [cam deleteTempVideo:videoUrl];
@@ -205,9 +180,9 @@ NSDate *startTime ;
     expression.progressBlock = self.progressBlock;
 
     startTime = [NSDate date];
-
-    NSString *uploadFolderName = [NSString stringWithFormat:@"%@/%@/%@_%@_%@.MOV",patientId,timestamp,patientId,timestamp,iteration];
-    [[transferUtility uploadData:reqVideoData
+    
+    NSString *uploadFolderName = [awsURL stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"%@/",s3BaseURL] withString:@""];
+    [[transferUtility uploadData:data
                           bucket:[PFGlobalConstants getS3BucketName]
                              key:uploadFolderName
                      contentType:@"binary/octet-stream"
@@ -240,9 +215,10 @@ NSDate *startTime ;
  *  @param documentUrl  document URL to be uploaded on the given URL
  *  @param timestamp    document was recorded at the given timpStamp
  */
-- (void)uploadData:(NSData *)reqVideoData : (NSString*)patientId : (NSString*)timestamp : (NSURL*)documentUrl{
-    NSLog(@"Patient ID : %@",patientId);
+- (void)uploadDocument:(NSData *)data : (NSString*)patientId : (NSString*)timestamp : (NSURL*)documentUrl {
     
+    NSLog(@"Patient ID : %@",patientId);
+
     NSLog(@"video: %@",documentUrl);
     
     __weak AWSBackgroundupload *weakSelf = self;
@@ -285,7 +261,7 @@ NSDate *startTime ;
     startTime = [NSDate date];
     
     NSString *uploadFolderName = [NSString stringWithFormat:@"%@/%@/%@_%@.jpg",patientId,timestamp,patientId,timestamp];
-    [[transferUtility uploadData:reqVideoData
+    [[transferUtility uploadData:data
                           bucket:[PFGlobalConstants getS3BucketName]
                              key:uploadFolderName
                      contentType:@"binary/octet-stream"

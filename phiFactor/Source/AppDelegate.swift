@@ -10,13 +10,14 @@ import UIKit
 import AWSS3
 import Fabric
 import Crashlytics
+import UserNotifications
 
 //@UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewControllerDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, ABPadLockScreenViewControllerDelegate {
 
     var window: UIWindow?
     let gaiInstance = GAI.sharedInstance()
-    var inactiveDelegate : AppInactiveDelegate?
+    var inactiveDelegate: AppInactiveDelegate?
 
     var remoteNotifyUUID = ""
     func application(application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: () -> Void) {
@@ -30,21 +31,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
         UIApplication.sharedApplication().idleTimerDisabled = true
         UIApplication.sharedApplication().statusBarHidden = true
         UIApplication.sharedApplication().applicationIconBadgeNumber = 0
-        logIntoFile()
+//        logIntoFile()
         print("AppDelegate didFinishLaunchingWithOptions begin")
         self.loadModelFile()
+//        if !UIApplication.sharedApplication().isRegisteredForRemoteNotifications() {
+//            if #available(iOS 10.0, *){
+//                UNUserNotificationCenter.currentNotificationCenter().delegate = self
+//                UNUserNotificationCenter.currentNotificationCenter().requestAuthorizationWithOptions([.Badge, .Sound, .Alert], completionHandler: {(granted, error) in
+//                    if (granted)
+//                    {
+//                        UIApplication.sharedApplication().registerForRemoteNotifications()
+//                    }
+//                    else{
+//                        //Do stuff if unsuccessful...
+//                    }
+//                })
+//            }
+//            else { //If user is not on iOS 10 use the old methods we've been using
+//                let notificationSettings = UIUserNotificationSettings(forTypes: [.Badge, .Sound, .Alert], categories: nil)
+//                application.registerUserNotificationSettings(notificationSettings)
+//            }
+//        }
         if !UIApplication.sharedApplication().isRegisteredForRemoteNotifications() {
             let notificationSettings = UIUserNotificationSettings(forTypes: [.Badge, .Sound, .Alert], categories: nil)
             application.registerUserNotificationSettings(notificationSettings)
         }
         let isDocScanOn = NSUserDefaults.standardUserDefaults().objectForKey("isDocScanOn")
-        if isDocScanOn == nil
-        {
+        if isDocScanOn == nil {
             NSUserDefaults.standardUserDefaults().setBool(false, forKey: PF_QUALITYCHECK)
         }
         let isQualityCheckOn = NSUserDefaults.standardUserDefaults().objectForKey(PF_QUALITYCHECK)
-        if isQualityCheckOn == nil
-        {
+        if isQualityCheckOn == nil {
             NSUserDefaults.standardUserDefaults().setBool(true, forKey: PF_QUALITYCHECK)
         }
         Fabric.with([Crashlytics.self])
@@ -62,7 +79,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
         gaiInstance.trackUncaughtExceptions = true  // report uncaught exceptions
 //        gaiInstance.logger.logLevel = GAILogLevel.Verbose  // remove before app release
         
-        PFGlobalConstants.envirnment(.Development)
+        PFGlobalConstants.environment(.Production)
         
         print("AppDelegate didFinishLaunchingWithOptions end")
         return true
@@ -125,8 +142,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
         UIApplication.sharedApplication().applicationIconBadgeNumber = 0
         if let notificationDic : NSDictionary = userInfo as NSDictionary
         {
-            if var uuidFromServer = notificationDic.objectForKey("uuid") as? String
-            {
+            if var uuidFromServer = notificationDic.objectForKey("uuid") as? String {
                 uuidFromServer = uuidFromServer.stringByReplacingOccurrencesOfString("Some", withString: "").stringByReplacingOccurrencesOfString("(", withString: "").stringByReplacingOccurrencesOfString(")", withString: "")
                 print(uuidFromServer)
                 remoteNotifyUUID = uuidFromServer
@@ -161,9 +177,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
                     case .canceled:
                         break
                     }
-                    
                 })
-                
             }
         }
     }
@@ -246,8 +260,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ABPadLockScreenViewContro
     
     func unlockWasUnsuccessful(falsePin: String!, afterAttemptNumber attemptNumber: Int, padLockScreenViewController: ABPadLockScreenViewController!) {
         print("Failed Attempt \(attemptNumber) with incorrect pin \(falsePin)")
-        if attemptNumber == 3
-        {
+        if attemptNumber == 3 {
             isAuthorizationRequesting = false;
             UIApplication.sharedApplication().keyWindow?.rootViewController!.dismissViewControllerAnimated(true, completion: nil)
         }

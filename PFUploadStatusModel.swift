@@ -215,7 +215,7 @@ if(eyeDetectMediaStatus=="completed") {
                     formatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
                     dateFormatter = formatter.stringFromDate(date)
                     print(dateFormatter)
-                    instanceOfCustomObject .uploadData(videoDataValue, patientId, iteration, videoURL, dateFormatter)
+//                    instanceOfCustomObject .uploadData(videoDataValue, patientId, iteration, videoURL, dateFormatter)
                 }
             }
         }
@@ -261,7 +261,7 @@ if(eyeDetectMediaStatus=="completed") {
                     formatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
                     dateFormatter = formatter.stringFromDate(date)
                     let videoURL = NSURL(string: str as! String)
-                    instanceOfCustomObject .uploadData(videoDataValue, patientId, iteration, videoURL, dateFormatter)
+//                    instanceOfCustomObject .uploadData(videoDataValue, patientId, iteration, videoURL, dateFormatter)
                 }
             }
         }

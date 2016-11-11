@@ -41,8 +41,8 @@ let PFUploadstatusViewControllerScreenName = "PFUploadstatusViewController"
 let PFSinginViewControllerScreenName = "PFSinginViewController"
 let PhiFactorIntroScreenName = "PhiFactorIntro"
 let VideoPreviewViewScreenName = "PFVideoPreviewView"
-let PF_USERNAME = "pfUserName"
-let PF_PASSWORD = "pfPassword"
+//let PF_USERNAME = "pfUserName"
+//let PF_PASSWORD = "pfPassword"
 let PF_QUALITYCHECK = "isQualityCheckOn"
 let PF_PatientIDOnDB = "pfPatientIDOnDB"
 let PF_ResumeVideoCount = "pfResumeVideoCount"
@@ -285,7 +285,7 @@ class PFGlobalConstants: NSObject {
     {
         return NSUserDefaults.standardUserDefaults().stringForKey("PF_Passcode") != nil ? true : false
     }
-    class func envirnment(environment: appEnvironment) {
+    class func environment(environment: appEnvironment) {
         switch environment {
         case .Production:
             baseURL = "https://api.phifactor.com"

@@ -120,11 +120,11 @@ class PFCameraScreenModel: NSObject {
                 return
             }
             else {
-                instanceOfCustomObject .uploadData(videoData, patientId, iteratio, itemtobeplayed, dateFormatter)
+//                instanceOfCustomObject .uploadData(videoData, patientId, iteratio, itemtobeplayed, dateFormatter)
             }
         }
         else {
-            instanceOfCustomObject .uploadData(videoData, patientId, iteratio, itemtobeplayed, dateFormatter)
+//            instanceOfCustomObject .uploadData(videoData, patientId, iteratio, itemtobeplayed, dateFormatter)
         }
         print("PFCameraScreenModel nextvideo \(iteratio) end")
     }
@@ -174,7 +174,7 @@ class PFCameraScreenModel: NSObject {
                     if(httpStatusCode==401) {
                         print("Invalid access token")
                         let refresh_token = defaults.stringForKey("refresh_token")! as String
-                        requestString = "\(baseURL)/login_dup"
+                        requestString = "\(baseURL)/login"
                         print(requestString)
                         let client_id = "102216378240-rf6fjt3konig2fr3p1376gq4jrooqcdm"
                         let client_secret = "bYQU1LQAjaSQ1BH9j3zr7woO"
@@ -223,25 +223,120 @@ class PFCameraScreenModel: NSObject {
      
      - parameter imageFilePath: Document URL in local device.
      */
-    func uploadDocument(imageFilePath: String) {
+    func uploadDocument(imageFilePath: String, patientId: String) -> String {
         print("PFCameraScreenModel uploadDocument begin")
         let imageData = NSData(contentsOfFile: imageFilePath)
-        patientId = defaults.stringForKey("patient_id")
         let date = NSDate()
         let formatter = NSDateFormatter()
     
         formatter.dateFormat = "yyyyMMddHHmmss"
         formatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
         formatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
-        dateFormatter = formatter.stringFromDate(date)
-        let doc = NSString .localizedStringWithFormat("\(amazomURL)/%@/%@/%@_%@.jpg", patientId!, dateFormatter, patientId!, dateFormatter)
+        let timeStamp = formatter.stringFromDate(date)
+        let doc = NSString .localizedStringWithFormat("\(amazomURL)/%@/%@/%@_%@.jpg", patientId, timeStamp, patientId, timeStamp)
         defaults.setObject (patientIdArray, forKey: "patient")
         
         defaults.setObject (doc, forKey: "doc")
-        
-        instanceOfCustomObject .uploadData(imageData, patientId, dateFormatter, NSURL(string: imageFilePath))
+        instanceOfCustomObject.uploadDocument(imageData, patientId, timeStamp, NSURL(string: imageFilePath))
         print("PFCameraScreenModel uploadDocument end")
+        return doc as String
     }
+    
+    /**
+     Genrating the NSMutableURLRequest with the requested parameters to update patient media details.
+     
+     - parameter patient_id:        patient_id
+     - parameter videoCount:        video number to be updated
+     - parameter mediaURL:          patient media URL from aws
+     - parameter isDocument:        Enables the document URL upload service.
+     
+     - returns: returns request with the provided parameters
+     */
+    
+    func getRequestParameterForAddPatientMediaDetails(patientId: String, mediaURL: String, isDocument: Bool) -> NSMutableURLRequest {
+        print("PFCameraScreenModel getRequestParameterForAddPatientMediaDetails begin")
+        var parameters = NSMutableDictionary()
+        if isDocument == true {
+            parameters = [
+                "patient_id": patientId,
+                "video_url": "",
+                "video_status": "",
+                "document_url": mediaURL as NSString
+            ]
+        }
+        else {
+            parameters = [
+                "patient_id": patientId,
+                "video_url": mediaURL as NSString,
+                "video_status": "In progress",
+                "document_url": ""
+            ]
+        }
+        print(parameters)
+        do {
+            let json = try NSJSONSerialization.dataWithJSONObject(parameters, options: NSJSONWritingOptions())
+            print(json)
+            urlRequest.HTTPBody = try NSJSONSerialization.dataWithJSONObject(parameters, options: NSJSONWritingOptions())
+            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        } catch {
+            print("JSON serialization Error!")
+        }
+        print("PFCameraScreenModel getRequestParameterForAddPatientMediaDetails end")
+        return urlRequest
+    }
+    
+    /**
+     Uploading the video to specified URL.
+     
+     - parameter iteration: Iteration of the video.
+     */
+    func uploadPatientMediaToAWS(iteration: String, patientId: String) -> String {
+        print("PFCameraScreenModel uploadPatientVideoToAWS \(iteration) begin")
+        videoData = NSData(contentsOfURL: itemtobeplayed)
+        let date = NSDate()
+        let formatter = NSDateFormatter()
+        formatter.dateFormat = "yyyyMMddHHmmss"
+        formatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
+        formatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
+        let timpStamp = formatter.stringFromDate(date)
+        let awsURL = NSString .localizedStringWithFormat("\(amazomURL)/%@/%@/%@_%@_%@.MOV", patientId, timpStamp, patientId, timpStamp, iteration)
+        
+//        instanceOfCustomObject .uploadData(videoData, patientId, iteration, itemtobeplayed, timpStamp)
+        instanceOfCustomObject.uploadVideo(videoData, itemtobeplayed, awsURL as String, amazomURL)
+        print("PFCameraScreenModel uploadPatientVideoToAWS \(iteration) end")
+        return awsURL as String
+    }
+    
+    /**
+     Genrating the NSMutableURLRequest with the requested parameters to update patient media details.
+     
+     - parameter patient_id:        patient_id
+     - parameter videoCount:        video number to be updated
+     - parameter mediaURL:          patient media URL from aws
+     - parameter isDocument:        Enables the document URL upload service.
+     
+     - returns: returns request with the provided parameters
+     */
+    
+    func getRequestParameterToGetResumePatientList(emailID: String) -> NSMutableURLRequest {
+        print("PFCameraScreenModel getRequestParameterToGetResumePatientList begin")
+        var parameters = NSMutableDictionary()
+        parameters = [
+            "email_id": emailID
+        ]
+        print(parameters)
+        do {
+            let json = try NSJSONSerialization.dataWithJSONObject(parameters, options: NSJSONWritingOptions())
+            print(json)
+            urlRequest.HTTPBody = try NSJSONSerialization.dataWithJSONObject(parameters, options: NSJSONWritingOptions())
+            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        } catch {
+            print("JSON serialization Error!")
+        }
+        print("PFCameraScreenModel getRequestParameterToGetResumePatientList end")
+        return urlRequest
+    }
+
 }
 
 //    func awsUrl(dateFormatter: String,iteration: String,patient: String) -> String  {

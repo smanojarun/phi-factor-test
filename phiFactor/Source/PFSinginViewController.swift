@@ -1216,8 +1216,8 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
         defaults.setInteger(1, forKey: "logout")
         defaults.setObject ("", forKey: "access_token")
         defaults.setObject("", forKey: "token_type")
-        defaults.removeObjectForKey(PF_USERNAME)
-        defaults.removeObjectForKey(PF_PASSWORD)
+//        defaults.removeObjectForKey(PF_USERNAME)
+//        defaults.removeObjectForKey(PF_PASSWORD)
         PFGlobalConstants.removeResumeVideoCount()
         let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PhiFactorIntro") as! PhiFactorIntro
@@ -1304,7 +1304,7 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
         PFGlobalConstants.sendEventWithCatogory("background", action: "functionCall", label: "refreshToken", value: nil)
         let defaults = NSUserDefaults.standardUserDefaults()
         let refresh_token = defaults.stringForKey("refresh_token")! as String
-        requestString = "\(baseURL)/login_dup"
+        requestString = "\(baseURL)/login"
         print(requestString)
         let clientID = "102216378240-rf6fjt3konig2fr3p1376gq4jrooqcdm"
         let clientSecret = "bYQU1LQAjaSQ1BH9j3zr7woO"
@@ -1538,7 +1538,7 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
                     if(httpStatusCode==401) {
                         print("Invalid access token")
                         let refresh_token = defaults.stringForKey("refresh_token")! as String
-                        requestString = "\(baseURL)/login_dup"
+                        requestString = "\(baseURL)/login"
                         print(requestString)
                         let client_id = "102216378240-rf6fjt3konig2fr3p1376gq4jrooqcdm"
                         let client_secret = "bYQU1LQAjaSQ1BH9j3zr7woO"

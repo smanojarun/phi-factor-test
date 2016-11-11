@@ -14,7 +14,7 @@ import CoreMotion
 import Alamofire
 
 /// Recording video by front and rear camera with flash availability. Presenting the preview for each video after the recording complition. Also provide the option to retake the video.
-class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutputRecordingDelegate, UIAccelerometerDelegate,AVCaptureVideoDataOutputSampleBufferDelegate, AppInactiveDelegate {
+class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutputRecordingDelegate, UIAccelerometerDelegate,AVCaptureVideoDataOutputSampleBufferDelegate, AppInactiveDelegate, PatientResumeDelegate {
     // Back button alert
     @IBOutlet var backButtonAlertCancel: UIButton!
     @IBOutlet var backButtonAlert: UIButton!
@@ -62,7 +62,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
     // camera properties and settings
     @IBOutlet var pfcFlashButton: UIButton!
     @IBOutlet var pfcBackButton: UIButton!
-    @IBOutlet var pfcDeletePreviousVideoButton: UIButton!
+//    @IBOutlet var pfcDeletePreviousVideoButton: UIButton!
     @IBOutlet var pfcToggleCameraButton: UIButton!
     // counter
     @IBOutlet var pfcCameraCountdownLabel: UILabel!
@@ -152,6 +152,8 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
     var resumeVideoCount : Int!
     var isResumeCameraViewEnabled = false
     var isShowingAlert = false
+    var patientID = ""
+    var documentAWSLink : String? =  nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -159,7 +161,10 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         self.screenName = PFCameraviewcontrollerScreenName
         // Acelometer
         self.initAccelometer()
-        
+        if let tempPatientId = NSUserDefaults.standardUserDefaults().stringForKey(PF_PatientIDOnDB) {
+            patientID = tempPatientId
+        }
+
         cameraModel = PFCameraScreenModel()
         patientModel=PFPatientDetailsModel()
         NSNotificationCenter.defaultCenter().addObserver(self,
@@ -225,9 +230,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             }
             let currentVideoDevice: AVCaptureDevice = self.videoDeviceInput!.device
             let currentPosition: AVCaptureDevicePosition = currentVideoDevice.position
-            self.global.isDeviceCompatibile()
             let bool: Bool=(self.global.isDeviceCompatibile())
-            print(bool)
             if(currentPosition == AVCaptureDevicePosition.Back) && (bool) {
                 self.session!.sessionPreset = AVCaptureSessionPresetiFrame960x540
             }
@@ -243,7 +246,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         pfCameraSview2.hidden=true
         pfCameraSview3.hidden=true
         pfCameraSview4.hidden=true
-        pfcDeletePreviousVideoButton.hidden = true
+//        pfcDeletePreviousVideoButton.hidden = true
         counterview.hidden=true
         playerlayer=false
         
@@ -304,7 +307,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         if (NSData(contentsOfFile: documentPath) != nil)
         {
             let cameraModel = PFCameraScreenModel()
-            cameraModel.uploadDocument(documentPath)
+            documentAWSLink = cameraModel.uploadDocument(documentPath, patientId: patientID)
             self.isDocumentAlert = true
             self.showAlertandDelete()
         }
@@ -355,13 +358,12 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         self.removeCameraDataOutput()
         myTimer.invalidate()
         avPlayer = AVPlayer()
-        motionManager.stopAccelerometerUpdates()
+        motionManager?.stopAccelerometerUpdates()
         motionManager = nil
         self.removeObserver(self, forKeyPath: "sessionRunningAndDeviceAuthorized", context: &self.sessionRunningAndDeviceAuthorizedContext)
         self.removeObserver(self, forKeyPath: "stillImageOutput.capturingStillImage" ,context: &self.capturingStillImageContext)
         NSNotificationCenter.defaultCenter().removeObserver(self)
         print("CameraScreen viewDidDisappear end")
-        
     }
 
     override func viewWillAppear(animated: Bool) {
@@ -474,7 +476,6 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
                 var flashModeOn : Bool
                 let currentVideoDevice: AVCaptureDevice = self.videoDeviceInput!.device
                 let currentPosition: AVCaptureDevicePosition = currentVideoDevice.position
-                self.global.isDeviceCompatibile()
                 if(currentPosition == AVCaptureDevicePosition.Front){
                      flashModeOn = true
                 }
@@ -626,9 +627,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         self.session?.beginConfiguration()
         let currentVideoDevice: AVCaptureDevice = self.videoDeviceInput!.device
         let currentPosition: AVCaptureDevicePosition = currentVideoDevice.position
-        global.isDeviceCompatibile()
         let bool: Bool=(global.isDeviceCompatibile())
-        print(bool)
         if(currentPosition == AVCaptureDevicePosition.Back) && (bool) {
             self.session!.sessionPreset = AVCaptureSessionPresetiFrame960x540
         }
@@ -736,9 +735,6 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         let instanceOfCustomObject: CVResult = CVResult()
         let currentVideoDevice: AVCaptureDevice = self.videoDeviceInput!.device
         let currentPosition: AVCaptureDevicePosition = currentVideoDevice.position
-        global.isDeviceCompatibile()
-        let bool: Bool=(global.isDeviceCompatibile())
-        print(bool)
         var errorCode: UnsafeMutablePointer<Int32>
         if(currentPosition == AVCaptureDevicePosition.Back) {
             errorCode = instanceOfCustomObject.getErrorCode(image,videoCount,retakeVideoCount, true)
@@ -897,6 +893,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
     @IBAction func pfCameraStartButtonaction(sender: AnyObject? = nil) {
         print("CameraScreen pfCameraStartButtonaction begin")
         if self.pfCameraStartButton.userInteractionEnabled {
+            self.pfCameraStartButton.userInteractionEnabled = false
             PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "pfCameraStartButtonaction", value: nil)
             if self.videoCount == 1
             {
@@ -916,7 +913,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             counterview.hidden=false
             pfcToggleCameraButton.hidden = true
             pfcCameraArrow.hidden = true
-            pfcDeletePreviousVideoButton.hidden = true
+//            pfcDeletePreviousVideoButton.hidden = true
             if !qualityCheck {
                 self.pfCameraStartButton.hidden=true
                 self.pfCameraStop.hidden = false
@@ -1047,6 +1044,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         if !qualityCheck
         {
             pfCameraStartButton.hidden = false
+            self.pfCameraStartButton.userInteractionEnabled = true
         }
         self.pfInfoselectButton.hidden = false
         previewBackground.hidden = true
@@ -1071,17 +1069,17 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         contentView.hidden=false
         // cancel unhidden
         if videoCount != nil && videoCount == 0 {
-            pfcDeletePreviousVideoButton.hidden=true
+//            pfcDeletePreviousVideoButton.hidden=true
             self.pfcCameraCountdownLabel.text = "5"
         }
         else {
             
             if tagvalue != nil {
-                pfcDeletePreviousVideoButton.hidden=false
+//                pfcDeletePreviousVideoButton.hidden=false
                 self.pfcCameraCountdownLabel.text = "15"
             }
             else {
-                pfcDeletePreviousVideoButton.hidden=true
+//                pfcDeletePreviousVideoButton.hidden=true
                 self.pfcCameraCountdownLabel.text = "5"
                 hideDeletePreviousVideoButtonIfResumeCount(videoCount)
             }
@@ -1145,6 +1143,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         self.pfcAcleometer.hidden = false
         if !qualityCheck {
             pfCameraStartButton.hidden = false
+            self.pfCameraStartButton.userInteractionEnabled = true
         }
         self.pfcCameraInstructionlabel.hidden=false
         // disable the button
@@ -1161,16 +1160,16 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             self.pfCameraFaceNotDetectedImageView.hidden=false
         }
         if videoCount != nil && videoCount == 0 {
-            pfcDeletePreviousVideoButton.hidden=true
+//            pfcDeletePreviousVideoButton.hidden=true
         }
         else {
             
             if tagvalue != nil {
-                pfcDeletePreviousVideoButton.hidden=false
+//                pfcDeletePreviousVideoButton.hidden=false
                 hideDeletePreviousVideoButtonIfResumeCount(videoCount)
             }
             else {
-                pfcDeletePreviousVideoButton.hidden=true
+//                pfcDeletePreviousVideoButton.hidden=true
             }
         }
         self.startButtonBackgroundImageView.hidden = false
@@ -1202,83 +1201,86 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
       - parameter sender: camera select button
      */
     @IBAction func pfcp_pcameraselete_action(sender: UIButton) {
-        print("CameraScreen pfcp_pcameraselete_action begin")
-        PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "toggleCamera", value: nil)
-        dispatch_async(dispatch_get_main_queue()) { 
-            self.activityImageView.hidden = false
-        }
-        self.pfCameraStartButton.userInteractionEnabled = false
-        sender.enabled = false
-        self.pfcToggleCameraButton.hidden = true
-        self.pfcCameraArrow.hidden = true
-        self.session!.removeOutput(self.videoDeviceDataOutput)
-        
-        let currentVideoDevice: AVCaptureDevice = self.videoDeviceInput!.device
-        let currentPosition: AVCaptureDevicePosition = currentVideoDevice.position
-        switch currentPosition{
-        case AVCaptureDevicePosition.Front:
-            self.pfcFlashButton.hidden = false
-        case AVCaptureDevicePosition.Back:
-            self.pfcFlashButton.hidden = true
-        case AVCaptureDevicePosition.Unspecified:
-            self.pfcFlashButton.hidden = false
-        }
-        dispatch_async(self.sessionQueue) { 
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)) {
-                
-               
-                return
+        if self.pfcToggleCameraButton.userInteractionEnabled == true {
+            print("CameraScreen pfcp_pcameraselete_action begin")
+            PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "toggleCamera", value: nil)
+            dispatch_async(dispatch_get_main_queue()) {
+                self.activityImageView.hidden = false
             }
+            self.pfcToggleCameraButton.userInteractionEnabled = false
+            self.pfCameraStartButton.userInteractionEnabled = false
+            sender.enabled = false
+            self.pfcToggleCameraButton.hidden = true
+            self.pfcCameraArrow.hidden = true
+            self.session!.removeOutput(self.videoDeviceDataOutput)
+            
             let currentVideoDevice: AVCaptureDevice = self.videoDeviceInput!.device
             let currentPosition: AVCaptureDevicePosition = currentVideoDevice.position
-            var preferredPosition: AVCaptureDevicePosition = AVCaptureDevicePosition.Unspecified
             switch currentPosition{
             case AVCaptureDevicePosition.Front:
-                preferredPosition = AVCaptureDevicePosition.Back
                 self.pfcFlashButton.hidden = false
             case AVCaptureDevicePosition.Back:
-                preferredPosition = AVCaptureDevicePosition.Front
-                self.pfcFlashButton.hidden = true
                 self.pfcFlashButton.hidden = true
             case AVCaptureDevicePosition.Unspecified:
-                preferredPosition = AVCaptureDevicePosition.Back
                 self.pfcFlashButton.hidden = false
             }
-            
-            let device: AVCaptureDevice = PFCameraviewcontrollerscreen.deviceWithMediaType(AVMediaTypeVideo, preferringPosition: preferredPosition)
-            var videoDeviceInput: AVCaptureDeviceInput?
-            do {
-                videoDeviceInput = try AVCaptureDeviceInput(device: device)
-            } catch _ as NSError {
-                videoDeviceInput = nil
-            } catch {
-                fatalError()
-            }
-            self.session!.beginConfiguration()
-            self.session!.removeInput(self.videoDeviceInput)
-            self.videoDeviceInput = videoDeviceInput
-            self.setCamerasession()
-            if self.session!.canAddInput(self.videoDeviceInput) {
-                NSNotificationCenter.defaultCenter().removeObserver(self, name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: currentVideoDevice)
-                PFCameraviewcontrollerscreen.setFlashMode(AVCaptureFlashMode.Auto, device: device)
-                NSNotificationCenter.defaultCenter().addObserver(self, selector: "subjectAreaDidChange: ", name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: device)
-                self.session!.addInput(videoDeviceInput)
+            dispatch_async(self.sessionQueue) {
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)) {
+                    
+                    
+                    return
+                }
+                let currentVideoDevice: AVCaptureDevice = self.videoDeviceInput!.device
+                let currentPosition: AVCaptureDevicePosition = currentVideoDevice.position
+                var preferredPosition: AVCaptureDevicePosition = AVCaptureDevicePosition.Unspecified
+                switch currentPosition{
+                case AVCaptureDevicePosition.Front:
+                    preferredPosition = AVCaptureDevicePosition.Back
+                    self.pfcFlashButton.hidden = false
+                case AVCaptureDevicePosition.Back:
+                    preferredPosition = AVCaptureDevicePosition.Front
+                    self.pfcFlashButton.hidden = true
+                    self.pfcFlashButton.hidden = true
+                case AVCaptureDevicePosition.Unspecified:
+                    preferredPosition = AVCaptureDevicePosition.Back
+                    self.pfcFlashButton.hidden = false
+                }
+                
+                let device: AVCaptureDevice = PFCameraviewcontrollerscreen.deviceWithMediaType(AVMediaTypeVideo, preferringPosition: preferredPosition)
+                var videoDeviceInput: AVCaptureDeviceInput?
+                do {
+                    videoDeviceInput = try AVCaptureDeviceInput(device: device)
+                } catch _ as NSError {
+                    videoDeviceInput = nil
+                } catch {
+                    fatalError()
+                }
+                self.session!.beginConfiguration()
+                self.session!.removeInput(self.videoDeviceInput)
                 self.videoDeviceInput = videoDeviceInput
-            }else {
-                self.session!.addInput(self.videoDeviceInput)
+                self.setCamerasession()
+                if self.session!.canAddInput(self.videoDeviceInput) {
+                    NSNotificationCenter.defaultCenter().removeObserver(self, name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: currentVideoDevice)
+                    PFCameraviewcontrollerscreen.setFlashMode(AVCaptureFlashMode.Auto, device: device)
+                    NSNotificationCenter.defaultCenter().addObserver(self, selector: "subjectAreaDidChange: ", name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: device)
+                    self.session!.addInput(videoDeviceInput)
+                    self.videoDeviceInput = videoDeviceInput
+                }else {
+                    self.session!.addInput(self.videoDeviceInput)
+                }
+                self.session!.commitConfiguration()
+                self.addCameraDataOutput()
+                dispatch_async(dispatch_get_main_queue(), {
+                    sender.enabled = true
+                    self.activityImageView.hidden = true
+                    self.pfcToggleCameraButton.hidden = false
+                    self.pfcCameraArrow.hidden = false
+                    self.pfCameraStartButton.userInteractionEnabled = true
+                    self.pfcToggleCameraButton.userInteractionEnabled = true
+                })
+                print("CameraScreen pfcp_pcameraselete_action end")
             }
-            self.session!.commitConfiguration()
-            self.addCameraDataOutput()
-            dispatch_async(dispatch_get_main_queue(), { 
-                sender.enabled = true
-                self.activityImageView.hidden = true
-                self.pfcToggleCameraButton.hidden = false
-                self.pfcCameraArrow.hidden = false
-                self.pfCameraStartButton.userInteractionEnabled = true
-            })
-            print("CameraScreen pfcp_pcameraselete_action end")
         }
-
     }
 
     /**
@@ -1294,10 +1296,10 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             if self.videoDeviceInput!.device.hasTorch {
                 // lock your device for configuration
                 do {
-                    let abv = try self.videoDeviceInput!.device.lockForConfiguration()
-                    print(abv)
+                    let lockForConfig = try self.videoDeviceInput!.device.lockForConfiguration()
+                    print(lockForConfig)
                 } catch {
-                    print("aaaa")
+                    print("Flash lockForConfig failed")
                 }
                 if self.videoDeviceInput!.device.torchActive {
                     self.videoDeviceInput!.device.torchMode = AVCaptureTorchMode.Off
@@ -1311,7 +1313,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
                 do {
                     try self.videoDeviceInput!.device.lockForConfiguration()
                 } catch {
-                    print("aaaa")
+                    print("Flash lockForConfig failed")
                 }
                 // check if your torchMode is on or off. If on turns it off otherwise turns it on
                 if self.videoDeviceInput!.device.torchActive {
@@ -1319,9 +1321,9 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
                 } else {
                     // sets the torch intensity to 100%
                     do {
-                        let abv = try self.videoDeviceInput!.device.setTorchModeOnWithLevel(1.0)
+                        let enableTorch = try self.videoDeviceInput!.device.setTorchModeOnWithLevel(1.0)
                     } catch {
-                        print("bbb")
+                        print("enableTorch failed")
                     }
                     //    self.videoDeviceInput!.setTorchModeOnWithLevel(1.0, error: nil)
                 }
@@ -1364,7 +1366,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             hideDeletePreviousVideoButtonIfResumeCount(videoCount)
             deleteTempVideo(iteminavPlayer3)
             tagvalue=430
-            pfcDeletePreviousVideoButton.hidden = true
+//            pfcDeletePreviousVideoButton.hidden = true
             pfCameraSview1.hidden=true
             pfCameraSview2.hidden=true
             pfCameraSview3.hidden=true
@@ -1547,7 +1549,6 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             self.canShowErrorMsg = true
         }
         pfcPreviewSlider.minimumValue = 0.0
-
         if(self.pfcPreviewSubmitButton.tag==460) {
 
             pfCameraSview1.hidden=false
@@ -1573,7 +1574,20 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             pfcFaceAnimationImageView.hidden=true
             self.pfcCameraInstructionlabel.text=facialVideoInstruction
             instructionstring=facialVideoInstruction
-            self.cameraModel!.nextvideo(iteration)
+//            self.cameraModel!.nextvideo(iteration)
+            let mediaAWSURL = self.cameraModel!.uploadPatientMediaToAWS(iteration, patientId: patientID)
+            if documentAWSLink != nil {
+                self.updatePatientMediaDetailsOnPortal(patientID, mediaURL: documentAWSLink!, isDocument: true, complition: { (isSucceed) in
+                    self.updatePatientMediaDetailsOnPortal(self.patientID, mediaURL: mediaAWSURL, isDocument: false, complition: { (isSucceed) in
+                        
+                    })
+                })
+            }
+            else {
+                self.updatePatientMediaDetailsOnPortal(patientID, mediaURL: mediaAWSURL, isDocument: false, complition: { (isSucceed) in
+                    
+                })
+            }
 
         }
         else if(self.pfcPreviewSubmitButton.tag==461) {
@@ -1601,15 +1615,18 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             self.pfcCameraBackgroundImageView.hidden = false
             self.pfcCameraInstructionlabel.text=headVideoInstruction
             instructionstring=headVideoInstruction
-            self.cameraModel!.nextvideo(iteration)
-
+//            self.cameraModel!.nextvideo(iteration)
+            let mediaAWSURL = self.cameraModel!.uploadPatientMediaToAWS(iteration, patientId: patientID)
+            self.updatePatientMediaDetailsOnPortal(patientID, mediaURL: mediaAWSURL, isDocument: false, complition: { (isSucceed) in
+                
+            })
         }
         else if(self.pfcPreviewSubmitButton.tag==462) {
 
             pfCameraSview3.hidden=false
             let iteration = "3"
             tagvalue = 422
-            cameraModel!.nextvideo(iteration)
+//            cameraModel!.nextvideo(iteration)
             videoCount = 4
             PFGlobalConstants.setResumeVideoCount(videoCount)
             setThumbImageFor(videothumbImageView3)
@@ -1640,12 +1657,17 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             self.pfCameraFaceNotDetectedImageView.hidden=true
             pfcFaceAnimationImageView.hidden=true
             pfcVideoTitleLabel.text="Eye Feature Analysis Video"
+            let mediaAWSURL = self.cameraModel!.uploadPatientMediaToAWS(iteration, patientId: patientID)
+            self.updatePatientMediaDetailsOnPortal(patientID, mediaURL: mediaAWSURL, isDocument: false, complition: { (isSucceed) in
+                
+            })
         }
         else if(self.pfcPreviewSubmitButton.tag==463) {
             
             self.pfcPreviewSubmitButton.tag = 464
             let iteration = "4"
-            self.cameraModel!.nextvideo(iteration)
+//            self.cameraModel!.nextvideo(iteration)
+            let mediaAWSURL = self.cameraModel!.uploadPatientMediaToAWS(iteration, patientId: patientID)
             
             self.pfCameraSview4.hidden=false
             setThumbImageFor(videothumbImageView4)
@@ -1670,25 +1692,65 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             self.pfCameraFaceNotDetectedImageView.hidden=true
             self.pfcEyeAnimationImageView.hidden=true
             self.isFaceorEyeDected = false
-            self.cameraModel!.updatePatientMediaDetails()
+//            self.cameraModel!.updatePatientMediaDetails()
             PFGlobalConstants.removeResumeVideoCount()
             previewView.removeFromSuperview()
             pfcCameraBackgroundImageView.hidden=true
-
-                dispatch_async(dispatch_get_main_queue(), {
-                    self.session?.stopRunning()
-                    let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-                            let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
-                    nextViewController.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
-                    nextViewController.canShowVideoUploadAlert = true
-                    let nav = UINavigationController(rootViewController: nextViewController)
-                    nav.navigationBarHidden = true
-                    let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
-                    UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
-                        appDelegaet!.window?.rootViewController = nav
-                    }) { (isCompleted) in
-                    }
-                })
+            self.activityImageView.hidden = false
+            self.updatePatientMediaDetailsOnPortal(patientID, mediaURL: mediaAWSURL, isDocument: false, complition: { (isSucceed) in
+                if self.isResumeCameraViewEnabled == true {
+                    self.getResumePatientList({ (isHavingList, patientList) in
+                        self.activityImageView.hidden = true
+                        dispatch_async(dispatch_get_main_queue(), { 
+                            if isHavingList == true {
+                                self.session?.stopRunning()
+                                let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                                let resumeListView = storyBoard.instantiateViewControllerWithIdentifier("ResumePatientListViewController") as! ResumePatientListViewController
+                                resumeListView.patientsArray = patientList
+                                resumeListView.delegate = self
+                                let nav = UINavigationController(rootViewController: resumeListView)
+                                nav.navigationBarHidden = true
+                                //                            self.presentViewController(nav, animated: true, completion: nil)
+                                UIView.transitionWithView((APP_DELEGATE?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+                                    APP_DELEGATE!.window?.rootViewController = nav
+                                }) { (isCompleted) in
+                                    self.view = nil
+                                }
+                            }
+                            else {
+                                self.session?.stopRunning()
+                                let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                                let patientsDetailsScreen = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
+                                let nav = UINavigationController(rootViewController: patientsDetailsScreen)
+                                nav.navigationBarHidden = true
+                                let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
+                                UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+                                    appDelegaet!.window?.rootViewController = nav
+                                }) { (isCompleted) in
+                                    self.view = nil
+                                }
+                            }
+                        })
+                    })
+                }
+                else {
+                    dispatch_async(dispatch_get_main_queue(), {
+                        self.session?.stopRunning()
+                        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                        let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
+                        nextViewController.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
+                        nextViewController.canShowVideoUploadAlert = true
+                        let nav = UINavigationController(rootViewController: nextViewController)
+                        nav.navigationBarHidden = true
+                        let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
+                        UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+                            appDelegaet!.window?.rootViewController = nav
+                        }) { (isCompleted) in
+                        }
+                    })
+                }
+            })
+            
         }
         if(self.pfcPreviewSubmitButton.tag != 464)
         {
@@ -1705,9 +1767,10 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             contentView.hidden=false
             if !qualityCheck {
                 pfCameraStartButton.hidden = false
+                self.pfCameraStartButton.userInteractionEnabled = true
             }
             // cancel unhidden
-            pfcDeletePreviousVideoButton.hidden=false
+//            pfcDeletePreviousVideoButton.hidden=false
             pfcBackButton.hidden=false
             isPreviewScreen = false
             // instruction label hidden
@@ -1715,6 +1778,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             pfcVideoTitleLabel.hidden=false
             if !qualityCheck {
                 pfCameraStartButton.hidden = false
+                self.pfCameraStartButton.userInteractionEnabled = true
             }
         }
        print("CameraScreen pfcPreviewSubmitButtonaction end")
@@ -1735,13 +1799,12 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             self.pfcPreviewRetakeButton.hidden=true
             self.pfcPreviewPlayButton.hidden=false
             self.pfcPreviewSubmitButton.hidden=true
-            self.pfcDeletePreviousVideoButton.hidden = true
+//            self.pfcDeletePreviousVideoButton.hidden = true
             // hidden camera functions
             self.pfcToggleCameraButton.hidden=true
             // acleometer hidden
             self.pfcAcleometer.hidden=true
             self.contentView.hidden=true
-            self.pfCameraStartButton.hidden = true
             self.pfCameraStartButton.hidden = true
             // animation hidden
             self.pfcFaceAnimationImageView.hidden=true
@@ -1942,7 +2005,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
                 self.pfcPreviewRetakeButton.hidden=false
                 self.pfcPreviewPlayButton.hidden=false
                 self.pfcPreviewSubmitButton.hidden=true
-                self.pfcDeletePreviousVideoButton.hidden = true
+//                self.pfcDeletePreviousVideoButton.hidden = true
                 // hidden camera functions
                 self.pfcToggleCameraButton.hidden=true
                 // acleometer hidden
@@ -2065,6 +2128,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         contentView.layer.cornerRadius = contentView.frame.width/2-30
         contentView.layer.masksToBounds = true
         greenCircleView.layer.cornerRadius = greenCircleView.frame.width/2-30
+        greenCircleView.layoutIfNeeded()
         print(greenCircleView.frame.width/2)
         greenCircleView.layer.masksToBounds = true
         motionManager = CMMotionManager()
@@ -2504,12 +2568,13 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             self.pfInfoselectButton.hidden = false
             if self.videoCount != 1
             {
-                self.pfcDeletePreviousVideoButton.hidden = false
+//                self.pfcDeletePreviousVideoButton.hidden = false
                 self.hideDeletePreviousVideoButtonIfResumeCount(self.videoCount)
             }
             if !self.qualityCheck
             {
                 self.pfCameraStartButton.hidden = false
+                self.pfCameraStartButton.userInteractionEnabled = true
             }
         }
     }
@@ -2629,7 +2694,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
     }
     func hideDeletePreviousVideoButtonIfResumeCount(count: Int){
         if isResumeCameraViewEnabled == true && resumeVideoCount != nil && resumeVideoCount == count{
-            self.pfcDeletePreviousVideoButton.hidden = true
+//            self.pfcDeletePreviousVideoButton.hidden = true
         }
     }
     func remainingTime(time: String) {
@@ -2672,6 +2737,128 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             self.uploadstatus.frame=setresizenormal
         }) { (completed) in
             self.isShowingAlert = false
+        }
+    }
+    
+    /**
+     Update patient media details to portal.
+     */
+    func updatePatientMediaDetailsOnPortal(patientId: String, mediaURL: String, isDocument: Bool, complition: (isSucceed: Bool)->()) {
+        print("PatientScreen getRefreshToken begin")
+        let defaults = NSUserDefaults.standardUserDefaults()
+        var access_token: String!
+        var token_type: String!
+        access_token = defaults.stringForKey("access_token")
+        token_type = defaults.stringForKey("token_type")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "functionCall", label: "updatePatientMediaDetailsOnPortal", value: nil)
+        requestString = "\(baseURL)/add_patient_video?Authorization=\(token_type)&access_token=\(access_token)"
+        print(requestString)
+        url1 = NSURL(string: requestString as String)!
+        urlRequest = NSMutableURLRequest(URL: url1)
+        urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
+        cameraModel!.getRequestParameterForAddPatientMediaDetails(patientId, mediaURL: mediaURL, isDocument: isDocument)
+        Alamofire.request(urlRequest)
+            .responseJSON { response in
+                switch response.result {
+                case .Failure( let error):
+                    print(error)
+                    complition(isSucceed: false)
+                case .Success(let responseObject):
+                    print(responseObject)
+                    complition(isSucceed: true)
+//                    let response = responseObject as! NSDictionary
+                }
+                print("PatientScreen getRefreshToken end")
+        }
+    }
+    
+    func resumePatientStatus(status: Bool, patientDetails: NSDictionary?) {
+        if  status == true {
+            self.dismissViewControllerAnimated(true, completion: {
+                NSUserDefaults.standardUserDefaults().setObject((patientDetails?.objectForKey("patient_id")), forKey: "patient_id")
+                NSUserDefaults.standardUserDefaults().setObject((patientDetails?.objectForKey("patient_id")), forKey: PF_PatientIDOnDB)
+                PFGlobalConstants.setResumeVideoCount(Int((patientDetails?.objectForKey("resume_video"))! as! NSNumber))
+                let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
+                nextViewController.isResumeCameraViewEnabled = true
+                let nav = UINavigationController(rootViewController: nextViewController)
+                nav.navigationBarHidden = true
+                let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
+                UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+                    appDelegaet!.window?.rootViewController = nav
+                }) { (isCompleted) in
+                    self.view = nil
+                }
+            })
+        }
+        else {
+            self.dismissViewControllerAnimated(true, completion: {
+                let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                let patientsDetailsScreen = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
+                let nav = UINavigationController(rootViewController: patientsDetailsScreen)
+                nav.navigationBarHidden = true
+                let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
+                UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+                    appDelegaet!.window?.rootViewController = nav
+                }) { (isCompleted) in
+                    self.view = nil
+                }
+            })
+        }
+    }
+    
+    /**
+     Get resume patient list.
+     */
+    func getResumePatientList(complition:(isHavingList: Bool, patientList: NSArray?)->()) {
+        print("PatientScreen getResumePatientList begin")
+        let defaults = NSUserDefaults.standardUserDefaults()
+        var access_token: String!
+        var token_type: String!
+        access_token = defaults.stringForKey("access_token")
+        token_type = defaults.stringForKey("token_type")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "functionCall", label: "updatePatientMediaDetailsOnPortal", value: nil)
+        requestString = "\(baseURL)/get_resume_patient_list?Authorization=\(token_type)&access_token=\(access_token)"
+        print(requestString)
+        url1 = NSURL(string: requestString as String)!
+        urlRequest = NSMutableURLRequest(URL: url1)
+        urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
+        cameraModel!.getRequestParameterToGetResumePatientList(user)
+        Alamofire.request(urlRequest)
+            .responseJSON { response in
+                switch response.result {
+                case .Failure( let error):
+                    print(error)
+                case .Success(let responseObject):
+                    print(responseObject)
+                    if responseObject is NSDictionary {
+                        if let status = responseObject.objectForKey("status") as? String {
+                            if status == "Success" {
+                                if let patientList = responseObject.objectForKey("patients") as? NSArray {
+                                    if patientList.count != 0 {
+                                        complition(isHavingList: true, patientList: patientList)
+                                    }
+                                    else {
+                                        complition(isHavingList: false, patientList: nil)
+                                    }
+                                }
+                                else {
+                                    complition(isHavingList: false, patientList: nil)
+                                }
+                            }
+                            else {
+                                complition(isHavingList: false, patientList: nil)
+                            }
+                        }
+                        else {
+                            complition(isHavingList: false, patientList: nil)
+                        }
+                    }
+                    else {
+                        complition(isHavingList: false, patientList: nil)
+                    }
+                }
+                print("PatientScreen getRefreshToken end")
         }
     }
 }

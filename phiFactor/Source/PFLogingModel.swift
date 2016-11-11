@@ -34,7 +34,7 @@ class PFLogingModel: NSObject {
         let app_version : Int = Int(NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleVersion") as! String)!
         let parameters1 = [
                            "username": user,
-//                           "password": pass,
+                           "password": pass,
                            "client_id": "102216378240-rf6fjt3konig2fr3p1376gq4jrooqcdm",
                            "client_secret": "bYQU1LQAjaSQ1BH9j3zr7woO",
                            "grant_type": grandType,
@@ -76,7 +76,6 @@ class PFLogingModel: NSObject {
     
     func getRegisterDeviceParams(emailId : String) -> NSMutableURLRequest {
         let accessToken : String = NSUserDefaults.standardUserDefaults().objectForKey("deviceToken") as! String
-        print(accessToken)
         print("PFLogingModel getRegisterDeviceParams begin")
         let deviceId : String = (UIDevice.currentDevice().identifierForVendor?.UUIDString)!
         let parameters1 = [

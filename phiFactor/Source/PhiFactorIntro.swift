@@ -19,6 +19,11 @@ extension String {
         let emailTest  = NSPredicate(format: "SELF MATCHES %@", emailRegEx)
         return emailTest.evaluateWithObject(self)
     }
+    var isPassword: Bool {
+        let stricterFilterString = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&]{10,}"
+        let passwordTest = NSPredicate(format: "SELF MATCHES %@", stricterFilterString)
+        return passwordTest.evaluateWithObject(self)
+    }
 }
 extension UIView {
     /**
@@ -41,7 +46,7 @@ extension UIView {
 }
 
 
-class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPresentationControllerDelegate, ABPadLockScreenSetupViewControllerDelegate, ABPadLockScreenViewControllerDelegate {
+class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPresentationControllerDelegate, ABPadLockScreenSetupViewControllerDelegate, ABPadLockScreenViewControllerDelegate, PatientResumeDelegate {
 
     var logout: NSNumber!
     var warningmessage: String?
@@ -420,12 +425,12 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         }
         else {
 
-            if(self.username.text=="") {
+            if(self.username.text==""&&(self.password.text=="")) {
                 self.username.attributedPlaceholder = NSAttributedString(string: "Enter username",
                                                                          attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
-//                self.password.attributedPlaceholder = NSAttributedString(string: "Enter password",
-//                                                                         attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
-//                self.password.shake(4, withDelta: 5)
+                self.password.attributedPlaceholder = NSAttributedString(string: "Enter password",
+                                                                         attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
+                self.password.shake(4, withDelta: 5)
                 self.username.shake(4, withDelta: 5)
 
             }
@@ -435,12 +440,12 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                 self.username.shake(4, withDelta: 5)
 
             }
-//            else if(self.password.text=="") {
-//                self.password.attributedPlaceholder = NSAttributedString(string: "Enter password",
-//                                                                         attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
-//                self.password.shake(4, withDelta: 5)
-//
-//            }
+            else if(self.password.text=="") {
+                self.password.attributedPlaceholder = NSAttributedString(string: "Enter password",
+                                                                         attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
+                self.password.shake(4, withDelta: 5)
+
+            }
              else {
                 user=username.text!
                 pass=password.text!
@@ -950,6 +955,9 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         {
             self.restPasswordSuccessLabel.text = "Password should contains minimum 8 characters and one uppercase character and one lowercase character"
         }
+        else if (self.newPasswordTextField.text?.isPassword == false) {
+            self.restPasswordSuccessLabel.text = "Password should contains minimum 8 characters and one uppercase character and one lowercase character"
+        }
         else{
             let currentPassword = currentPasswordTextField.text
             let newPassword = newPasswordTextField.text
@@ -1043,7 +1051,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         print("IntroScreen userLoginService begin")
         PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "UserLoginService", value: nil)
         self.progessbarshow()
-        requestString = "\(baseURL)/login_dup"
+        requestString = "\(baseURL)/login"
         print(requestString)
         url1 = NSURL(string: requestString as String)!
         
@@ -1086,8 +1094,36 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                         defaults.setObject (access_token ,forKey: "access_token")
                         defaults.setObject(token_type, forKey: "token_type")
                         defaults.setObject(refresh_token, forKey: "refresh_token")
-                        defaults.setObject(user, forKey: PF_USERNAME)
-                        defaults.setObject(pass, forKey: PF_PASSWORD)
+                        self.getResumePatientList({ (isHavingList, patientList) in
+                            if isHavingList == true {
+                                let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                                let resumeListView = storyBoard.instantiateViewControllerWithIdentifier("ResumePatientListViewController") as! ResumePatientListViewController
+                                resumeListView.patientsArray = patientList
+//                                resumeListView.delegate = self
+                                let nav = UINavigationController(rootViewController: resumeListView)
+                                nav.navigationBarHidden = true
+//                                self.presentViewController(nav, animated: true, completion: nil)
+                                UIView.transitionWithView((APP_DELEGATE?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+                                    APP_DELEGATE!.window?.rootViewController = nav
+                                }) { (isCompleted) in
+                                    self.view = nil
+                                }
+                            }
+                            else {
+                                let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                                let patientsDetailsScreen = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
+                                let nav = UINavigationController(rootViewController: patientsDetailsScreen)
+                                nav.navigationBarHidden = true
+                                let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
+                                UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+                                    appDelegaet!.window?.rootViewController = nav
+                                }) { (isCompleted) in
+                                    self.view = nil
+                                }
+                            }
+                        })
+//                        defaults.setObject(user, forKey: PF_USERNAME)
+//                        defaults.setObject(pass, forKey: PF_PASSWORD)
 //                        let patientIDOnDB = defaults.integerForKey(PF_PatientIDOnDB)
 //                        if  patientIDOnDB != 0{
 //                            self.getPatientDetails(patientIDOnDB)
@@ -1104,16 +1140,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
 //                                self.view = nil
 //                            }
 //                        }
-                        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-                        let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
-                        let nav = UINavigationController(rootViewController: nextViewController)
-                        nav.navigationBarHidden = true
-                        let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
-                        UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
-                            appDelegaet!.window?.rootViewController = nav
-                        }) { (isCompleted) in
-                            self.view = nil
-                        }
+                        
                         
                     }
                     else if(httpStatusCode==400) {
@@ -1139,8 +1166,6 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                         self.warning.hidden=false
                         self.password.shake(4, withDelta: 5)
                         self.username.shake(4, withDelta: 5)
-                        
-                        
                         self.progressbarhidden()
                     }
                     else if(httpStatusCode==401) {
@@ -1200,7 +1225,6 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                         UIView.animateWithDuration(0.40, delay:0, options:UIViewAnimationOptions.CurveEaseInOut, animations:
                             {
                                 self.signinview.frame=setframepass;
-                                
                             }, completion:nil)
                         UIView.animateWithDuration(0.40, delay:0.39, options:UIViewAnimationOptions.CurveEaseInOut, animations:
                             {
@@ -1214,148 +1238,138 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
     
     func registerDeviceService(isFromSignInButton: Bool) {
         PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "RegisterDevice", value: nil)
-        self.progessbarshow()
-        let registerDeviceUrlString = "\(baseURL)/register_device"
-        let registerDeviceURl = NSURL(string: registerDeviceUrlString)
-        urlRequest = NSMutableURLRequest(URL: registerDeviceURl!)
-        urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
-        urlRequest = loginModel.getRegisterDeviceParams(user)
-        Alamofire.request(urlRequest).responseJSON { (response) in
-            switch response.result
-            {
-            case .Failure(let error):
-                let err = error as NSError
-                if err.code == -1009 {
-                    self.netwrkAlertLabel.text = networkErrorAlertText
-                    self.networkAlertViewAction()
-                }
-                else {
-                    self.netwrkAlertLabel.text = "There is an error occured."
-                    self.networkAlertViewAction()
-                }
-                self.progressbarhidden()
-                break
-            case .Success(let responseObject):
-                let httpStatusCode = response.response?.statusCode
-                print(httpStatusCode)
-                print(responseObject)
-                if(httpStatusCode==200) {
-                    let defaults = NSUserDefaults.standardUserDefaults()
-                    if let passcode = defaults.objectForKey("PF_Passcode") as? String {
-                        self.thePin = passcode
-                        PFGlobalConstants.authenticateUserByTouchID({ (status) in
-                            switch status{
-                            case .authorized:
-                                let response = responseObject as! NSDictionary
-                                let result = response.objectForKey("result")! as! String
-                                let message = response.objectForKey("message")! as! String
-                                if result == "Success"
-                                {
-                                    self.userLoginService()
-                                    self.warning.text = ""
-                                    self.warning.textColor = UIColor.lightGrayColor()
-                                }
-                                else
-                                {
-                                    self.warning.text = message
-                                    self.warning.textColor = UIColor.redColor()
-                                }
-                                break
-                            case .unAuthorized:
-                                self.warning.text = "Touch ID authentication failed."
-                                self.warning.textColor = UIColor.redColor()
-                                dispatch_async(dispatch_get_main_queue(), {
-                                    if(PFGlobalConstants.isPasscodeAvailable()) {
-                                        let lockScreen = ABPadLockScreenViewController(delegate: self, complexPin: false)
-                                        lockScreen.setAllowedAttempts(3)
-                                        lockScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
-                                        lockScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
-                                        isAuthorizationRequesting = true;
-                                        self.presentViewController(lockScreen, animated: true, completion: nil)
-                                    }
-                                    else
-                                    {
-                                        UIAlertView(title: "", message: "No registered passcode found.", delegate: nil, cancelButtonTitle: "Ok").show()
+        if let _ : String = NSUserDefaults.standardUserDefaults().objectForKey("deviceToken") as? String {
+            self.progessbarshow()
+            let registerDeviceUrlString = "\(baseURL)/register_device"
+            let registerDeviceURl = NSURL(string: registerDeviceUrlString)
+            urlRequest = NSMutableURLRequest(URL: registerDeviceURl!)
+            urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
+            urlRequest = loginModel.getRegisterDeviceParams(user)
+            Alamofire.request(urlRequest).responseJSON { (response) in
+                switch response.result
+                {
+                case .Failure(let error):
+                    let err = error as NSError
+                    if err.code == -1009 {
+                        self.netwrkAlertLabel.text = networkErrorAlertText
+                        self.networkAlertViewAction()
+                    }
+                    else {
+                        self.netwrkAlertLabel.text = "There is an error occured."
+                        self.networkAlertViewAction()
+                    }
+                    self.progressbarhidden()
+                    break
+                case .Success(let responseObject):
+                    let httpStatusCode = response.response?.statusCode
+                    print(httpStatusCode)
+                    print(responseObject)
+                    if(httpStatusCode==200) {
+                        let response = responseObject as! NSDictionary
+                        let result = response.objectForKey("result")! as! String
+                        let message = response.objectForKey("message")! as! String
+                        if result == "Success"
+                        {
+                            self.warning.text = ""
+                            self.warning.textColor = UIColor.lightGrayColor()
+                            let defaults = NSUserDefaults.standardUserDefaults()
+                            if let passcode = defaults.objectForKey("PF_Passcode") as? String {
+                                self.thePin = passcode
+                                PFGlobalConstants.authenticateUserByTouchID({ (status) in
+                                    switch status{
+                                    case .authorized:
+                                        self.userLoginService()
+                                        break
+                                    case .unAuthorized:
+                                        self.warning.text = "Touch ID authentication failed."
+                                        self.warning.textColor = UIColor.redColor()
+                                        dispatch_async(dispatch_get_main_queue(), {
+                                            if(PFGlobalConstants.isPasscodeAvailable()) {
+                                                let lockScreen = ABPadLockScreenViewController(delegate: self, complexPin: false)
+                                                lockScreen.setAllowedAttempts(3)
+                                                lockScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
+                                                lockScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
+                                                isAuthorizationRequesting = true;
+                                                self.presentViewController(lockScreen, animated: true, completion: nil)
+                                            }
+                                            else {
+                                                UIAlertView(title: "", message: "No registered passcode found.", delegate: nil, cancelButtonTitle: "Ok").show()
+                                            }
+                                        })
+                                        break
+                                    case .unKnown:
+                                        self.warning.text = "Check touch id configured and enabled on your device to begin."
+                                        self.warning.textColor = UIColor.redColor()
+                                        break
+                                    case .canceled:
+                                        break
                                     }
                                 })
-                                break
-                            case .unKnown:
-                                self.warning.text = "Check touch id configured and enabled on your device to begin."
-                                self.warning.textColor = UIColor.redColor()
-                                break
-                            case .canceled:
-                                break
                             }
-                        })
-                    }
-                    else
-                    {
-                        if isFromSignInButton
-                        {
-                            PFGlobalConstants.authenticateUserByTouchID({ (status) in
-                                switch status{
-                                case .authorized:
-                                    let response = responseObject as! NSDictionary
-                                    let result = response.objectForKey("result")! as! String
-                                    let message = response.objectForKey("message")! as! String
-                                    if result == "Success"
-                                    {
-                                        self.userLoginService()
-                                        self.warning.text = ""
-                                        self.warning.textColor = UIColor.lightGrayColor()
-                                    }
-                                    else
-                                    {
-                                        self.warning.text = message
-                                        self.warning.textColor = UIColor.redColor()
-                                    }
-                                    break
-                                case .unAuthorized:
-                                    self.warning.text = "Touch ID authentication failed."
-                                    self.warning.textColor = UIColor.redColor()
-                                    dispatch_async(dispatch_get_main_queue(), {
-                                        if(PFGlobalConstants.isPasscodeAvailable()) {
-                                            let lockScreen = ABPadLockScreenViewController(delegate: self, complexPin: false)
-                                            lockScreen.setAllowedAttempts(3)
-                                            lockScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
-                                            lockScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
-                                            isAuthorizationRequesting = true;
-                                            self.presentViewController(lockScreen, animated: true, completion: nil)
-                                        }
-                                        else
-                                        {
-                                            UIAlertView(title: "", message: "No registered passcode found.", delegate: nil, cancelButtonTitle: "Ok").show()
+                            else
+                            {
+                                if isFromSignInButton
+                                {
+                                    PFGlobalConstants.authenticateUserByTouchID({ (status) in
+                                        switch status{
+                                        case .authorized:
+                                            self.userLoginService()
+                                            break
+                                        case .unAuthorized:
+                                            self.warning.text = "Touch ID authentication failed."
+                                            self.warning.textColor = UIColor.redColor()
+                                            dispatch_async(dispatch_get_main_queue(), {
+                                                if(PFGlobalConstants.isPasscodeAvailable()) {
+                                                    let lockScreen = ABPadLockScreenViewController(delegate: self, complexPin: false)
+                                                    lockScreen.setAllowedAttempts(3)
+                                                    lockScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
+                                                    lockScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
+                                                    isAuthorizationRequesting = true;
+                                                    self.presentViewController(lockScreen, animated: true, completion: nil)
+                                                }
+                                                else {
+                                                    UIAlertView(title: "", message: "No registered passcode found.", delegate: nil, cancelButtonTitle: "Ok").show()
+                                                }
+                                            })
+                                            break
+                                        case .unKnown:
+                                            self.warning.text = "Check touch id configured and enabled on your device to begin."
+                                            self.warning.textColor = UIColor.redColor()
+                                            break
+                                        case .canceled:
+                                            break
                                         }
                                     })
-                                    break
-                                case .unKnown:
-                                    self.warning.text = "Check touch id configured and enabled on your device to begin."
-                                    self.warning.textColor = UIColor.redColor()
-                                    break
-                                case .canceled:
-                                    break
                                 }
-                            })
+                            }
+                        }
+                        else
+                        {
+                            self.warning.text = message
+                            self.warning.textColor = UIColor.redColor()
                         }
                     }
+                    else if httpStatusCode == 201 {
+                        let response = responseObject as! NSDictionary
+                        let message = response.objectForKey("message")! as! String
+                        self.warning.text = message
+                        self.warning.textColor = UIColor.redColor()
+                    }
+                    else if httpStatusCode == 400 {
+                        let response = responseObject as! NSDictionary
+                        let message = response.objectForKey("message")! as! String
+                        self.warning.text = message
+                        self.warning.textColor = UIColor.redColor()
+                    }
+                    self.progressbarhidden()
+                    break
                 }
-                else if httpStatusCode == 201 {
-                    let response = responseObject as! NSDictionary
-                    let message = response.objectForKey("message")! as! String
-                    self.warning.text = message
-                    self.warning.textColor = UIColor.redColor()
-                }
-                else if httpStatusCode == 400 {
-                    let response = responseObject as! NSDictionary
-                    let message = response.objectForKey("message")! as! String
-                    self.warning.text = message
-                    self.warning.textColor = UIColor.redColor()
-                }
-                self.progressbarhidden()
-                break
             }
         }
-        
+        else {
+            self.warning.text = "Allow application for push notification to begin login.."
+            self.warning.textColor = UIColor.redColor()
+        }        
     }
     
     
@@ -1502,7 +1516,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         let defaults = NSUserDefaults.standardUserDefaults()
         let patientID = defaults.integerForKey(PF_PatientIDOnDB)
         let refresh_token = defaults.stringForKey("refresh_token")! as String
-        requestString = "\(baseURL)/login_dup"
+        requestString = "\(baseURL)/login"
         print(requestString)
         let clientID = "102216378240-rf6fjt3konig2fr3p1376gq4jrooqcdm"
         let clientSecret = "bYQU1LQAjaSQ1BH9j3zr7woO"
@@ -1574,5 +1588,101 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         print("Unlock Cancled")
         isAuthorizationRequesting = false;
         dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    /**
+     Get resume patient list.
+     */
+    func getResumePatientList(complition:(isHavingList: Bool, patientList: NSArray?)->()) {
+        print("PatientScreen getResumePatientList begin")
+        let defaults = NSUserDefaults.standardUserDefaults()
+        var access_token: String!
+        var token_type: String!
+        access_token = defaults.stringForKey("access_token")
+        token_type = defaults.stringForKey("token_type")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "functionCall", label: "updatePatientMediaDetailsOnPortal", value: nil)
+        requestString = "\(baseURL)/get_resume_patient_list?Authorization=\(token_type)&access_token=\(access_token)"
+        print(requestString)
+        url1 = NSURL(string: requestString as String)!
+        urlRequest = NSMutableURLRequest(URL: url1)
+        urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
+        cameraModel!.getRequestParameterToGetResumePatientList(user)
+        Alamofire.request(urlRequest)
+            .responseJSON { response in
+                switch response.result {
+                case .Failure( let error):
+                    print(error)
+                case .Success(let responseObject):
+                    print(responseObject)
+                    if responseObject is NSDictionary {
+                        if let status = responseObject.objectForKey("status") as? String {
+                            if status == "Success" {
+                                if let patientList = responseObject.objectForKey("patients") as? NSArray {
+                                    if patientList.count != 0 {
+                                        complition(isHavingList: true, patientList: patientList)
+                                    }
+                                    else {
+                                        complition(isHavingList: false, patientList: nil)
+                                    }
+                                }
+                                else {
+                                    complition(isHavingList: false, patientList: nil)
+                                }
+                            }
+                            else {
+                                complition(isHavingList: false, patientList: nil)
+                            }
+                        }
+                        else {
+                            complition(isHavingList: false, patientList: nil)
+                        }
+                    }
+                    else {
+                        complition(isHavingList: false, patientList: nil)
+                    }
+                }
+                print("PatientScreen getRefreshToken end")
+        }
+    }
+    
+    func resumePatientStatus(status: Bool, patientDetails: NSDictionary?) {
+        if  status == true {
+            self.dismissViewControllerAnimated(true, completion: {
+                NSUserDefaults.standardUserDefaults().setObject((patientDetails?.objectForKey("patient_id")), forKey: "patient_id")
+                NSUserDefaults.standardUserDefaults().setObject((patientDetails?.objectForKey("patient_id")), forKey: PF_PatientIDOnDB)
+                PFGlobalConstants.setResumeVideoCount(Int((patientDetails?.objectForKey("resume_video"))! as! NSNumber))
+                let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
+                nextViewController.isResumeCameraViewEnabled = true
+                let nav = UINavigationController(rootViewController: nextViewController)
+                nav.navigationBarHidden = true
+                let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
+                UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+                    appDelegaet!.window?.rootViewController = nav
+                }) { (isCompleted) in
+                    self.view = nil
+                }
+            })
+        }
+        else {
+            self.dismissViewControllerAnimated(true, completion: { 
+                let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                let patientsDetailsScreen = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
+                let nav = UINavigationController(rootViewController: patientsDetailsScreen)
+                nav.navigationBarHidden = true
+                let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
+                UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+                    appDelegaet!.window?.rootViewController = nav
+                }) { (isCompleted) in
+                    self.view = nil
+                }
+            })
+        }
+    }
+    
+    func isValidPassword(passwordString: String) -> Bool {
+        let stricterFilterString = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&]{10,}"
+        let passwordTest = NSPredicate(format: "SELF MATCHES %@", stricterFilterString)
+        return passwordTest.evaluateWithObject(passwordString)
     }
 }

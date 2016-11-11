@@ -157,6 +157,11 @@
 		AE3067EF1DAD12480062408E /* status_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = AE3067E21DAD12480062408E /* status_icon.png */; };
 		AE3067F01DAD12480062408E /* upload_button.png in Resources */ = {isa = PBXBuildFile; fileRef = AE3067E31DAD12480062408E /* upload_button.png */; };
 		AE3067F11DAD12480062408E /* video_name_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = AE3067E41DAD12480062408E /* video_name_icon.png */; };
+		AE6C79851DD0B2190016341C /* skip_button.png in Resources */ = {isa = PBXBuildFile; fileRef = AE6C79841DD0B2190016341C /* skip_button.png */; };
+		AE6C79871DD0B2500016341C /* continue_button.png in Resources */ = {isa = PBXBuildFile; fileRef = AE6C79861DD0B2500016341C /* continue_button.png */; };
+		AE7EB1341DCCD0C80032B8AB /* ResumePatientListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE7EB1331DCCD0C80032B8AB /* ResumePatientListViewController.swift */; };
+		AE7EB1361DCCD65C0032B8AB /* ResumePatientDetailsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE7EB1351DCCD65C0032B8AB /* ResumePatientDetailsCell.swift */; };
+		AEB2ECFA1DD1AAE30098323A /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AEB2ECF91DD1AAE30098323A /* StoreKit.framework */; };
 		F429BDE01D0E763E0050802E /* CV_algos in Resources */ = {isa = PBXBuildFile; fileRef = F429BDDF1D0E763E0050802E /* CV_algos */; };
 		F429BDE61D0FE6910050802E /* border.png in Resources */ = {isa = PBXBuildFile; fileRef = F429BDE51D0FE6910050802E /* border.png */; };
 		F429BDEC1D102A360050802E /* fullVideo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = F429BDE71D102A070050802E /* fullVideo.mp4 */; };
@@ -426,6 +431,12 @@
 		AE3067E21DAD12480062408E /* status_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = status_icon.png; sourceTree = "<group>"; };
 		AE3067E31DAD12480062408E /* upload_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = upload_button.png; sourceTree = "<group>"; };
 		AE3067E41DAD12480062408E /* video_name_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = video_name_icon.png; sourceTree = "<group>"; };
+		AE6C79841DD0B2190016341C /* skip_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = skip_button.png; sourceTree = "<group>"; };
+		AE6C79861DD0B2500016341C /* continue_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = continue_button.png; sourceTree = "<group>"; };
+		AE7EB1331DCCD0C80032B8AB /* ResumePatientListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResumePatientListViewController.swift; sourceTree = "<group>"; };
+		AE7EB1351DCCD65C0032B8AB /* ResumePatientDetailsCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResumePatientDetailsCell.swift; sourceTree = "<group>"; };
+		AEB2ECF91DD1AAE30098323A /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		AEB2ECFB1DD1AF300098323A /* PhiFactor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = PhiFactor.entitlements; path = PhiFactor/PhiFactor.entitlements; sourceTree = "<group>"; };
 		C23C38C1C14E1F1C977E3B1B /* Pods_PhiFactor.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PhiFactor.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F429BDDF1D0E763E0050802E /* CV_algos */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CV_algos; sourceTree = "<group>"; };
 		F429BDE51D0FE6910050802E /* border.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = border.png; sourceTree = "<group>"; };
@@ -442,7 +453,7 @@
 		F43367A71D22DFE6008CE401 /* launch_screen.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = launch_screen.png; path = Menu/launch_screen.png; sourceTree = "<group>"; };
 		F43367A91D22E2EC008CE401 /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
 		F43751B71CF74AB80040DF07 /* upload-512.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "upload-512.png"; sourceTree = "<group>"; };
-		F446CC481CF6446400EE918E /* PhiFactorDEV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhiFactorDEV.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F446CC481CF6446400EE918E /* PhiFactorPROD.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhiFactorPROD.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F446CC501CF6446400EE918E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		F446CC521CF6446400EE918E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../Assets.xcassets; sourceTree = "<group>"; };
 		F446CCCF1CF645FF00EE918E /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -529,6 +540,7 @@
 				18435C061D3546280055CDB1 /* algoBucket_boost_v_1_0.a in Frameworks */,
 				654BC60FA870BB2D37F01042 /* Pods_PhiFactor.framework in Frameworks */,
 				18F3FA131D6F6C4C00802741 /* libalgoBucket_QualityChecker_V_1_5.a in Frameworks */,
+				AEB2ECFA1DD1AAE30098323A /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -642,6 +654,7 @@
 				F446CCDA1CF645FF00EE918E /* PFHowtotakevideo.swift */,
 				1832DC5F1D421866005264D2 /* VideoPreviewView.swift */,
 				AE3067A11DAD11F90062408E /* PFUploadstatusViewController.swift */,
+				AE7EB1331DCCD0C80032B8AB /* ResumePatientListViewController.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -665,6 +678,7 @@
 				F446CCD01CF645FF00EE918E /* AVCamPreviewView.swift */,
 				F446CCDE1CF645FF00EE918E /* PFSiginuptablecellTableViewCell.swift */,
 				AE30679F1DAD11EB0062408E /* PFUploadTableViewCell.swift */,
+				AE7EB1351DCCD65C0032B8AB /* ResumePatientDetailsCell.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -688,6 +702,7 @@
 		69CB599B37EE946C6751B7DE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AEB2ECF91DD1AAE30098323A /* StoreKit.framework */,
 				18D09DC91D4F9D18005C1BF8 /* Fabric.framework */,
 				18D09DCA1D4F9D18005C1BF8 /* Crashlytics.framework */,
 				18D09D9F1D4F6D50005C1BF8 /* libGoogleAnalytics.a */,
@@ -773,6 +788,7 @@
 		F446CC3F1CF6446400EE918E = {
 			isa = PBXGroup;
 			children = (
+				AEB2ECFB1DD1AF300098323A /* PhiFactor.entitlements */,
 				F446CC4A1CF6446400EE918E /* phiFactor */,
 				F446CC491CF6446400EE918E /* Products */,
 				87AD75602B8078D08047D504 /* Pods */,
@@ -783,7 +799,7 @@
 		F446CC491CF6446400EE918E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F446CC481CF6446400EE918E /* PhiFactorDEV.app */,
+				F446CC481CF6446400EE918E /* PhiFactorPROD.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -845,6 +861,8 @@
 				AE3067D71DAD12480062408E /* Uploadscreen */,
 				1846F3261D1ACF1A00674F49 /* Menu */,
 				F43367A71D22DFE6008CE401 /* launch_screen.png */,
+				AE6C79861DD0B2500016341C /* continue_button.png */,
+				AE6C79841DD0B2190016341C /* skip_button.png */,
 				184102E51D5E364800539302 /* main_bg_layer1.png */,
 				182E96F61D537DD700140C34 /* passcode.png */,
 				182E96F71D537DD700140C34 /* report_icon.png */,
@@ -1030,7 +1048,7 @@
 			);
 			name = PhiFactor;
 			productName = phiFactor;
-			productReference = F446CC481CF6446400EE918E /* PhiFactorDEV.app */;
+			productReference = F446CC481CF6446400EE918E /* PhiFactorPROD.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -1048,6 +1066,9 @@
 						DevelopmentTeam = 26P5KDRV39;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+							com.apple.InAppPurchase = {
 								enabled = 1;
 							};
 							com.apple.Push = {
@@ -1186,8 +1207,10 @@
 				F4E9E8FC1CF74D4700B8F839 /* settings_icon.png in Resources */,
 				F4BDEA461D058833008846BC /* PFC_keep1.png in Resources */,
 				18435BE91D34F16F0055CDB1 /* toolbar-icon-crop.png in Resources */,
+				AE6C79871DD0B2500016341C /* continue_button.png in Resources */,
 				F43227281D01796A00054DD2 /* PFC_dotted_circleicon.png in Resources */,
 				183782291D40D7E7001DED97 /* focusIndicator@2x.png in Resources */,
+				AE6C79851DD0B2190016341C /* skip_button.png in Resources */,
 				F446CDC91CF645FF00EE918E /* PFSd_Clinical_Trail.png in Resources */,
 				F446CDBF1CF645FF00EE918E /* pasw_icon2.png in Resources */,
 				F4BDEA3E1D049132008846BC /* PFC_camera_select.png in Resources */,
@@ -1358,6 +1381,7 @@
 				182DFCD91D755D4500A1ED2C /* PFIdle.swift in Sources */,
 				189DC2801D5071DF00240D3E /* ABPadLockScreenView.m in Sources */,
 				AE3067CA1DAD121C0062408E /* FSCalendar.m in Sources */,
+				AE7EB1341DCCD0C80032B8AB /* ResumePatientListViewController.swift in Sources */,
 				AE3067A21DAD11F90062408E /* PFUploadstatusViewController.swift in Sources */,
 				AE3067D31DAD121C0062408E /* FSCalendarScopeHandle.m in Sources */,
 				AE3067A41DAD12030062408E /* PFUploadStatusModel.swift in Sources */,
@@ -1365,6 +1389,7 @@
 				183C9A821D1D5B880076F207 /* PFCameraScreenModel.swift in Sources */,
 				F446CD9F1CF645FF00EE918E /* PhiFactorIntro.swift in Sources */,
 				182EFFC91D2B80370098C732 /* PFPatientDetailsModel.swift in Sources */,
+				AE7EB1361DCCD65C0032B8AB /* ResumePatientDetailsCell.swift in Sources */,
 				18435BF11D34F16F0055CDB1 /* MAImagePickerController.mm in Sources */,
 				18435BFA1D351E720055CDB1 /* IPDFCameraViewController.m in Sources */,
 				AE3067C61DAD121C0062408E /* CALayer+FSExtension.m in Sources */,
@@ -1507,9 +1532,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_ENTITLEMENTS = PhiFactor/PhiFactor.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer: Shanthoshi priya sanmugasundaram (8CZS69S55P)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Shanthoshi priya sanmugasundaram (8CZS69S55P)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 26P5KDRV39;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1530,9 +1557,10 @@
 					"$(PROJECT_DIR)",
 				);
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hubino.PhiFactorDevAPNS;
-				PRODUCT_NAME = PhiFactorDEV;
-				PROVISIONING_PROFILE = "3ae560b2-df80-48b5-9e42-1bc1a2520041";
+				PRODUCT_BUNDLE_IDENTIFIER = com.hubino.PhiFactorPrdAPNS;
+				PRODUCT_NAME = PhiFactorPROD;
+				PROVISIONING_PROFILE = "e0014a4b-9832-4675-bb8a-0324d30b953c";
+				PROVISIONING_PROFILE_SPECIFIER = "PhiFactorPrdAPNS Sep 23";
 				SWIFT_OBJC_BRIDGING_HEADER = "phiFactor/Source/Obj-c/PhiFactor-Bridging-Header.h";
 			};
 			name = Debug;
@@ -1543,8 +1571,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_ENTITLEMENTS = PhiFactor/PhiFactor.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer: Shanthoshi priya sanmugasundaram (8CZS69S55P)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Shanthoshi priya sanmugasundaram (8CZS69S55P)";
+				DEVELOPMENT_TEAM = 26P5KDRV39;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1565,9 +1595,10 @@
 					"$(PROJECT_DIR)",
 				);
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hubino.PhiFactorDevAPNS;
-				PRODUCT_NAME = PhiFactorDEV;
-				PROVISIONING_PROFILE = "3ae560b2-df80-48b5-9e42-1bc1a2520041";
+				PRODUCT_BUNDLE_IDENTIFIER = com.hubino.PhiFactorPrdAPNS;
+				PRODUCT_NAME = PhiFactorPROD;
+				PROVISIONING_PROFILE = "e0014a4b-9832-4675-bb8a-0324d30b953c";
+				PROVISIONING_PROFILE_SPECIFIER = "PhiFactorPrdAPNS Sep 23";
 				SWIFT_OBJC_BRIDGING_HEADER = "phiFactor/Source/Obj-c/PhiFactor-Bridging-Header.h";
 			};
 			name = Release;
