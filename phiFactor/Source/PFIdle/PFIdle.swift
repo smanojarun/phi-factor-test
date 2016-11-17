@@ -51,7 +51,7 @@ class PFIdle: UIApplication, ABPadLockScreenViewControllerDelegate
     func idle_timer_exceeded()
     {
         inactiveTime = inactiveTime + g_secs
-        if inactiveTime == PF_MaximumTimeLimit {
+        if inactiveTime == PFIdleTimeLimitMaximum {
             print( "App Inactive!" )
             APP_DELEGATE?.inactiveDelegate?.hideInactiveAlert()
             let currentViewController = UIApplication.topViewController()
@@ -91,9 +91,9 @@ class PFIdle: UIApplication, ABPadLockScreenViewControllerDelegate
                 })
             }
         }
-        else if inactiveTime > PF_MinimumTimeLimit && inactiveTime < PF_MaximumTimeLimit{
-            let min = Int((PF_MaximumTimeLimit-inactiveTime)/60)
-            let sec = Int((PF_MaximumTimeLimit-inactiveTime)%60)
+        else if inactiveTime > PFIdleTimeLimitMinimum && inactiveTime < PFIdleTimeLimitMaximum{
+            let min = Int((PFIdleTimeLimitMaximum-inactiveTime)/60)
+            let sec = Int((PFIdleTimeLimitMaximum-inactiveTime)%60)
             if min == 0 && sec == 0 {
                 APP_DELEGATE?.inactiveDelegate?.hideInactiveAlert()
             }
@@ -112,7 +112,8 @@ class PFIdle: UIApplication, ABPadLockScreenViewControllerDelegate
     //MARK: Lock Screen Delegate
     func padLockScreenViewController(padLockScreenViewController: ABPadLockScreenViewController!, validatePin pin: String!) -> Bool {
         print("Validating Pin \(pin)")
-        let thePin = NSUserDefaults.standardUserDefaults().stringForKey("PF_Passcode")
+        let passcode = PFPassCode.stringByReplacingOccurrencesOfString("X", withString: user)
+        let thePin = NSUserDefaults.standardUserDefaults().stringForKey(passcode)
         return thePin == pin
     }
     

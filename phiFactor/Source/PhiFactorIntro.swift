@@ -681,12 +681,10 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                             if response.response?.statusCode == 401
                             {
                                 self.emailID.attributedPlaceholder = NSAttributedString(string: "Enter email id",   attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
-                                if let message = responseDict?.objectForKey("message") as? String
-                                {
+                                if let message = responseDict?.objectForKey("message") as? String {
                                     self.warninforpassword.text = message
                                 }
-                                else
-                                {
+                                else {
                                     self.warninforpassword.text = "Enter valid email id"
                                 }
                                 
@@ -1094,6 +1092,16 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                         defaults.setObject (access_token ,forKey: "access_token")
                         defaults.setObject(token_type, forKey: "token_type")
                         defaults.setObject(refresh_token, forKey: "refresh_token")
+                        let docScanStatus = PFDocScan.stringByReplacingOccurrencesOfString("X", withString: user)
+                        let qualityCheckStatus = PFQualityCheck.stringByReplacingOccurrencesOfString("X", withString: user)
+                        let isDocScanOn = NSUserDefaults.standardUserDefaults().objectForKey(docScanStatus)
+                        if isDocScanOn == nil {
+                            NSUserDefaults.standardUserDefaults().setBool(false, forKey: docScanStatus)
+                        }
+                        let isQualityCheckOn = NSUserDefaults.standardUserDefaults().objectForKey(qualityCheckStatus)
+                        if isQualityCheckOn == nil {
+                            NSUserDefaults.standardUserDefaults().setBool(true, forKey: qualityCheckStatus)
+                        }
                         self.getResumePatientList({ (isHavingList, patientList) in
                             if isHavingList == true {
                                 let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
@@ -1152,12 +1160,10 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                         
                         self.password.attributedPlaceholder = NSAttributedString(string: "Enter valid password",
                             attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
-                        if let message = responseDict?.objectForKey("error_description") as? String
-                        {
+                        if let message = responseDict?.objectForKey("error_description") as? String {
                             self.warning.text = message
                         }
-                        else
-                        {
+                        else {
                             self.warning.text = "Enter valid username and password"
                         }
                         self.warning.textColor = UIColor.redColor()
@@ -1178,12 +1184,10 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                         self.password.attributedPlaceholder = NSAttributedString(string: "Enter valid password",
                             attributes: [NSForegroundColorAttributeName: UIColor.redColor(), NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
                         
-                        if let message = responseDict?.objectForKey("error_description") as? String
-                        {
+                        if let message = responseDict?.objectForKey("error_description") as? String {
                             self.warning.text = message
                         }
-                        else
-                        {
+                        else {
                             self.warning.text = "Enter valid username and password"
                         }
                         self.warning.textColor = UIColor.redColor()
@@ -1268,12 +1272,13 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                         let response = responseObject as! NSDictionary
                         let result = response.objectForKey("result")! as! String
                         let message = response.objectForKey("message")! as! String
-                        if result == "Success"
-                        {
+                        if result == "Success" {
                             self.warning.text = ""
                             self.warning.textColor = UIColor.lightGrayColor()
                             let defaults = NSUserDefaults.standardUserDefaults()
-                            if let passcode = defaults.objectForKey("PF_Passcode") as? String {
+                            let passcodeKey = PFPassCode.stringByReplacingOccurrencesOfString("X", withString: user)
+                            print(passcodeKey)
+                            if let passcode = defaults.objectForKey(passcodeKey) as? String {
                                 self.thePin = passcode
                                 PFGlobalConstants.authenticateUserByTouchID({ (status) in
                                     switch status{
@@ -1306,10 +1311,8 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                                     }
                                 })
                             }
-                            else
-                            {
-                                if isFromSignInButton
-                                {
+                            else {
+                                if isFromSignInButton {
                                     PFGlobalConstants.authenticateUserByTouchID({ (status) in
                                         switch status{
                                         case .authorized:
@@ -1343,8 +1346,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                                 }
                             }
                         }
-                        else
-                        {
+                        else {
                             self.warning.text = message
                             self.warning.textColor = UIColor.redColor()
                         }
@@ -1398,8 +1400,8 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
             appDelegaet!.window?.rootViewController = nav
         }) { (isCompleted) in
             self.view = nil
-            NSUserDefaults.standardUserDefaults().removeObjectForKey(PF_PatientIDOnDB)
-            NSUserDefaults.standardUserDefaults().removeObjectForKey(PF_ResumeVideoCount)
+            NSUserDefaults.standardUserDefaults().removeObjectForKey(PFPatientIDOnDB)
+            NSUserDefaults.standardUserDefaults().removeObjectForKey(PFResumeVideoCount)
         }
     }
     
@@ -1494,8 +1496,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                                 self.showResumeSessionAlertView()
                             }
                         }
-                        else
-                        {
+                        else {
 
                         }
                     }
@@ -1514,7 +1515,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         print("PatientScreen getRefreshToken begin")
         PFGlobalConstants.sendEventWithCatogory("background", action: "functionCall", label: "refreshToken", value: nil)
         let defaults = NSUserDefaults.standardUserDefaults()
-        let patientID = defaults.integerForKey(PF_PatientIDOnDB)
+        let patientID = defaults.integerForKey(PFPatientIDOnDB)
         let refresh_token = defaults.stringForKey("refresh_token")! as String
         requestString = "\(baseURL)/login"
         print(requestString)
@@ -1649,7 +1650,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         if  status == true {
             self.dismissViewControllerAnimated(true, completion: {
                 NSUserDefaults.standardUserDefaults().setObject((patientDetails?.objectForKey("patient_id")), forKey: "patient_id")
-                NSUserDefaults.standardUserDefaults().setObject((patientDetails?.objectForKey("patient_id")), forKey: PF_PatientIDOnDB)
+                NSUserDefaults.standardUserDefaults().setObject((patientDetails?.objectForKey("patient_id")), forKey: PFPatientIDOnDB)
                 PFGlobalConstants.setResumeVideoCount(Int((patientDetails?.objectForKey("resume_video"))! as! NSNumber))
                 let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
                 let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen

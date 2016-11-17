@@ -56,14 +56,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             let notificationSettings = UIUserNotificationSettings(forTypes: [.Badge, .Sound, .Alert], categories: nil)
             application.registerUserNotificationSettings(notificationSettings)
         }
-        let isDocScanOn = NSUserDefaults.standardUserDefaults().objectForKey("isDocScanOn")
-        if isDocScanOn == nil {
-            NSUserDefaults.standardUserDefaults().setBool(false, forKey: PF_QUALITYCHECK)
-        }
-        let isQualityCheckOn = NSUserDefaults.standardUserDefaults().objectForKey(PF_QUALITYCHECK)
-        if isQualityCheckOn == nil {
-            NSUserDefaults.standardUserDefaults().setBool(true, forKey: PF_QUALITYCHECK)
-        }
         Fabric.with([Crashlytics.self])
         Crashlytics.sharedInstance().setUserIdentifier(UIDevice.currentDevice().identifierForVendor?.UUIDString)
         
@@ -79,7 +71,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         gaiInstance.trackUncaughtExceptions = true  // report uncaught exceptions
 //        gaiInstance.logger.logLevel = GAILogLevel.Verbose  // remove before app release
         
-        PFGlobalConstants.environment(.Production)
+        PFGlobalConstants.environment(.Staging)
         
         print("AppDelegate didFinishLaunchingWithOptions end")
         return true
@@ -247,7 +239,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     //MARK: Lock Screen Delegate
     func padLockScreenViewController(padLockScreenViewController: ABPadLockScreenViewController!, validatePin pin: String!) -> Bool {
         print("Validating Pin \(pin)")
-        let thePin = NSUserDefaults.standardUserDefaults().stringForKey("PF_Passcode")
+        let passcode = PFPassCode.stringByReplacingOccurrencesOfString("X", withString: user)
+        let thePin = NSUserDefaults.standardUserDefaults().stringForKey(passcode)
         return thePin == pin
     }
     

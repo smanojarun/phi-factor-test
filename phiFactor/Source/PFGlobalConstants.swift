@@ -43,11 +43,13 @@ let PhiFactorIntroScreenName = "PhiFactorIntro"
 let VideoPreviewViewScreenName = "PFVideoPreviewView"
 //let PF_USERNAME = "pfUserName"
 //let PF_PASSWORD = "pfPassword"
-let PF_QUALITYCHECK = "isQualityCheckOn"
-let PF_PatientIDOnDB = "pfPatientIDOnDB"
-let PF_ResumeVideoCount = "pfResumeVideoCount"
-let PF_MinimumTimeLimit = 60.0
-let PF_MaximumTimeLimit = 300.0
+let PFPassCode = "passcode_X"
+let PFQualityCheck = "isQualityCheckOn_X"
+let PFDocScan = "isDocScanOn_X"
+let PFPatientIDOnDB = "patientIDOnDB"
+let PFResumeVideoCount = "resumeVideoCount"
+let PFIdleTimeLimitMinimum = 60.0
+let PFIdleTimeLimitMaximum = 300.0
 var isAuthorizationRequesting = false;
 
 enum authenticateStatus {
@@ -254,11 +256,11 @@ class PFGlobalConstants: NSObject {
     }
 
     class func setResumeVideoCount(count: Int) {
-        NSUserDefaults.standardUserDefaults().setInteger(count, forKey: PF_ResumeVideoCount)
+        NSUserDefaults.standardUserDefaults().setInteger(count, forKey: PFResumeVideoCount)
         NSUserDefaults.standardUserDefaults().synchronize()
     }
     class func removeResumeVideoCount() {
-        NSUserDefaults.standardUserDefaults().removeObjectForKey(PF_ResumeVideoCount)
+        NSUserDefaults.standardUserDefaults().removeObjectForKey(PFResumeVideoCount)
         NSUserDefaults.standardUserDefaults().synchronize()
     }
     class func logoutUser()
@@ -283,7 +285,8 @@ class PFGlobalConstants: NSObject {
     }
     class func isPasscodeAvailable() ->Bool
     {
-        return NSUserDefaults.standardUserDefaults().stringForKey("PF_Passcode") != nil ? true : false
+        let passcode = PFPassCode.stringByReplacingOccurrencesOfString("X", withString: user)
+        return NSUserDefaults.standardUserDefaults().stringForKey(passcode) != nil ? true : false
     }
     class func environment(environment: appEnvironment) {
         switch environment {

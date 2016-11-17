@@ -178,7 +178,7 @@ class PFPatientDetailsModel: NSObject {
         var document_url = ""
         var patient_id = ""
         let defaults = NSUserDefaults.standardUserDefaults()
-        if let temp = defaults.objectForKey(PF_PatientIDOnDB) as? String
+        if let temp = defaults.objectForKey(PFPatientIDOnDB) as? String
         {
             patient_id = temp
         }

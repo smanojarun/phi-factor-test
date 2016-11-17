@@ -212,7 +212,7 @@ class PFCameraScreenModel: NSObject {
                     defaults.removeObjectForKey("ethen_id")
                     defaults.removeObjectForKey("lan_id")
                     defaults.removeObjectForKey("encounterID")
-                    defaults.removeObjectForKey(PF_PatientIDOnDB)
+                    defaults.removeObjectForKey(PFPatientIDOnDB)
                 }
                 print("PFCameraScreenModel registerPatient end")
         }

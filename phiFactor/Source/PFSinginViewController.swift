@@ -81,7 +81,8 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
             alertMessageLabel.text = videoUploadingAlertText
             showUploadStatusAlert()
         }
-        let isDocScanOn = NSUserDefaults.standardUserDefaults().boolForKey("isDocScanOn")
+        let docScanStatus = PFDocScan.stringByReplacingOccurrencesOfString("X", withString: user)
+        let isDocScanOn = NSUserDefaults.standardUserDefaults().boolForKey(docScanStatus)
         if isDocScanOn != false
         {
             docScanSwitch.setOn(true, animated: false)
@@ -90,7 +91,8 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
         {
             docScanSwitch.setOn(false, animated: false)
         }
-        let isQualityCheckOn = NSUserDefaults.standardUserDefaults().boolForKey(PF_QUALITYCHECK)
+        let qualityCheckStatus = PFQualityCheck.stringByReplacingOccurrencesOfString("X", withString: user)
+        let isQualityCheckOn = NSUserDefaults.standardUserDefaults().boolForKey(qualityCheckStatus)
         if isQualityCheckOn == true
         {
             qualityCheckSwitch.setOn(true, animated: false)
@@ -1336,15 +1338,16 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
     @IBAction func docScanSwitcAction(sender: SevenSwitch) {
         print("PatientScreen docScanSwitcAction begin")
         let defaults = NSUserDefaults.standardUserDefaults()
+        let docScanStatus = PFDocScan.stringByReplacingOccurrencesOfString("X", withString: user)
         if docScanSwitch.isOn()
         {
-            defaults.setBool(true, forKey: "isDocScanOn")
+            defaults.setBool(true, forKey: docScanStatus)
             defaults.synchronize()
             print("isDocScanOn switched On")
         }
         else
         {
-            defaults.setBool(false, forKey: "isDocScanOn")
+            defaults.setBool(false, forKey: docScanStatus)
             defaults.synchronize()
             print("isDocScanOn switched off")
         }
@@ -1353,15 +1356,16 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
     @IBAction func qualityCheckSwitchAction(sender: SevenSwitch) {
         print("PatientScreen qualityCheckSwitchAction begin")
         let defaults = NSUserDefaults.standardUserDefaults()
+        let qualityCheckStatus = PFQualityCheck.stringByReplacingOccurrencesOfString("X", withString: user)
         if qualityCheckSwitch.isOn()
         {
-            defaults.setBool(true, forKey: PF_QUALITYCHECK)
+            defaults.setBool(true, forKey: qualityCheckStatus)
             defaults.synchronize()
             print("isQualityCheck switched On")
         }
         else
         {
-            defaults.setBool(false, forKey: PF_QUALITYCHECK)
+            defaults.setBool(false, forKey: qualityCheckStatus)
             defaults.synchronize()
             print("isQualityCheck switched off")
         }
@@ -1371,7 +1375,8 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
         
         print("PatientScreen setPasscodeAction begin")
         let defaults = NSUserDefaults.standardUserDefaults()
-        if let passcode = defaults.objectForKey("PF_Passcode") as? String
+        let passcode = PFPassCode.stringByReplacingOccurrencesOfString("X", withString: user)
+        if let passcode = defaults.objectForKey(passcode) as? String
         {
             thePin = passcode
             if !unlocked
@@ -1452,7 +1457,8 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
     //MARK: Lock Screen Setup Delegate
     func pinSet(pin: String!, padLockScreenSetupViewController padLockScreenViewController: ABPadLockScreenSetupViewController!) {
         thePin = pin
-        NSUserDefaults.standardUserDefaults().setObject(pin, forKey: "PF_Passcode")
+        let passcode = PFPassCode.stringByReplacingOccurrencesOfString("X", withString: user)
+        NSUserDefaults.standardUserDefaults().setObject(pin, forKey: passcode)
         dismissViewControllerAnimated(true, completion: nil)
     }
     
@@ -1581,11 +1587,12 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
                     if(httpStatusCode==200) {
                         let response = responseObject as! NSDictionary
                         if let patientIDOnDB = response.objectForKey("patient_id") as? String {
-                            defaults.setObject(patientIDOnDB, forKey: PF_PatientIDOnDB)
+                            defaults.setObject(patientIDOnDB, forKey: PFPatientIDOnDB)
                             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1), dispatch_get_main_queue(), {
                                 //            let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
                                 //            let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
-                                let isDocScanOn = NSUserDefaults.standardUserDefaults().boolForKey("isDocScanOn")
+                                let docScanStatus = PFDocScan.stringByReplacingOccurrencesOfString("X", withString: user)
+                                let isDocScanOn = NSUserDefaults.standardUserDefaults().boolForKey(docScanStatus)
                                 if isDocScanOn == true
                                 {
                                     self.navigationController?.pushViewController(IOViewController(), animated: false)

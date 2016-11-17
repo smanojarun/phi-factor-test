@@ -84,7 +84,7 @@ class ResumePatientListViewController: UIViewController, UITableViewDelegate, UI
             dispatch_async(dispatch_get_main_queue(), { 
                 //            delegate?.resumePatientStatus(true, patientDetails: patientsArray[selectedIndex] as? NSDictionary)
                 NSUserDefaults.standardUserDefaults().setObject((self.patientsArray[self.selectedIndex].objectForKey("patient_id")), forKey: "patient_id")
-                NSUserDefaults.standardUserDefaults().setObject((self.patientsArray[self.selectedIndex].objectForKey("patient_id")), forKey: PF_PatientIDOnDB)
+                NSUserDefaults.standardUserDefaults().setObject((self.patientsArray[self.selectedIndex].objectForKey("patient_id")), forKey: PFPatientIDOnDB)
                 PFGlobalConstants.setResumeVideoCount(Int((self.patientsArray[self.selectedIndex].objectForKey("resume_video"))! as! NSNumber))
                 let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
                 let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
