@@ -1188,7 +1188,8 @@
 				TargetAttributes = {
 					F446CC471CF6446400EE918E = {
 						CreatedOnToolsVersion = 7.3.1;
-						DevelopmentTeam = 26P5KDRV39;
+						DevelopmentTeam = D76S3FF9TY;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
 								enabled = 1;
@@ -1697,10 +1698,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_ENTITLEMENTS = PhiFactor/PhiFactor.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Shanthoshi priya sanmugasundaram (8CZS69S55P)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Shanthoshi priya sanmugasundaram (8CZS69S55P)";
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 26P5KDRV39;
+				DEVELOPMENT_TEAM = D76S3FF9TY;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1721,10 +1722,10 @@
 					"$(PROJECT_DIR)",
 				);
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hubino.PhiFactorDevAPNS;
+				PRODUCT_BUNDLE_IDENTIFIER = com.phifactor.clinicalStag;
 				PRODUCT_NAME = PhiFactorSTAG;
-				PROVISIONING_PROFILE = "74de02ff-b09a-4507-813a-6ffccda52b8b";
-				PROVISIONING_PROFILE_SPECIFIER = "PhiFactorDevAPNS Sep 23";
+				PROVISIONING_PROFILE = "f9606bff-ba56-4c6c-bbaf-44b32248fb4e";
+				PROVISIONING_PROFILE_SPECIFIER = "Inhouse staging Nov 09";
 				SWIFT_OBJC_BRIDGING_HEADER = "phiFactor/Source/Obj-c/PhiFactor-Bridging-Header.h";
 			};
 			name = Debug;
@@ -1736,9 +1737,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_ENTITLEMENTS = PhiFactor/PhiFactor.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Shanthoshi priya sanmugasundaram (8CZS69S55P)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Shanthoshi priya sanmugasundaram (8CZS69S55P)";
-				DEVELOPMENT_TEAM = 26P5KDRV39;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				DEVELOPMENT_TEAM = D76S3FF9TY;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1759,10 +1760,10 @@
 					"$(PROJECT_DIR)",
 				);
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hubino.PhiFactorDevAPNS;
+				PRODUCT_BUNDLE_IDENTIFIER = com.phifactor.clinicalStag;
 				PRODUCT_NAME = PhiFactorSTAG;
-				PROVISIONING_PROFILE = "74de02ff-b09a-4507-813a-6ffccda52b8b";
-				PROVISIONING_PROFILE_SPECIFIER = "PhiFactorDevAPNS Sep 23";
+				PROVISIONING_PROFILE = "f9606bff-ba56-4c6c-bbaf-44b32248fb4e";
+				PROVISIONING_PROFILE_SPECIFIER = "Inhouse staging Nov 09";
 				SWIFT_OBJC_BRIDGING_HEADER = "phiFactor/Source/Obj-c/PhiFactor-Bridging-Header.h";
 			};
 			name = Release;
