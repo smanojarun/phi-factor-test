@@ -46,7 +46,7 @@ extension UIView {
 }
 
 
-class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPresentationControllerDelegate, ABPadLockScreenSetupViewControllerDelegate, ABPadLockScreenViewControllerDelegate, PatientResumeDelegate {
+class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPresentationControllerDelegate, ABPadLockScreenSetupViewControllerDelegate, ABPadLockScreenViewControllerDelegate {
 
     var logout: NSNumber!
     var warningmessage: String?
@@ -464,7 +464,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                     }
                      else {
 
-                        registerDeviceService(true)
+                        registerDeviceService(true, canClearSession: false)
 //                        self.userLoginService()
                     }
                 }
@@ -1045,7 +1045,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         avPlayer1.play()
     }
     
-    func userLoginService() {
+    func userLoginService(canClearSession: Bool) {
         print("IntroScreen userLoginService begin")
         PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "UserLoginService", value: nil)
         self.progessbarshow()
@@ -1102,54 +1102,41 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                         if isQualityCheckOn == nil {
                             NSUserDefaults.standardUserDefaults().setBool(true, forKey: qualityCheckStatus)
                         }
-                        self.getResumePatientList({ (isHavingList, patientList) in
-                            if isHavingList == true {
-                                let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-                                let resumeListView = storyBoard.instantiateViewControllerWithIdentifier("ResumePatientListViewController") as! ResumePatientListViewController
-                                resumeListView.patientsArray = patientList
-//                                resumeListView.delegate = self
-                                let nav = UINavigationController(rootViewController: resumeListView)
-                                nav.navigationBarHidden = true
-//                                self.presentViewController(nav, animated: true, completion: nil)
-                                UIView.transitionWithView((APP_DELEGATE?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
-                                    APP_DELEGATE!.window?.rootViewController = nav
-                                }) { (isCompleted) in
-                                    self.view = nil
-                                }
+                        let passcodeKey = PFPassCode.stringByReplacingOccurrencesOfString("X", withString: user)
+                        
+                        if canClearSession {
+                            defaults.removeObjectForKey(passcodeKey)
+                            let lockSetupScreen = ABPadLockScreenSetupViewController(delegate: self, complexPin: false, subtitleLabelText: "Select a pin")
+                            lockSetupScreen.tapSoundEnabled = true
+                            lockSetupScreen.errorVibrateEnabled = true
+                            lockSetupScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
+                            lockSetupScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
+                            self.presentViewController(lockSetupScreen, animated: true, completion: nil)
+                        }
+                        else {
+                            if (response.objectForKey("set_passcode") as? String) != nil {
+                                defaults.removeObjectForKey(passcodeKey)
+                                let lockSetupScreen = ABPadLockScreenSetupViewController(delegate: self, complexPin: false, subtitleLabelText: "Select a pin")
+                                lockSetupScreen.tapSoundEnabled = true
+                                lockSetupScreen.errorVibrateEnabled = true
+                                lockSetupScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
+                                lockSetupScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
+                                self.presentViewController(lockSetupScreen, animated: true, completion: nil)
                             }
                             else {
-                                let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-                                let patientsDetailsScreen = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
-                                let nav = UINavigationController(rootViewController: patientsDetailsScreen)
-                                nav.navigationBarHidden = true
-                                let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
-                                UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
-                                    appDelegaet!.window?.rootViewController = nav
-                                }) { (isCompleted) in
-                                    self.view = nil
+                                if (PFGlobalConstants.isPasscodeAvailable()) {
+                                    self.setNextRootViewController()
+                                }
+                                else {
+                                    let lockSetupScreen = ABPadLockScreenSetupViewController(delegate: self, complexPin: false, subtitleLabelText: "Select a pin")
+                                    lockSetupScreen.tapSoundEnabled = true
+                                    lockSetupScreen.errorVibrateEnabled = true
+                                    lockSetupScreen.modalPresentationStyle = UIModalPresentationStyle.FullScreen
+                                    lockSetupScreen.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
+                                    self.presentViewController(lockSetupScreen, animated: true, completion: nil)
                                 }
                             }
-                        })
-//                        defaults.setObject(user, forKey: PF_USERNAME)
-//                        defaults.setObject(pass, forKey: PF_PASSWORD)
-//                        let patientIDOnDB = defaults.integerForKey(PF_PatientIDOnDB)
-//                        if  patientIDOnDB != 0{
-//                            self.getPatientDetails(patientIDOnDB)
-//                        }
-//                        else {
-//                            let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-//                            let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
-//                            let nav = UINavigationController(rootViewController: nextViewController)
-//                            nav.navigationBarHidden = true
-//                            let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
-//                            UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
-//                                appDelegaet!.window?.rootViewController = nav
-//                            }) { (isCompleted) in
-//                                self.view = nil
-//                            }
-//                        }
-                        
-                        
+                        }
                     }
                     else if(httpStatusCode==400) {
                         print("Invalid params")
@@ -1240,7 +1227,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         }
     }
     
-    func registerDeviceService(isFromSignInButton: Bool) {
+    func registerDeviceService(isFromSignInButton: Bool, canClearSession: Bool) {
         PFGlobalConstants.sendEventWithCatogory("UI", action: "buttonPressed", label: "RegisterDevice", value: nil)
         if let _ : String = NSUserDefaults.standardUserDefaults().objectForKey("deviceToken") as? String {
             self.progessbarshow()
@@ -1248,7 +1235,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
             let registerDeviceURl = NSURL(string: registerDeviceUrlString)
             urlRequest = NSMutableURLRequest(URL: registerDeviceURl!)
             urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
-            urlRequest = loginModel.getRegisterDeviceParams(user)
+            urlRequest = loginModel.getRegisterDeviceParams(user, canClearSession: canClearSession)
             Alamofire.request(urlRequest).responseJSON { (response) in
                 switch response.result
                 {
@@ -1283,7 +1270,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                                 PFGlobalConstants.authenticateUserByTouchID({ (status) in
                                     switch status{
                                     case .authorized:
-                                        self.userLoginService()
+                                        self.userLoginService(canClearSession)
                                         break
                                     case .unAuthorized:
                                         self.warning.text = "Touch ID authentication failed."
@@ -1316,7 +1303,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                                     PFGlobalConstants.authenticateUserByTouchID({ (status) in
                                         switch status{
                                         case .authorized:
-                                            self.userLoginService()
+                                            self.userLoginService(canClearSession)
                                             break
                                         case .unAuthorized:
                                             self.warning.text = "Touch ID authentication failed."
@@ -1363,6 +1350,9 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                         self.warning.text = message
                         self.warning.textColor = UIColor.redColor()
                     }
+                    else if httpStatusCode == 405 {
+                        self.showResumeSessionAlertView()
+                    }
                     self.progressbarhidden()
                     break
                 }
@@ -1377,32 +1367,10 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
     
     @IBAction func resumeSessionOKButtonAction(sender: AnyObject) {
         removeResumeSessionAlert()
-        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-        let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
-        nextViewController.isResumeCameraViewEnabled = true
-        let nav = UINavigationController(rootViewController: nextViewController)
-        nav.navigationBarHidden = true
-        let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
-        UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
-            appDelegaet!.window?.rootViewController = nav
-        }) { (isCompleted) in
-            self.view = nil
-        }
+        registerDeviceService(true, canClearSession: true)
     }
     @IBAction func resumeSessionCancelAction(sender: AnyObject) {
         removeResumeSessionAlert()
-        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-        let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
-        let nav = UINavigationController(rootViewController: nextViewController)
-        nav.navigationBarHidden = true
-        let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
-        UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
-            appDelegaet!.window?.rootViewController = nav
-        }) { (isCompleted) in
-            self.view = nil
-            NSUserDefaults.standardUserDefaults().removeObjectForKey(PFPatientIDOnDB)
-            NSUserDefaults.standardUserDefaults().removeObjectForKey(PFResumeVideoCount)
-        }
     }
     
     func  removeResumeSessionAlert() {
@@ -1493,7 +1461,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                             if let patientMrnId = response.objectForKey("Patient_Mrn_id") {
                                 NSUserDefaults.standardUserDefaults().setObject(patientMrnId, forKey: "patient_id")
                                 self.resumeAlertLabel.text = "Do you want to continue the last session for the patient \(patientName)"
-                                self.showResumeSessionAlertView()
+//                                self.showResumeSessionAlertView()
                             }
                         }
                         else {
@@ -1552,11 +1520,14 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
     //MARK: Lock Screen Setup Delegate
     func pinSet(pin: String!, padLockScreenSetupViewController padLockScreenViewController: ABPadLockScreenSetupViewController!) {
         thePin = pin
+        let passcode = PFPassCode.stringByReplacingOccurrencesOfString("X", withString: user)
+        NSUserDefaults.standardUserDefaults().setObject(pin, forKey: passcode)
         dismissViewControllerAnimated(true, completion: nil)
+        self.setNextRootViewController()
     }
     
     func unlockWasCancelledForSetupViewController(padLockScreenViewController: ABPadLockScreenAbstractViewController!) {
-        dismissViewControllerAnimated(true, completion: nil)
+//        dismissViewControllerAnimated(true, completion: nil)
     }
     
     //MARK: Lock Screen Delegate
@@ -1569,7 +1540,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         print("Unlock Successful!")
         isAuthorizationRequesting = false;
         dismissViewControllerAnimated(true, completion: nil)
-        self.userLoginService()
+        self.userLoginService(false)
         self.warning.text = ""
         self.warning.textColor = UIColor.lightGrayColor()
     }
@@ -1646,27 +1617,28 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
         }
     }
     
-    func resumePatientStatus(status: Bool, patientDetails: NSDictionary?) {
-        if  status == true {
-            self.dismissViewControllerAnimated(true, completion: {
-                NSUserDefaults.standardUserDefaults().setObject((patientDetails?.objectForKey("patient_id")), forKey: "patient_id")
-                NSUserDefaults.standardUserDefaults().setObject((patientDetails?.objectForKey("patient_id")), forKey: PFPatientIDOnDB)
-                PFGlobalConstants.setResumeVideoCount(Int((patientDetails?.objectForKey("resume_video"))! as! NSNumber))
+    func isValidPassword(passwordString: String) -> Bool {
+        let stricterFilterString = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&]{10,}"
+        let passwordTest = NSPredicate(format: "SELF MATCHES %@", stricterFilterString)
+        return passwordTest.evaluateWithObject(passwordString)
+    }
+    
+
+    func setNextRootViewController() {
+        self.getResumePatientList({ (isHavingList, patientList) in
+            if isHavingList == true {
                 let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-                let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
-                nextViewController.isResumeCameraViewEnabled = true
-                let nav = UINavigationController(rootViewController: nextViewController)
+                let resumeListView = storyBoard.instantiateViewControllerWithIdentifier("ResumePatientListViewController") as! ResumePatientListViewController
+                resumeListView.patientsArray = patientList
+                let nav = UINavigationController(rootViewController: resumeListView)
                 nav.navigationBarHidden = true
-                let appDelegaet = UIApplication.sharedApplication().delegate as? AppDelegate
-                UIView.transitionWithView((appDelegaet?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
-                    appDelegaet!.window?.rootViewController = nav
+                UIView.transitionWithView((APP_DELEGATE?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
+                    APP_DELEGATE!.window?.rootViewController = nav
                 }) { (isCompleted) in
                     self.view = nil
                 }
-            })
-        }
-        else {
-            self.dismissViewControllerAnimated(true, completion: { 
+            }
+            else {
                 let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
                 let patientsDetailsScreen = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
                 let nav = UINavigationController(rootViewController: patientsDetailsScreen)
@@ -1677,13 +1649,7 @@ class PhiFactorIntro: GAITrackedViewController, UITextFieldDelegate, UIPopoverPr
                 }) { (isCompleted) in
                     self.view = nil
                 }
-            })
-        }
-    }
-    
-    func isValidPassword(passwordString: String) -> Bool {
-        let stricterFilterString = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&]{10,}"
-        let passwordTest = NSPredicate(format: "SELF MATCHES %@", stricterFilterString)
-        return passwordTest.evaluateWithObject(passwordString)
+            }
+        })
     }
 }

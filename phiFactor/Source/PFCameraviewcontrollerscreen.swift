@@ -14,7 +14,7 @@ import CoreMotion
 import Alamofire
 
 /// Recording video by front and rear camera with flash availability. Presenting the preview for each video after the recording complition. Also provide the option to retake the video.
-class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutputRecordingDelegate, UIAccelerometerDelegate,AVCaptureVideoDataOutputSampleBufferDelegate, AppInactiveDelegate, PatientResumeDelegate {
+class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutputRecordingDelegate, UIAccelerometerDelegate,AVCaptureVideoDataOutputSampleBufferDelegate, AppInactiveDelegate {
     // Back button alert
     @IBOutlet var backButtonAlertCancel: UIButton!
     @IBOutlet var backButtonAlert: UIButton!
@@ -1045,11 +1045,10 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
     @IBAction func pfc_preview_retakeaction(sender: AnyObject) {
         print("CameraScreen pfc_preview_retakeaction begin")
         PFGlobalConstants.sendEventWithCatogory("background", action: "funCall", label: "retakeAction", value: nil)
-        if !qualityCheck
-        {
+        if !qualityCheck {
             pfCameraStartButton.hidden = false
-            self.pfCameraStartButton.userInteractionEnabled = true
         }
+        self.pfCameraStartButton.userInteractionEnabled = true
         avPlayer.pause()
         self.avPlayerLayer.hidden = true
         self.pfInfoselectButton.hidden = false
@@ -1069,7 +1068,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         pfcToggleCameraButton.hidden=false
         // acleometer unhidden
         pfcAcleometer.hidden=false
-        contentView.hidden=false
+//        contentView.hidden=false
         accelerometerView.hidden = false
         // cancel unhidden
         if videoCount != nil && videoCount == 0 {
@@ -1155,13 +1154,13 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         self.pfcPreviewPauseButton.hidden = true
         self.pfcToggleCameraButton.hidden = false
         self.pfcPreviewSlider.hidden = true
-        self.contentView.hidden = false
+//        self.contentView.hidden = false
         accelerometerView.hidden = false
         self.pfcAcleometer.hidden = false
         if !qualityCheck {
             pfCameraStartButton.hidden = false
-            self.pfCameraStartButton.userInteractionEnabled = true
         }
+        self.pfCameraStartButton.userInteractionEnabled = true
         self.pfcCameraInstructionlabel.hidden=false
         // disable the button
         self.canShowErrorMsg = true
@@ -1728,10 +1727,8 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
                                 let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
                                 let resumeListView = storyBoard.instantiateViewControllerWithIdentifier("ResumePatientListViewController") as! ResumePatientListViewController
                                 resumeListView.patientsArray = patientList
-                                resumeListView.delegate = self
                                 let nav = UINavigationController(rootViewController: resumeListView)
                                 nav.navigationBarHidden = true
-                                //                            self.presentViewController(nav, animated: true, completion: nil)
                                 UIView.transitionWithView((APP_DELEGATE?.window)!, duration: 0.5, options: UIViewAnimationOptions.TransitionCrossDissolve, animations: {
                                     APP_DELEGATE!.window?.rootViewController = nav
                                 }) { (isCompleted) in
@@ -1783,12 +1780,13 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             pfcToggleCameraButton.hidden=false
             // acleometer unhidden
             pfcAcleometer.hidden=false
-            contentView.hidden=false
+//            contentView.hidden=false
             accelerometerView.hidden = false
             if !qualityCheck {
                 pfCameraStartButton.hidden = false
-                self.pfCameraStartButton.userInteractionEnabled = true
             }
+            self.pfCameraStartButton.userInteractionEnabled = true
+
             // cancel unhidden
 //            pfcDeletePreviousVideoButton.hidden=false
             pfcBackButton.hidden=false
@@ -1798,8 +1796,8 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             pfcVideoTitleLabel.hidden=false
             if !qualityCheck {
                 pfCameraStartButton.hidden = false
-                self.pfCameraStartButton.userInteractionEnabled = true
             }
+            self.pfCameraStartButton.userInteractionEnabled = true
         }
        print("CameraScreen pfcPreviewSubmitButtonaction end")
     }
@@ -1824,7 +1822,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             self.pfcToggleCameraButton.hidden=true
             // acleometer hidden
             self.pfcAcleometer.hidden=true
-            self.contentView.hidden=true
+//            self.contentView.hidden=true
             accelerometerView.hidden = true
             self.pfCameraStartButton.hidden = true
             // animation hidden
@@ -2031,7 +2029,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
                 self.pfcToggleCameraButton.hidden=true
                 // acleometer hidden
                 self.pfcAcleometer.hidden=true
-                self.contentView.hidden=true
+//                self.contentView.hidden=true
                 self.accelerometerView.hidden = true
                 self.pfCameraStartButton.hidden = true
                 // animation hidden
@@ -2057,6 +2055,7 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
                 
                 self.previewBackground.hidden = false
                 self.pfcCameraBackgroundImageView.hidden = true
+                self.pfCameraStartButton.userInteractionEnabled = true
                 print("CameraScreen didFinishRecordingToOutputFileAtURL end")
             })
         }
@@ -2599,11 +2598,10 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
 //                self.pfcDeletePreviousVideoButton.hidden = false
                 self.hideDeletePreviousVideoButtonIfResumeCount(self.videoCount)
             }
-            if !self.qualityCheck
-            {
+            if !self.qualityCheck {
                 self.pfCameraStartButton.hidden = false
-                self.pfCameraStartButton.userInteractionEnabled = true
             }
+            self.pfCameraStartButton.userInteractionEnabled = true
         }
     }
     

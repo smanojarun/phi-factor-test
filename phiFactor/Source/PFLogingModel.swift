@@ -74,15 +74,22 @@ class PFLogingModel: NSObject {
         return urlRequest
     }
     
-    func getRegisterDeviceParams(emailId : String) -> NSMutableURLRequest {
+    func getRegisterDeviceParams(emailId : String, canClearSession: Bool) -> NSMutableURLRequest {
         let accessToken : String = NSUserDefaults.standardUserDefaults().objectForKey("deviceToken") as! String
         print("PFLogingModel getRegisterDeviceParams begin")
         let deviceId : String = (UIDevice.currentDevice().identifierForVendor?.UUIDString)!
+        var clear = "0"
+        if canClearSession {
+            clear = "1"
+        }
+        
         let parameters1 = [
                             "email_id": emailId,
                             "access_token": accessToken,
-                            "device_id": deviceId
+                            "device_id": deviceId,
+                            "clear": clear,
                             ]
+        print(parameters1)
         do {
             urlRequest.HTTPBody = try NSJSONSerialization.dataWithJSONObject(parameters1,options: NSJSONWritingOptions())
             urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")

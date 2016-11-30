@@ -7,15 +7,12 @@
 //
 
 import UIKit
-protocol PatientResumeDelegate {
-    func resumePatientStatus(status: Bool, patientDetails: NSDictionary?)
-}
+
 class ResumePatientListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet weak var resumePatientsTable: UITableView!    
     @IBOutlet weak var skipButton: UIButton!
     @IBOutlet weak var continueButton: UIButton!
-    var delegate : PatientResumeDelegate? = nil
     var patientsArray : NSArray!
     var selectedIndex = 0
     var userSelected = false
@@ -67,7 +64,6 @@ class ResumePatientListViewController: UIViewController, UITableViewDelegate, UI
         selectedIndex = indexPath.row
     }
     @IBAction func skipAction(sender: UIButton) {
-//        delegate?.resumePatientStatus(false, patientDetails: nil)
         let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let patientsDetailsScreen = storyBoard.instantiateViewControllerWithIdentifier("PFSinginViewController") as! PFSinginViewController
         let nav = UINavigationController(rootViewController: patientsDetailsScreen)
@@ -82,7 +78,6 @@ class ResumePatientListViewController: UIViewController, UITableViewDelegate, UI
     @IBAction func resumeSessionAction(sender: UIButton) {
         if userSelected == true {
             dispatch_async(dispatch_get_main_queue(), { 
-                //            delegate?.resumePatientStatus(true, patientDetails: patientsArray[selectedIndex] as? NSDictionary)
                 NSUserDefaults.standardUserDefaults().setObject((self.patientsArray[self.selectedIndex].objectForKey("patient_id")), forKey: "patient_id")
                 NSUserDefaults.standardUserDefaults().setObject((self.patientsArray[self.selectedIndex].objectForKey("patient_id")), forKey: PFPatientIDOnDB)
                 PFGlobalConstants.setResumeVideoCount(Int((self.patientsArray[self.selectedIndex].objectForKey("resume_video"))! as! NSNumber))
