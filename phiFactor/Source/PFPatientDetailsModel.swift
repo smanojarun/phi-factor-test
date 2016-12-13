@@ -25,6 +25,8 @@ var ethincity_name_arr = NSMutableArray ()
 var clinical_trials_id_arr = NSMutableArray()
 var clinical_trials_name_arr = NSMutableArray ()
 var cliical_trains_novalue = NSMutableArray()
+var patient : patientProperties = patientProperties(name: nil, emhId: nil, IDonDB: nil, document: docuSignDocument(status: nil, envelopeID: "", signedDocumentURL: nil, certificateURL: nil), age: nil, encounterID: nil, email: nil)
+
 
 /// Manipulating the Patient details objects and API parameters.
 class PFPatientDetailsModel: NSObject {

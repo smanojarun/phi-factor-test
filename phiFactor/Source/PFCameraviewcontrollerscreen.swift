@@ -310,6 +310,9 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
         {
             let cameraModel = PFCameraScreenModel()
             documentAWSLink = cameraModel.uploadDocument(documentPath, patientId: patientID)
+            self.updatePatientDocumentInfoOnPortal(patient.IDonDB!, documentURL: documentAWSLink!, isDocuSign: false, complition: { (isSucceed) in
+                
+            })
             self.isDocumentAlert = true
             self.showAlertandDelete()
         }
@@ -1594,18 +1597,18 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
             instructionstring=facialVideoInstruction
 //            self.cameraModel!.nextvideo(iteration)
             let mediaAWSURL = self.cameraModel!.uploadPatientMediaToAWS(iteration, patientId: patientID)
-            if documentAWSLink != nil {
-                self.updatePatientMediaDetailsOnPortal(patientID, mediaURL: documentAWSLink!, isDocument: true, complition: { (isSucceed) in
-                    self.updatePatientMediaDetailsOnPortal(self.patientID, mediaURL: mediaAWSURL, isDocument: false, complition: { (isSucceed) in
-                        
-                    })
-                })
-            }
-            else {
+//            if documentAWSLink != nil {
+//                self.updatePatientMediaDetailsOnPortal(patientID, mediaURL: documentAWSLink!, isDocument: true, complition: { (isSucceed) in
+//                    self.updatePatientMediaDetailsOnPortal(self.patientID, mediaURL: mediaAWSURL, isDocument: false, complition: { (isSucceed) in
+//                        
+//                    })
+//                })
+//            }
+//            else {
                 self.updatePatientMediaDetailsOnPortal(patientID, mediaURL: mediaAWSURL, isDocument: false, complition: { (isSucceed) in
                     
                 })
-            }
+//            }
 
         }
         else if(self.pfcPreviewSubmitButton.tag==461) {
@@ -2886,4 +2889,40 @@ class PFCameraviewcontrollerscreen: GAITrackedViewController, AVCaptureFileOutpu
                 print("PatientScreen getRefreshToken end")
         }
     }
+    
+    
+    
+    /**
+     Update patient media details to portal.
+     */
+    func updatePatientDocumentInfoOnPortal(patientId: String, documentURL: String, certificateURL: String = "", documentID: String = "", envelopeID: String = "", isDocuSign: Bool, complition: (isSucceed: Bool)->()) {
+        print("PatientScreen getRefreshToken begin")
+        let defaults = NSUserDefaults.standardUserDefaults()
+        var access_token: String!
+        var token_type: String!
+        access_token = defaults.stringForKey("access_token")
+        token_type = defaults.stringForKey("token_type")
+        PFGlobalConstants.sendEventWithCatogory("background", action: "functionCall", label: "updatePatientMediaDetailsOnPortal", value: nil)
+        requestString = "\(baseURL)/document_info_update?Authorization=\(token_type)&access_token=\(access_token)"
+        print(requestString)
+        url1 = NSURL(string: requestString as String)!
+        urlRequest = NSMutableURLRequest(URL: url1)
+        urlRequest.HTTPMethod = Alamofire.Method.POST.rawValue
+        let cameraModel = PFCameraScreenModel()
+        cameraModel.getRequestParameterForUpdatePatientDocumentInfo(patientId, documentURL: documentURL, certificateURL: certificateURL, documentID: documentID, envelopeID: envelopeID, isDocuSign: isDocuSign)
+        Alamofire.request(urlRequest)
+            .responseJSON { response in
+                switch response.result {
+                case .Failure( let error):
+                    print(error)
+                    complition(isSucceed: false)
+                case .Success(let responseObject):
+                    print(responseObject)
+                    complition(isSucceed: true)
+                    //                    let response = responseObject as! NSDictionary
+                }
+                print("PatientScreen getRefreshToken end")
+        }
+    }
+
 }

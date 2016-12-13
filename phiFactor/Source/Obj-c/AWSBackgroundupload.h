@@ -30,5 +30,5 @@
 //- (void)uploadData:(NSData *)reqVideoData : (NSString*)patientId : (NSString*)iteration : (NSURL*)videoUrl : (NSString*)timestamp;
 - (void)uploadVideo:(NSData *)data : (NSURL*)videoUrl : (NSString*)awsURL : (NSString*) s3BaseURL;
 
-- (void)uploadDocument:(NSData *)data : (NSString*)patientId : (NSString*)timestamp : (NSURL*)documentUrl;
+- (void)uploadDocument:(NSData *)data : (NSString*)patientId : (NSString*)timestamp : (NSURL*)documentUrl pathExtention:(NSString*)pathExtention;
 @end

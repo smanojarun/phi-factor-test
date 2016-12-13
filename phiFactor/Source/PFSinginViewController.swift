@@ -12,7 +12,7 @@ import AVFoundation
 import MessageUI
 
 /// Getting the mandatory and non mandatory details of the patient.
-class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UITableViewDataSource, UIPopoverPresentationControllerDelegate, UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource, ABPadLockScreenSetupViewControllerDelegate, ABPadLockScreenViewControllerDelegate, MFMailComposeViewControllerDelegate, AppInactiveDelegate {
+class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UITableViewDataSource, UIPopoverPresentationControllerDelegate, UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource, ABPadLockScreenSetupViewControllerDelegate, ABPadLockScreenViewControllerDelegate, MFMailComposeViewControllerDelegate, AppInactiveDelegate, UIActionSheetDelegate {
 
     @IBOutlet var tapGuest: UITapGestureRecognizer!
     @IBOutlet weak var PFSHbackrongimage: UIImageView!
@@ -53,10 +53,10 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
     var timeInSecond: Float!
     var newtime: CMTime!
     var myTimer: NSTimer!
-    var patientID: String!
-    var patientAge: NSNumber!
-    var patientName: String!
-    var encounterID: String!
+//    var patientID: String!
+//    var patientAge: NSNumber!
+//    var patientName: String!
+//    var encounterID: String!
     var istextend2: Bool!
     var playerlayer: Bool!
     var tap: UITapGestureRecognizer!
@@ -65,9 +65,10 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
     let button = UIButton(type: UIButtonType.Custom)
     var progressview: UIView!
     var pickframe: CGRect!
-    var patientDetailList: [String] = ["Clinical Trail", "Patient Name", "Patient ID", "Age", "Gender", "Ethnicity", "Language Spoken", "Encounter ID"]
-    var warningdetaillist: [String] = ["Enter clinical trail", "Enter patient name", "Enter patient id", "Enter age", "Enter gender", "Enter ethnicity", "Enter language", "Enter Encounter ID"]
-    var patientDetailListImage: [String] = ["PFSd_Clinical_Trail", "PFSd_patient_name", "PFSd_patient_id", "PFSd_Age", "PFSd_Gender", "PFSd_Eteniticity", "PFSd_language", "PFSd_language"]
+//    var patientEmail : String?
+    var patientDetailList: [String] = ["Clinical Trail", "Patient Name", "Patient ID", "Age", "Gender", "Ethnicity", "Language Spoken", "Encounter ID", "Email"]
+    var warningdetaillist: [String] = ["Enter clinical trail", "Enter patient name", "Enter patient id", "Enter age", "Enter gender", "Enter ethnicity", "Enter language", "Enter Encounter ID", "Enter Email"]
+    var patientDetailListImage: [String] = ["PFSd_Clinical_Trail", "PFSd_patient_name", "PFSd_patient_id", "PFSd_Age", "PFSd_Gender", "PFSd_Eteniticity", "PFSd_language", "PFSd_language", "PFSd_patient_name"]
     var isShowingAlert = false
     var isShowingInactiveAlert = false
     
@@ -75,6 +76,8 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
     override func viewDidLoad() {
         super.viewDidLoad()
         print("PatientScreen viewDidLoad begin")
+        patient = patientProperties(name: nil, emhId: nil, IDonDB: nil, document: docuSignDocument(status: nil, envelopeID: "", signedDocumentURL: nil, certificateURL: nil), age: nil, encounterID: nil, email: nil)
+
         pinUnlockTimer = NSTimer.scheduledTimerWithTimeInterval(60.0, target: self, selector: #selector(PFSinginViewController.resetUnlockFlag), userInfo: nil, repeats: true)
         self.screenName = PFSinginViewControllerScreenName
         if canShowVideoUploadAlert {
@@ -293,7 +296,7 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = self.patientdetails.dequeueReusableCellWithIdentifier("cell")! as! PFSiginuptablecellTableViewCell
         let patientDetailListstring=self.patientDetailList[indexPath.row]
-                if(patientDetailListstring .isEqual("Patient Name")||patientDetailListstring .isEqual("Patient ID")||patientDetailListstring .isEqual("Age")||patientDetailListstring .isEqual("Encounter ID")) {
+                if(patientDetailListstring .isEqual("Patient Name")||patientDetailListstring .isEqual("Patient ID")||patientDetailListstring .isEqual("Age")||patientDetailListstring .isEqual("Encounter ID") || patientDetailListstring .isEqual("Email")) {
 
                     cell.celltextchossen.attributedPlaceholder = NSAttributedString(string: "Type Here",
                                                                                     attributes: [ NSFontAttributeName: UIFont(name: "calibri", size: 18.0)! ])
@@ -364,11 +367,11 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
         pickerbuttonaction.hidden=false
         closePicker.hidden=false
         pickerview.hidden = false
-        if(rowcount==1||rowcount==2||rowcount==3||rowcount==7) {
+        if(rowcount == 1 || rowcount == 2 || rowcount == 3 || rowcount == 7 || rowcount == 8) {
             cell.celltextchossen.hidden=false
             cell.celltextchossen.delegate=self
             cell.celltextchossen.enabled=true
-            if(rowcount==1 || rowcount == 2||rowcount==7) {
+            if(rowcount==1 || rowcount == 2||rowcount==7 || rowcount == 8) {
                 cell.celltextchossen.keyboardType = UIKeyboardType.Alphabet
             }
             else {
@@ -722,23 +725,23 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
             self.rowcount=2
             let indexPath = NSIndexPath(forRow: 2, inSection: 0)
             let cell = self.patientdetails.cellForRowAtIndexPath(indexPath) as! PFSiginuptablecellTableViewCell
-            patientName = cell.celltextchossen.text
+            patient.name = cell.celltextchossen.text
             button.hidden=true
-            print(patientName)
+            print(patient.name)
             }
         else if(rowcount==1) {
             self.rowcount=1
             let indexPath = NSIndexPath(forRow: 1, inSection: 0)
             let cell = self.patientdetails.cellForRowAtIndexPath(indexPath) as! PFSiginuptablecellTableViewCell
-            patientID = cell.celltextchossen.text
+            patient.emhId = cell.celltextchossen.text
             button.hidden=true
-            print(patientID)
+            print(patient.emhId)
             }
         else if(rowcount==3) {
             self.rowcount=3
             let indexPath = NSIndexPath(forRow: 3, inSection: 0)
             let cell = self.patientdetails.cellForRowAtIndexPath(indexPath) as! PFSiginuptablecellTableViewCell
-            patientAge = Int(cell.celltextchossen.text!)
+            patient.age = Int(cell.celltextchossen.text!)
             button.hidden=true
 
         }
@@ -746,7 +749,7 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
             self.rowcount=7
             let indexPath = NSIndexPath(forRow: 7, inSection: 0)
             let cell = self.patientdetails.cellForRowAtIndexPath(indexPath) as! PFSiginuptablecellTableViewCell
-            encounterID = cell.celltextchossen.text
+            patient.encounterID = cell.celltextchossen.text
             button.hidden=true
         }
     }
@@ -763,27 +766,30 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
             var valid: Bool!
             var indexPath = NSIndexPath(forRow: 1, inSection: 0)
             var cell = self.patientdetails.cellForRowAtIndexPath(indexPath) as! PFSiginuptablecellTableViewCell
-            self.patientName = cell.celltextchossen.text
-            print(self.patientName)
+            patient.name = cell.celltextchossen.text
+            print(patient.name)
             indexPath = NSIndexPath(forRow: 2, inSection: 0)
             cell = self.patientdetails.cellForRowAtIndexPath(indexPath) as! PFSiginuptablecellTableViewCell
-            self.patientID = cell.celltextchossen.text
-            print(self.patientID)
+            patient.emhId = cell.celltextchossen.text
+            print(patient.emhId)
             
             indexPath = NSIndexPath(forRow: 3, inSection: 0)
             cell = self.patientdetails.cellForRowAtIndexPath(indexPath) as! PFSiginuptablecellTableViewCell
-            self.patientAge = Int(cell.celltextchossen.text!)
+            patient.age = Int(cell.celltextchossen.text!)
             indexPath = NSIndexPath(forRow: 7, inSection: 0)
             cell = self.patientdetails.cellForRowAtIndexPath(indexPath) as! PFSiginuptablecellTableViewCell
-            self.encounterID = cell.celltextchossen.text
+            patient.encounterID = cell.celltextchossen.text
+            indexPath = NSIndexPath(forRow: 8, inSection: 0)
+            cell = self.patientdetails.cellForRowAtIndexPath(indexPath) as! PFSiginuptablecellTableViewCell
+            patient.email = cell.celltextchossen.text
             print("Validation Start")
             valid=true
-            let someInts: [Int] = [0, 1, 2, 3, 4]
+            let someInts: [Int] = [0, 1, 2, 3, 4, 8]
             for index in someInts {
                 print("Value of  index is \(index)")
                 let indexPath = NSIndexPath(forRow: index, inSection: 0)
                 let cell = self.patientdetails.cellForRowAtIndexPath(indexPath) as! PFSiginuptablecellTableViewCell
-                if(cell.celltextchossen.text=="") {
+                if(cell.celltextchossen.text=="" && index != 8) {
                     let warningetailliststring=self.warningdetaillist[indexPath.row] as String
                     cell.celltextchossen.attributedPlaceholder = NSAttributedString(string: warningetailliststring,
                                                                                     attributes: [NSForegroundColorAttributeName: UIColor.redColor()])
@@ -858,6 +864,36 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
                         valid=false
                     }
                 }
+                else if indexPath.row == 8 {
+                    if cell.celltextchossen.text != "" && cell.celltextchossen.text?.isEmail == false {
+                        cell.celltextchossen.text = ""
+                        let warningetailliststring = "Enter valid email"
+                        cell.celltextchossen.attributedPlaceholder = NSAttributedString(string: warningetailliststring,
+                                                                                        attributes: [NSForegroundColorAttributeName: UIColor.redColor()])
+                        var celltextdetailmoveup: CGRect
+                        celltextdetailmoveup = (cell.celltextdetails?.frame)!
+                        celltextdetailmoveup.origin.y=15
+                        UIView.animateWithDuration(0.40, delay: 0, options: UIViewAnimationOptions.TransitionFlipFromBottom, animations: {
+                            cell.celltextdetails?.frame=celltextdetailmoveup
+                            }, completion: nil)
+                        cell.celltextdetails.font = UIFont(name: "calibri", size: 12)
+                        var celltextchossen: CGRect
+                        celltextchossen=cell.celltextchossen.frame
+                        celltextchossen.origin.y=15
+                        celltextchossen.origin.x=142
+                        celltextchossen.size.width=(cell.celltextchossen?.frame.size.width)!+60
+                        UIView.animateWithDuration(0.40, delay: 0, options: UIViewAnimationOptions.TransitionFlipFromBottom, animations: {
+                            cell.celltextchossen?.frame=celltextchossen
+                            cell.celltextchossen?.translatesAutoresizingMaskIntoConstraints = true
+                            cell.celltextdetails?.translatesAutoresizingMaskIntoConstraints = true
+                            }, completion: nil)
+                        valid=false
+                    }
+                    else {
+                        cell.celltextchossen.attributedPlaceholder = NSAttributedString(string: "Type Here",
+                                                                                        attributes: [NSForegroundColorAttributeName: UIColor.lightGrayColor()])
+                    }
+                }
                 else {
                     
                 }
@@ -877,9 +913,9 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
                 let defaults = NSUserDefaults.standardUserDefaults()
                 
                 defaults.setObject (clinical_id, forKey: "clinical_id")
-                defaults.setObject (self.patientName, forKey: "patient_name")
-                defaults.setObject (self.patientID, forKey: "patient_id")
-                defaults.setObject (self.patientAge, forKey: "patient_age")
+                defaults.setObject (patient.name, forKey: "patient_name")
+                defaults.setObject (patient.emhId, forKey: "patient_id")
+                defaults.setObject (patient.age, forKey: "patient_age")
                 defaults.setObject (gender_id, forKey: "gender_id")
                 if Ethinicity_id != nil {
                     defaults.setObject (Ethinicity_id, forKey: "ethen_id")
@@ -895,7 +931,7 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
                 {
                     defaults.setObject (51, forKey: "lan_id")
                 }
-                defaults.setObject(self.encounterID, forKey: "encounterID")
+                defaults.setObject(patient.encounterID, forKey: "encounterID")
                 defaults.synchronize()
 //                if self.progressview == nil {
 //                    self.progessbar()
@@ -1087,7 +1123,7 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
     func textFieldDidBeginEditing(textField: UITextField) {
         print(textField.tag)
 
-        if(textField.tag==1 || textField.tag==2 || textField.tag==7) {
+        if(textField.tag==1 || textField.tag==2 || textField.tag==7 || textField.tag==8) {
             button.hidden=true
             }
         else {
@@ -1588,22 +1624,41 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
                         let response = responseObject as! NSDictionary
                         if let patientIDOnDB = response.objectForKey("patient_id") as? String {
                             defaults.setObject(patientIDOnDB, forKey: PFPatientIDOnDB)
+                            patient.IDonDB = patientIDOnDB
                             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1), dispatch_get_main_queue(), {
-                                //            let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-                                //            let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
+
                                 let docScanStatus = PFDocScan.stringByReplacingOccurrencesOfString("X", withString: user)
                                 let isDocScanOn = NSUserDefaults.standardUserDefaults().boolForKey(docScanStatus)
                                 if isDocScanOn == true
                                 {
-                                    self.navigationController?.pushViewController(IOViewController(), animated: false)
-                                    
+                                    if patient.document?.status == docuSignStatus.completed {
+                                        let cameraView = PFGlobalConstants.getViewController("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
+                                        self.navigationController?.pushViewController(cameraView, animated: false)
+                                    }
+                                    else {
+                                        UIActionSheet(title: "Select document option", delegate: self, cancelButtonTitle: "Cancel", destructiveButtonTitle: "E-Sign Agreement", otherButtonTitles: "Agreement Scanner", "Skip").showInView(self.view)
+                                    }
                                 }
                                 else
                                 {
-                                    let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-                                    let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
-                                    self.navigationController?.pushViewController(nextViewController, animated: false)
+                                    let cameraView = PFGlobalConstants.getViewController("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
+                                    self.navigationController?.pushViewController(cameraView, animated: false)
                                 }
+                                
+//                                let docScanStatus = PFDocScan.stringByReplacingOccurrencesOfString("X", withString: user)
+//                                let isDocScanOn = NSUserDefaults.standardUserDefaults().boolForKey(docScanStatus)
+//                                if isDocScanOn == true
+//                                {
+////                                    self.navigationController?.pushViewController(IOViewController(), animated: false)
+//                                    let docuSignView = PFGlobalConstants.getViewController("DocuSignViewController") as! DocuSignViewController
+//                                    self.navigationController?.pushViewController(docuSignView, animated: false)
+//                                }
+//                                else
+//                                {
+//                                    let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+//                                    let nextViewController = storyBoard.instantiateViewControllerWithIdentifier("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
+//                                    self.navigationController?.pushViewController(nextViewController, animated: false)
+//                                }
                                 self.imageActivityView.hidden = true
                                 self.startvedio.hidden = false
                                 print("PatientScreen startvedioaction end")
@@ -1669,7 +1724,26 @@ class PFSinginViewController: GAITrackedViewController, UITableViewDelegate, UIT
                 self.isShowingInactiveAlert = false
             }
         }
-        
+    }
+    
+    func actionSheet(actionSheet: UIActionSheet, didDismissWithButtonIndex buttonIndex: Int) {
+        switch buttonIndex {
+        case 0:
+            let docuSignView = PFGlobalConstants.getViewController("DocuSignViewController") as! DocuSignViewController
+            self.navigationController?.pushViewController(docuSignView, animated: false)
+            break
+        case 1:
+            break
+        case 2:
+            self.navigationController?.pushViewController(IOViewController(), animated: false)
+            break
+        case 3:
+            let cameraView = PFGlobalConstants.getViewController("PFCameraviewcontrollerscreen") as! PFCameraviewcontrollerscreen
+            self.navigationController?.pushViewController(cameraView, animated: false)
+            break
+        default:
+            break
+        }
     }
    
 }

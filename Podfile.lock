@@ -1,24 +1,56 @@
 PODS:
+  - AFNetworking (2.6.3):
+    - AFNetworking/NSURLConnection (= 2.6.3)
+    - AFNetworking/NSURLSession (= 2.6.3)
+    - AFNetworking/Reachability (= 2.6.3)
+    - AFNetworking/Security (= 2.6.3)
+    - AFNetworking/Serialization (= 2.6.3)
+    - AFNetworking/UIKit (= 2.6.3)
+  - AFNetworking/NSURLConnection (2.6.3):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/NSURLSession (2.6.3):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (2.6.3)
+  - AFNetworking/Security (2.6.3)
+  - AFNetworking/Serialization (2.6.3)
+  - AFNetworking/UIKit (2.6.3):
+    - AFNetworking/NSURLConnection
+    - AFNetworking/NSURLSession
   - Alamofire (3.5.1)
   - AWSCore (2.4.11)
   - AWSS3 (2.4.11):
     - AWSCore (= 2.4.11)
   - DeviceKit (0.3.4)
+  - DocuSignESign (2.0.0):
+    - AFNetworking (~> 2.3)
+    - ISO8601 (~> 0.3)
+    - JSONModel (~> 1.1)
   - GoogleAnalytics (3.17.0)
+  - ISO8601 (0.6.0)
+  - JSONModel (1.7.0)
 
 DEPENDENCIES:
   - Alamofire (~> 3.4)
   - AWSS3 (~> 2.4.1)
   - DeviceKit (~> 0.3.2)
+  - DocuSignESign (~> 2.0.0)
   - GoogleAnalytics (~> 3.14)
 
 SPEC CHECKSUMS:
+  AFNetworking: cb8d14a848e831097108418f5d49217339d4eb60
   Alamofire: 0dfba1184a543e2aa160f4e39cac4e8aba48d223
   AWSCore: e66b0f50d68f9897cc9e68471062f0cb5379eec5
   AWSS3: 2f90735901744687eaeb91621fa62ee921db6510
   DeviceKit: b414b210c225ae19b77a47e64cb04f187c1c4f9a
+  DocuSignESign: ad7fa6d72c33f96dafd46fc05af992413661bb29
   GoogleAnalytics: f42cc53a87a51fe94334821868d9c8481ff47a7b
+  ISO8601: d3ea3ba9b752820cf92c6b47a9ee327e9f0e13fc
+  JSONModel: 840bc0fcffb24b8454d2c026bf26fea454b8e98d
 
-PODFILE CHECKSUM: fafbc27b30da4d3ead2d5366eb78ae98c31c08cb
+PODFILE CHECKSUM: b515337f5dbb09a0d8abbbc1b1dd4a66d55667cd
 
 COCOAPODS: 1.1.1

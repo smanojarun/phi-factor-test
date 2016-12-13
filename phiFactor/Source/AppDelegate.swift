@@ -71,7 +71,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         gaiInstance.trackUncaughtExceptions = true  // report uncaught exceptions
 //        gaiInstance.logger.logLevel = GAILogLevel.Verbose  // remove before app release
         
-        PFGlobalConstants.environment(.Staging)
+        PFGlobalConstants.environment(.Local)
         
         print("AppDelegate didFinishLaunchingWithOptions end")
         return true

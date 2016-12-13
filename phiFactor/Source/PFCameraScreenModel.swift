@@ -228,16 +228,17 @@ class PFCameraScreenModel: NSObject {
         let imageData = NSData(contentsOfFile: imageFilePath)
         let date = NSDate()
         let formatter = NSDateFormatter()
-    
+        let filePath : NSString = imageFilePath as NSString
+        
         formatter.dateFormat = "yyyyMMddHHmmss"
         formatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
         formatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
         let timeStamp = formatter.stringFromDate(date)
-        let doc = NSString .localizedStringWithFormat("\(amazomURL)/%@/%@/%@_%@.jpg", patientId, timeStamp, patientId, timeStamp)
+        let doc = NSString .localizedStringWithFormat("\(amazomURL)/%@/%@/%@_%@.%@", patientId, timeStamp, patientId, timeStamp, filePath.pathExtension)
         defaults.setObject (patientIdArray, forKey: "patient")
         
         defaults.setObject (doc, forKey: "doc")
-        instanceOfCustomObject.uploadDocument(imageData, patientId, timeStamp, NSURL(string: imageFilePath))
+        instanceOfCustomObject.uploadDocument(imageData, patientId, timeStamp, NSURL(string: imageFilePath), pathExtention: filePath.pathExtension)
         print("PFCameraScreenModel uploadDocument end")
         return doc as String
     }
@@ -246,7 +247,6 @@ class PFCameraScreenModel: NSObject {
      Genrating the NSMutableURLRequest with the requested parameters to update patient media details.
      
      - parameter patient_id:        patient_id
-     - parameter videoCount:        video number to be updated
      - parameter mediaURL:          patient media URL from aws
      - parameter isDocument:        Enables the document URL upload service.
      
@@ -270,6 +270,56 @@ class PFCameraScreenModel: NSObject {
                 "video_url": mediaURL as NSString,
                 "video_status": "In progress",
                 "document_url": ""
+            ]
+        }
+        print(parameters)
+        do {
+            let json = try NSJSONSerialization.dataWithJSONObject(parameters, options: NSJSONWritingOptions())
+            print(json)
+            urlRequest.HTTPBody = try NSJSONSerialization.dataWithJSONObject(parameters, options: NSJSONWritingOptions())
+            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        } catch {
+            print("JSON serialization Error!")
+        }
+        print("PFCameraScreenModel getRequestParameterForAddPatientMediaDetails end")
+        return urlRequest
+    }
+    
+    /**
+     Genrating the NSMutableURLRequest with the requested parameters to update patient media details.
+     
+     - parameter patient_id:        patient_id
+     - parameter videoCount:        video number to be updated
+     - parameter documentURL:       patient media URL from aws
+     - parameter certificateURL:    patient media URL from aws
+     - parameter documetnId:        docusign document id
+     - parameter envelopeID:        docusign envelope id
+     - parameter isDocument:        Enables the document URL upload service.
+     
+     - returns: returns request with the provided parameters
+     */
+    
+    func getRequestParameterForUpdatePatientDocumentInfo(patientId: String, documentURL: String, certificateURL: String, documentID: String, envelopeID: String, isDocuSign: Bool) -> NSMutableURLRequest {
+        print("PFCameraScreenModel getRequestParameterForAddPatientMediaDetails begin")
+        var parameters = NSMutableDictionary()
+        if isDocuSign == true {
+            parameters = [
+                "patient_id": patientId,
+                "document_type": "docusign",
+                "document_id":documentID,
+                "document_url":documentURL,
+                "envelop_id":envelopeID,
+                "certificate_url": certificateURL
+            ]
+        }
+        else {
+            parameters = [
+                "patient_id": patientId,
+                "document_type": "docuscan",
+                "document_id":documentID,
+                "document_url":documentURL,
+                "envelop_id":envelopeID,
+                "certificate_url": certificateURL
             ]
         }
         print(parameters)

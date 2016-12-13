@@ -31,6 +31,8 @@ let videoUploadingAlertText = "Recording process has completed, upload videos in
 let networkErrorAlertText = "Network not available. Please check your internet connections."
 let noValuesAlert = "Content may expired or not assigned yet. Contact admin for more details."
 let faqURL = "https://phifactor.com/7f29385ba747553b17043dd57841cbc761099136/faq.html"
+let docuSignComplitionAlertText = "DocuSign E-Signing completed."
+let docuSignErrorAlertText = "An error occured while loading DocuSign E-Signing."
 let APP_DELEGATE = UIApplication.sharedApplication().delegate as? AppDelegate
 var canShowBatteryAlert = true
 
@@ -51,6 +53,25 @@ let PFResumeVideoCount = "resumeVideoCount"
 let PFIdleTimeLimitMinimum = 60.0
 let PFIdleTimeLimitMaximum = 300.0
 var isAuthorizationRequesting = false;
+#if true
+    let DocuSignIntegratorKey = "f6f36aa6-25d0-4272-8c0d-34196630434e"
+    let DocuSignUserName = "support@phifactor.com"
+    let DocuSignPassword = "phifactor"
+    let DocuSignEnglishTemplateID = "4c8cd5f7-fcf2-4a16-9e75-e2c3d3a26343"
+    let DocuSignSpanishTemplateID = "0f32b6ca-4ac8-411f-bfa8-d3960a81a47f"
+    let DocuSignRecipientMailID = "support@phifactor.com"
+#else
+    let DocuSignIntegratorKey = "7ee3d2d6-2be1-4a6d-bb6d-5a67fe6ea069"
+    let DocuSignUserName = "shajakhan.ansari@hubino.com"
+    let DocuSignPassword = "hubino123"
+    let DocuSignEnglishTemplateID = "00c08865-1161-40fe-9511-963790177d45"
+    let DocuSignSpanishTemplateID = "00c08865-1161-40fe-9511-963790177d45"
+    let DocuSignRecipientMailID = "shajakhan.ansari@hubino.com"
+#endif
+
+let DocuSignHostURL = "https://demo.docusign.net/restapi"
+let DocuSignAuth = "{\"Username\":\"\(DocuSignUserName)\",\"Password\":\"\(DocuSignPassword)\",\"IntegratorKey\":\"\(DocuSignIntegratorKey)\"}"
+let DocuSignAuthHeader = "X-DocuSign-Authentication"
 
 enum authenticateStatus {
     case authorized
@@ -63,6 +84,36 @@ enum appEnvironment {
     case Staging
     case Development
     case Local
+}
+enum docuSignStatus {
+    case created
+    case Sent
+    case completed
+    case delivered
+    case signed
+    case declined
+    case timedOut
+    case voided
+    case deleted
+}
+struct patientProperties {
+    var name: String?
+    var emhId: String?
+    var IDonDB: String?
+    var document: docuSignDocument?
+    var age: Int?
+    var encounterID: String?
+    var email: String?
+}
+struct docuSignDocument {
+    var status: docuSignStatus?
+    var envelopeID: String?
+    var signedDocumentURL: NSURL?
+    var certificateURL: NSURL?
+}
+struct userProperties {
+    var name : String?
+    var password : String?
 }
 class PFGlobalConstants: NSObject {
 
@@ -306,7 +357,8 @@ class PFGlobalConstants: NSObject {
             S3BucketName = "dev-phifactor"
             break
         case .Local:
-            baseURL = "http://10.10.1.6:9001"
+//            baseURL = "http://10.10.1.6:9001"
+            baseURL =  "http://10.10.1.229:9001"
             amazomURL = "https://s3-us-west-2.amazonaws.com/dev-phifactor"
             S3BucketName = "dev-phifactor"
             break
@@ -328,6 +380,10 @@ class PFGlobalConstants: NSObject {
         }
         // something failed
         return nil
+    }
+    class func getViewController(identifier : String) -> UIViewController {
+        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+        return storyBoard.instantiateViewControllerWithIdentifier(identifier)
     }
 
 }

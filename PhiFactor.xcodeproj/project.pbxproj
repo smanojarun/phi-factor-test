@@ -127,6 +127,8 @@
 		654BC60FA870BB2D37F01042 /* Pods_PhiFactor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C23C38C1C14E1F1C977E3B1B /* Pods_PhiFactor.framework */; };
 		AE0551DD1DDB2DD900EB2C59 /* Cam_BG_layer.png in Resources */ = {isa = PBXBuildFile; fileRef = AE0551DC1DDB2DD900EB2C59 /* Cam_BG_layer.png */; };
 		AE0551DF1DDB31F200EB2C59 /* Cam_BG_Layer1.png in Resources */ = {isa = PBXBuildFile; fileRef = AE0551DE1DDB31F200EB2C59 /* Cam_BG_Layer1.png */; };
+		AE2FC8851DFAF47700EBF072 /* span_button.png in Resources */ = {isa = PBXBuildFile; fileRef = AE2FC8841DFAF47700EBF072 /* span_button.png */; };
+		AE2FC8871DFAF48000EBF072 /* eng_button.png in Resources */ = {isa = PBXBuildFile; fileRef = AE2FC8861DFAF48000EBF072 /* eng_button.png */; };
 		AE3067A01DAD11EB0062408E /* PFUploadTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE30679F1DAD11EB0062408E /* PFUploadTableViewCell.swift */; };
 		AE3067A21DAD11F90062408E /* PFUploadstatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE3067A11DAD11F90062408E /* PFUploadstatusViewController.swift */; };
 		AE3067A41DAD12030062408E /* PFUploadStatusModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE3067A31DAD12030062408E /* PFUploadStatusModel.swift */; };
@@ -165,6 +167,7 @@
 		AE6C79871DD0B2500016341C /* continue_button.png in Resources */ = {isa = PBXBuildFile; fileRef = AE6C79861DD0B2500016341C /* continue_button.png */; };
 		AE7EB1341DCCD0C80032B8AB /* ResumePatientListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE7EB1331DCCD0C80032B8AB /* ResumePatientListViewController.swift */; };
 		AE7EB1361DCCD65C0032B8AB /* ResumePatientDetailsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE7EB1351DCCD65C0032B8AB /* ResumePatientDetailsCell.swift */; };
+		AE8C30A01DF0241300C7F2E4 /* DocuSignViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE8C309F1DF0241300C7F2E4 /* DocuSignViewController.swift */; };
 		AE968FCD1DDC5FB400273D07 /* circle_icon2.png in Resources */ = {isa = PBXBuildFile; fileRef = AE968FCA1DDC5FB400273D07 /* circle_icon2.png */; };
 		AE968FCE1DDC5FB400273D07 /* circle_icon1.png in Resources */ = {isa = PBXBuildFile; fileRef = AE968FCB1DDC5FB400273D07 /* circle_icon1.png */; };
 		AE968FCF1DDC5FB400273D07 /* circle_icon3.png in Resources */ = {isa = PBXBuildFile; fileRef = AE968FCC1DDC5FB400273D07 /* circle_icon3.png */; };
@@ -425,6 +428,8 @@
 		4985F2561CFDC92D001F0CC3 /* bacground_layer.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bacground_layer.png; sourceTree = "<group>"; };
 		AE0551DC1DDB2DD900EB2C59 /* Cam_BG_layer.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Cam_BG_layer.png; sourceTree = "<group>"; };
 		AE0551DE1DDB31F200EB2C59 /* Cam_BG_Layer1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Cam_BG_Layer1.png; sourceTree = "<group>"; };
+		AE2FC8841DFAF47700EBF072 /* span_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = span_button.png; sourceTree = "<group>"; };
+		AE2FC8861DFAF48000EBF072 /* eng_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = eng_button.png; sourceTree = "<group>"; };
 		AE30679F1DAD11EB0062408E /* PFUploadTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PFUploadTableViewCell.swift; sourceTree = "<group>"; };
 		AE3067A11DAD11F90062408E /* PFUploadstatusViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PFUploadstatusViewController.swift; sourceTree = "<group>"; };
 		AE3067A31DAD12030062408E /* PFUploadStatusModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PFUploadStatusModel.swift; sourceTree = "<group>"; };
@@ -478,6 +483,7 @@
 		AE6C79861DD0B2500016341C /* continue_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = continue_button.png; sourceTree = "<group>"; };
 		AE7EB1331DCCD0C80032B8AB /* ResumePatientListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResumePatientListViewController.swift; sourceTree = "<group>"; };
 		AE7EB1351DCCD65C0032B8AB /* ResumePatientDetailsCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResumePatientDetailsCell.swift; sourceTree = "<group>"; };
+		AE8C309F1DF0241300C7F2E4 /* DocuSignViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocuSignViewController.swift; sourceTree = "<group>"; };
 		AE968FCA1DDC5FB400273D07 /* circle_icon2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = circle_icon2.png; sourceTree = "<group>"; };
 		AE968FCB1DDC5FB400273D07 /* circle_icon1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = circle_icon1.png; sourceTree = "<group>"; };
 		AE968FCC1DDC5FB400273D07 /* circle_icon3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = circle_icon3.png; sourceTree = "<group>"; };
@@ -531,7 +537,7 @@
 		F43367A71D22DFE6008CE401 /* launch_screen.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = launch_screen.png; path = Menu/launch_screen.png; sourceTree = "<group>"; };
 		F43367A91D22E2EC008CE401 /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
 		F43751B71CF74AB80040DF07 /* upload-512.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "upload-512.png"; sourceTree = "<group>"; };
-		F446CC481CF6446400EE918E /* PhiFactorSTAG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhiFactorSTAG.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F446CC481CF6446400EE918E /* PhiFactorDEV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhiFactorDEV.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F446CC501CF6446400EE918E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		F446CC521CF6446400EE918E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../Assets.xcassets; sourceTree = "<group>"; };
 		F446CCCF1CF645FF00EE918E /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -733,6 +739,7 @@
 				1832DC5F1D421866005264D2 /* VideoPreviewView.swift */,
 				AE3067A11DAD11F90062408E /* PFUploadstatusViewController.swift */,
 				AE7EB1331DCCD0C80032B8AB /* ResumePatientListViewController.swift */,
+				AE8C309F1DF0241300C7F2E4 /* DocuSignViewController.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -914,7 +921,7 @@
 		F446CC491CF6446400EE918E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F446CC481CF6446400EE918E /* PhiFactorSTAG.app */,
+				F446CC481CF6446400EE918E /* PhiFactorDEV.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -978,6 +985,8 @@
 				1846F3261D1ACF1A00674F49 /* Menu */,
 				F43367A71D22DFE6008CE401 /* launch_screen.png */,
 				AE63BF3A1DDD869C00F585B1 /* BG_layer.png */,
+				AE2FC8841DFAF47700EBF072 /* span_button.png */,
+				AE2FC8861DFAF48000EBF072 /* eng_button.png */,
 				AE968FCB1DDC5FB400273D07 /* circle_icon1.png */,
 				AE968FCA1DDC5FB400273D07 /* circle_icon2.png */,
 				AE968FCC1DDC5FB400273D07 /* circle_icon3.png */,
@@ -1173,7 +1182,7 @@
 			);
 			name = PhiFactor;
 			productName = phiFactor;
-			productReference = F446CC481CF6446400EE918E /* PhiFactorSTAG.app */;
+			productReference = F446CC481CF6446400EE918E /* PhiFactorDEV.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -1376,6 +1385,7 @@
 				49017F5F1D007F6100B74446 /* PFcamera_stop.png in Resources */,
 				189DC2831D5071DF00240D3E /* Info.plist in Resources */,
 				F446CDCE1CF645FF00EE918E /* PFSd_patient_name.png in Resources */,
+				AE2FC8871DFAF48000EBF072 /* eng_button.png in Resources */,
 				182F6B091D37C7AA00F84B35 /* eye_layer.png in Resources */,
 				F446CDC51CF645FF00EE918E /* PFSP_ondemand_icon.png in Resources */,
 				1846F32E1D1ACF1A00674F49 /* ondemand_icon.png in Resources */,
@@ -1417,6 +1427,7 @@
 				F446CDA71CF645FF00EE918E /* Calibri Bold.ttf in Resources */,
 				F446CDC01CF645FF00EE918E /* pause_button.png in Resources */,
 				AE3067EA1DAD12480062408E /* footerbg_layer.png in Resources */,
+				AE2FC8851DFAF47700EBF072 /* span_button.png in Resources */,
 				49017F5E1D007F6100B74446 /* PFcamera_start.png in Resources */,
 				183782281D40D7E7001DED97 /* focusIndicator.png in Resources */,
 				AE3067EC1DAD12480062408E /* inprogress_icon.png in Resources */,
@@ -1544,6 +1555,7 @@
 				AE3067C71DAD121C0062408E /* FSCalendar+DateTools.m in Sources */,
 				182DFCD91D755D4500A1ED2C /* PFIdle.swift in Sources */,
 				189DC2801D5071DF00240D3E /* ABPadLockScreenView.m in Sources */,
+				AE8C30A01DF0241300C7F2E4 /* DocuSignViewController.swift in Sources */,
 				AE3067CA1DAD121C0062408E /* FSCalendar.m in Sources */,
 				AE7EB1341DCCD0C80032B8AB /* ResumePatientListViewController.swift in Sources */,
 				AE3067A21DAD11F90062408E /* PFUploadstatusViewController.swift in Sources */,
@@ -1722,7 +1734,7 @@
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hubino.PhiFactorDevAPNS;
-				PRODUCT_NAME = PhiFactorSTAG;
+				PRODUCT_NAME = PhiFactorDEV;
 				PROVISIONING_PROFILE = "74de02ff-b09a-4507-813a-6ffccda52b8b";
 				PROVISIONING_PROFILE_SPECIFIER = "PhiFactorDevAPNS Sep 23";
 				SWIFT_OBJC_BRIDGING_HEADER = "phiFactor/Source/Obj-c/PhiFactor-Bridging-Header.h";
@@ -1760,7 +1772,7 @@
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hubino.PhiFactorDevAPNS;
-				PRODUCT_NAME = PhiFactorSTAG;
+				PRODUCT_NAME = PhiFactorDEV;
 				PROVISIONING_PROFILE = "74de02ff-b09a-4507-813a-6ffccda52b8b";
 				PROVISIONING_PROFILE_SPECIFIER = "PhiFactorDevAPNS Sep 23";
 				SWIFT_OBJC_BRIDGING_HEADER = "phiFactor/Source/Obj-c/PhiFactor-Bridging-Header.h";

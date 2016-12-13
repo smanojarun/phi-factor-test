@@ -8,6 +8,7 @@ target 'PhiFactor' do
     pod 'Alamofire', '~> 3.4'
     pod 'DeviceKit', '~> 0.3.2'
     pod 'GoogleAnalytics', '~> 3.14'
+    pod 'DocuSignESign', '~> 2.0.0'
 end
 post_install do |installer|
     installer.pods_project.targets.each do |target|

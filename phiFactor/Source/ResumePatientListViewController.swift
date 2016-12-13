@@ -8,11 +8,15 @@
 
 import UIKit
 
-class ResumePatientListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class ResumePatientListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, AppInactiveDelegate {
 
     @IBOutlet weak var resumePatientsTable: UITableView!    
     @IBOutlet weak var skipButton: UIButton!
     @IBOutlet weak var continueButton: UIButton!
+    @IBOutlet var alertView: UIView!
+    @IBOutlet weak var alertMessageLabel: UILabel!
+
+    var isShowingAlert = false
     var patientsArray : NSArray!
     var selectedIndex = 0
     var userSelected = false
@@ -95,5 +99,46 @@ class ResumePatientListViewController: UIViewController, UITableViewDelegate, UI
             })
         }
     }
-    
+    func remainingTime(time: String) {
+        if !isShowingAlert {
+            self.alertMessageLabel.text = time
+            var uploadframe: CGRect!
+            uploadframe=alertView.frame
+            uploadframe.origin.x=self.view.frame.origin.x
+            uploadframe.size.width=self.view.frame.size.width
+            uploadframe.size.height=100
+            uploadframe.origin.y=self.view.frame.origin.y-50
+            self.alertView.frame=uploadframe
+            self.view.addSubview(alertView)
+            self.alertMessageLabel.text = time
+            var setresize: CGRect!
+            setresize=self.alertView.frame
+            setresize.origin.x=self.alertView.frame.origin.x
+            setresize.origin.y=0
+            setresize.size.width=self.view.frame.size.width
+            setresize.size.height=100
+            isShowingAlert = true
+            
+            UIView.animateWithDuration(0.30, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+                self.alertView.frame=setresize
+                }, completion: nil)
+        }
+        else {
+            self.alertMessageLabel.text = time
+        }
+        
+    }
+    func hideInactiveAlert() {
+        var setresizenormal: CGRect!
+        setresizenormal=self.alertView.frame
+        setresizenormal.origin.x=self.alertView.frame.origin.x
+        setresizenormal.origin.y=0-self.alertView.frame.size.height
+        setresizenormal.size.width=self.view.frame.size.width
+        setresizenormal.size.height=100
+        UIView.animateWithDuration(0.30, delay: 3.0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+            self.alertView.frame=setresizenormal
+        }) { (completed) in
+            self.isShowingAlert = false
+        }
+    }
 }

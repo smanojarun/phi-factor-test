@@ -16,7 +16,7 @@
 #import "AWSBackgroundupload.h"
 //#import "Constants.h"
 #import <QuartzCore/QuartzCore.h>
-#import "PhiFactorSTAG-Swift.h"
+#import "PhiFactorDEV-Swift.h"
 
 @interface AWSBackgroundupload ()
 
@@ -215,7 +215,7 @@ NSDate *startTime ;
  *  @param documentUrl  document URL to be uploaded on the given URL
  *  @param timestamp    document was recorded at the given timpStamp
  */
-- (void)uploadDocument:(NSData *)data : (NSString*)patientId : (NSString*)timestamp : (NSURL*)documentUrl {
+- (void)uploadDocument:(NSData *)data : (NSString*)patientId : (NSString*)timestamp : (NSURL*)documentUrl pathExtention:(NSString*)pathExtention{
     
     NSLog(@"Patient ID : %@",patientId);
 
@@ -260,7 +260,7 @@ NSDate *startTime ;
     
     startTime = [NSDate date];
     
-    NSString *uploadFolderName = [NSString stringWithFormat:@"%@/%@/%@_%@.jpg",patientId,timestamp,patientId,timestamp];
+    NSString *uploadFolderName = [NSString stringWithFormat:@"%@/%@/%@_%@.%@",patientId,timestamp,patientId,timestamp,pathExtention];
     [[transferUtility uploadData:data
                           bucket:[PFGlobalConstants getS3BucketName]
                              key:uploadFolderName
